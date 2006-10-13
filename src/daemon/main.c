@@ -6,8 +6,8 @@
 #include <unistd.h>
 #include <syslog.h>
 
+#include "enter.h"
 #include "cfg.h"
-#include "config.h"
 #include "server.h"
 #include "greeter.h"
 

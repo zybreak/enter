@@ -2,9 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "enter.h"
 #include "cfg.h"
 #include "utils.h"
-#include "config.h"
 
 #define BUFFER_SIZE 200
 

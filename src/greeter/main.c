@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "config.h"
+#include "enter.h"
 #include "display.h"
 #include "window.h"
 #include "cfg.h"

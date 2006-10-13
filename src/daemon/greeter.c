@@ -2,8 +2,8 @@
 #include <unistd.h>
 #include <syslog.h>
 
+#include "enter.h"
 #include "cfg.h"
-#include "config.h"
 
 #define CMD_LEN 256
 

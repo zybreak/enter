@@ -6,9 +6,9 @@
 #include <syslog.h>
 #include <time.h>
 
+#include "enter.h"
 #include "server.h"
 #include "utils.h"
-#include "config.h"
 
 #define AUTH_DATA_LEN 16
 #define AUTH_NAME "MIT-MAGIC-COOKIE-1"

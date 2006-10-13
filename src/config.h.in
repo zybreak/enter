@@ -1,8 +1,5 @@
 /* src/config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* foo */
-#undef FALSE
-
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 
@@ -81,9 +78,6 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
-
-/* foo */
-#undef TRUE
 
 /* Version number of package */
 #undef VERSION

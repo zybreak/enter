@@ -1,15 +1,12 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.60)
-AC_INIT([enter],[0.0.1], BUG-REPORT-ADDRESS)
+AC_INIT([enter],[0.0.1], [rob_dobbs@users.sourceforge.net])
 AC_CONFIG_SRCDIR([src/utils.c])
 
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER([src/config.h])
 AM_MAINTAINER_MODE
-
-AC_DEFINE(FALSE,0,[foo])
-AC_DEFINE(TRUE,(!FALSE),[foo])
 
 # Checks for programs.
 AC_PROG_CC
