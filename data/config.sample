@@ -1,0 +1,2 @@
+server_path=/usr/bin/X
+greeter_path=/usr/bin/aterm
