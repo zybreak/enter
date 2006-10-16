@@ -2,7 +2,6 @@
 #define WINDOW_H_
 
 #include <X11/Xlib.h>
-#include <X11/Xmu/WinUtil.h>
 
 #include "display.h"
 #include "cfg.h"

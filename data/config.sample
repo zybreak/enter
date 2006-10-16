@@ -1,2 +1,7 @@
+#
+# This is a sample .config file
+#
+
 server_path=/usr/bin/X
 greeter_path=/usr/bin/aterm
+

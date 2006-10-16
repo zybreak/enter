@@ -17,7 +17,7 @@ AC_CHECK_FT2
 # Checks for header files.
 AC_PATH_X
 if test x"$no_x" != x; then
-	AC_MSG_ERROR([Cannot find X Windows include files and libraries!])
+	AC_MSG_ERROR([Cannot find X Windows include files or libraries!])
 fi
 
 if test x"$x_includes" == x; then

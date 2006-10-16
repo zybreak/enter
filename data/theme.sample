@@ -1,0 +1,18 @@
+#
+# This is a sample .theme config file.
+#
+
+# Main title settings.
+title.string
+title.font
+title.size
+title.color
+title.position
+title.x
+title.y
+
+# Background settings.
+background.style
+background.color
+background.image
+
