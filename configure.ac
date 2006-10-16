@@ -15,7 +15,28 @@ AC_PROG_CC
 AC_CHECK_FT2
 
 # Checks for header files.
-AC_PATH_XTRA
+AC_PATH_X
+if test x"$no_x" != x; then
+	AC_MSG_ERROR([Cannot find X Windows include files and libraries!])
+fi
+
+if test x"$x_includes" == x; then
+	X_CFLAGS=""
+else
+	X_CFLAGS="-I$x_includes";
+fi
+if test x"$x_includes" == x; then
+	X_LIBS=""
+else
+	X_LIBS="-L$x_libraries";
+fi
+AC_SUBST([X_CFLAGS])
+AC_SUBST([X_LIBS])
+
+dnl TODO: Add better check for libpng.
+AC_SUBST([PNG_CFLAGS],[`libpng-config --cflags`])
+AC_SUBST([PNG_LIBS],[`libpng-config --libs`])
+
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h string.h syslog.h unistd.h])
 

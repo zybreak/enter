@@ -3,10 +3,13 @@
 
 #include <X11/Xlib.h>
 
-typedef struct {
+typedef struct display_t {
 	Window root;
 	GC gc;
 	int screen;
+	int width;
+	int height;
+	int depth;
 	Display *dpy;
 	unsigned long gcm;
 	Colormap colormap;
@@ -14,6 +17,5 @@ typedef struct {
 } display_t;
 
 display_t* display_init();
-void display_blank(display_t *display);
 
 #endif /*DISPLAY_H_*/

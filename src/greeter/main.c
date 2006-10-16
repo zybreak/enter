@@ -10,57 +10,60 @@
 static void parse_args(int argc, char **argv, cfg_t *conf)
 {
 	int i;
+
+	if (argc<=1) {
+		fprintf(stderr,"no theme specified\n");
+		exit(EXIT_FAILURE);
+	}
 	
-	for (i=1;i<argc;i++) {
-		if ((strcmp(argv[i],"-t") == 0) && (i+1 < argc)) {
-			conf_set(conf,"config_file",argv[++i]);
-		} else if ((strcmp(argv[i],"-d") == 0) && (i+1 < argc)) {
+	for (i=1;i<argc-1;i++) {
+		if ((strcmp(argv[i],"-d") == 0) && (i+1 < argc)) {
 			conf_set(conf,"display",argv[++i]);
-		} else if (strcmp(argv[i],"-n") == 0) {
-			conf_set(conf,"daemon","false");
 		} else if (strcmp(argv[i],"-v") == 0) {
 			printf("%s version %s\n",PACKAGE,VERSION);
 			exit(EXIT_SUCCESS);
 		} else if (strcmp(argv[i],"-h") == 0) {
 			printf(
-				"usage %s: [options]\n\n"
-				"  -c          specify an alternative config file\n"
+				"usage %s: [options] THEME\n\n"
 				"  -d          connect to an existing display\n"
-				"  -n          dont run as a daemon\n"
 				"  -v          print version information\n"
 				"  -h          print avaiable arguments\n"
 				"\n",
 				argv[0]);
 			exit(EXIT_SUCCESS);
 		} else {
-			printf("unknown argument, try -h");
+
+			printf("unknown argument, try -h\n");
 			exit(EXIT_SUCCESS);
 		}
 	}
+	conf_set(conf,"theme_path",argv[i]);
 }
 
 static void default_settings(cfg_t *conf)
 {
-	conf_set(conf,"theme","theme_path");
+	conf_set(conf,"theme_path","path_to_theme");
 }
 
 int main(int argc, char **argv)
 {
 	display_t *display;
 	window_t *window;
-	cfg_t *conf = conf_new();
+	cfg_t *theme = conf_new();
 	
-	default_settings(conf);
+	default_settings(theme);
 	
-	parse_args(argc, argv, conf);
+	parse_args(argc, argv, theme);
+
+	/* Parse theme config file.  */
+	if (!conf_parse(theme,conf_get(theme,"theme_path")))
+		return EXIT_FAILURE;
 	
 	display = display_init();
 	if (!display)
 		return EXIT_FAILURE;
 	
-	display_blank(display);
-	
-	window = window_init(display,conf);
+	window = window_init(display,theme);
 	if (!window)
 		return EXIT_FAILURE;
 	

@@ -7,13 +7,12 @@ enter_SOURCES = \
 	../utils.c \
 	../cfg.c \
 	display.c display.h \
-	theme.c theme.h \
+	png.c \
 	window.c window.h
 
 # This should be removed if we choose to use imlib2 instead
 EXTRA_DIST = \
-	png.c \
 	jpeg.c
 
-enter_CFLAGS = @FT2_CFLAGS@ @X_CFLAGS@ -I..
-enter_LDFLAGS = @FT2_LIBS@ @X_LIBS@ -lX11
+enter_CFLAGS = @FT2_CFLAGS@ @PNG_CFLAGS@ @X_CFLAGS@ -I..
+enter_LDFLAGS = @FT2_LIBS@ @PNG_LIBS@ @X_LIBS@ -lX11

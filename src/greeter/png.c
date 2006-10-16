@@ -1,33 +1,16 @@
-/****************************************************************************
-    png.c - read and write png images using libpng routines.
-    Distributed with Xplanet.
-    Copyright (C) 2002 Hari Nair <hari@alumni.caltech.edu>
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-****************************************************************************/
-
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <png.h>
 
-int
-read_png(const char *filename, int *width, int *height, unsigned char **rgb, 
+#include "enter.h"
+#include "utils.h"
+
+int read_png(const char *filename, int *width, int *height, unsigned char **rgb, 
 	 unsigned char **alpha)
 {
     FILE *infile = fopen(filename, "rb");
+    if (!infile)
+	    return FALSE;
 
     png_structp png_ptr;
     png_infop info_ptr;
@@ -42,26 +25,23 @@ read_png(const char *filename, int *width, int *height, unsigned char **rgb,
                                      (png_voidp) NULL, 
                                      (png_error_ptr) NULL, 
                                      (png_error_ptr) NULL);
-    if (!png_ptr) 
-    {
+    if (!png_ptr) {
         fclose(infile);
-        return(0);
+        return FALSE;
     }
   
     info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr)
-    {
+    if (!info_ptr) {
         png_destroy_read_struct(&png_ptr, (png_infopp) NULL, 
                                 (png_infopp) NULL);
         fclose(infile);
-        return(0);
+        return FALSE;
     }
   
-    if (setjmp(png_ptr->jmpbuf))
-    {
+    if (setjmp(png_ptr->jmpbuf)) {
         png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp) NULL);
         fclose(infile);
-        return(0);
+        return FALSE;
     }
   
     png_init_io(png_ptr, infile);
@@ -74,13 +54,11 @@ read_png(const char *filename, int *width, int *height, unsigned char **rgb,
     *height = (int) h;
     
     if (color_type == PNG_COLOR_TYPE_RGB_ALPHA
-	|| color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
-    {
-	alpha[0] = malloc(*width * *height);
-	if (alpha[0] == NULL)
-	{
+	|| color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
+	*alpha = xmalloc(*width * *height);
+	if (!*alpha) {
 	    fprintf(stderr, "Can't allocate memory for alpha channel in PNG file.\n");
-	    return(0); 
+	    return FALSE; 
 	}
     }
 
@@ -94,68 +72,61 @@ read_png(const char *filename, int *width, int *height, unsigned char **rgb,
         png_set_gray_to_rgb(png_ptr);
 
     /* If the PNG file has 16 bits per channel, strip them down to 8 */
-    if (bit_depth == 16) png_set_strip_16(png_ptr);
+    if (bit_depth == 16)
+	    png_set_strip_16(png_ptr);
 
     /* use 1 byte per pixel */
     png_set_packing(png_ptr);
 
-    row_pointers = malloc(*height * sizeof(png_bytep));
-    if (row_pointers == NULL)
-    {
+    row_pointers = xmalloc(*height * sizeof(png_bytep));
+    if (!row_pointers) {
         fprintf(stderr, "Can't allocate memory for PNG file.\n");
-        return(0);
+        return FALSE;
     }
 
-    for (i = 0; i < *height; i++)
-    {
-        row_pointers[i] = malloc(4 * *width);
-        if (row_pointers == NULL)
-        {
+    for (i = 0; i < *height; i++) {
+        row_pointers[i] = xmalloc(4 * *width);
+        if (!row_pointers) {
             fprintf(stderr, "Can't allocate memory for PNG line.\n");
-            return(0);
+            return FALSE;
         }
     }
 
     png_read_image(png_ptr, row_pointers);
 
-    rgb[0] = malloc(3 * *width * *height);
-    if (rgb[0] == NULL)
-    {
+    *rgb = xmalloc(3 * *width * *height);
+    if (!*rgb) {
         fprintf(stderr, "Can't allocate memory for PNG file.\n");
-        return(0);
+        return FALSE;
     }
 
-    if (alpha[0] == NULL)
-    {
-	ptr = rgb[0];
-	for (i = 0; i < *height; i++)
-	{
+    if (!*alpha) {
+	ptr = *rgb;
+	for (i = 0; i < *height; i++) {
 	    memcpy(ptr, row_pointers[i], 3 * *width);
 	    ptr += 3 * *width;
 	}
-    }
-    else
-    {
+    } else {
 	int j;
-	ptr = rgb[0];
-	for (i = 0; i < *height; i++)
-	{
+	ptr = *rgb;
+	for (i = 0; i < *height; i++) {
 	    int ipos = 0;
-	    for (j = 0; j < *width; j++)
-	    {
+	    for (j = 0; j < *width; j++) {
 		*ptr++ = row_pointers[i][ipos++];
 		*ptr++ = row_pointers[i][ipos++];
 		*ptr++ = row_pointers[i][ipos++];
-		alpha[0][i * *width + j] = row_pointers[i][ipos++];
+		*alpha[i * *width + j] = row_pointers[i][ipos++];
 	    }
 	}
     }
 
     png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp) NULL);
 
-    for (i = 0; i < *height; i++) free(row_pointers[i]);
+    for (i = 0; i < *height; i++)
+	    free(row_pointers[i]);
     free(row_pointers);
 
     fclose(infile);
-    return(1);
+
+    return TRUE;
 }

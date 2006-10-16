@@ -15,6 +15,12 @@ display_t* display_init()
 	
 	display->screen = DefaultScreen(display->dpy);
 	display->root = RootWindow(display->dpy,display->screen);
+	display->depth = DefaultDepth(display->dpy,display->screen);
+
+	display->width = XWidthOfScreen(
+			ScreenOfDisplay(display->dpy, display->screen));
+	display->height = XHeightOfScreen(
+			ScreenOfDisplay(display->dpy, display->screen));
 	
 	display->gc = XCreateGC(display->dpy,display->root,0,0);
 	display->gcm = GCForeground|GCBackground|GCGraphicsExposures;
@@ -25,12 +31,3 @@ display_t* display_init()
 	return display;
 }
 
-void display_blank(display_t *display)
-{
-	XSetForeground(display->dpy,display->gc,BlackPixel(display->dpy,display->screen));
-	
-	XFillRectangle(display->dpy, display->root, display->gc, 0, 0,
-		XWidthOfScreen(ScreenOfDisplay(display->dpy, display->screen)),
-		XHeightOfScreen(ScreenOfDisplay(display->dpy, display->screen)));
-	XFlush(display->dpy);
-}
