@@ -232,7 +232,53 @@ int load_image(display_t *display, Pixmap pixmap, const char *filename)
 		}
 		}
 		break;
-	/* TODO: add PseudoColor  */
+	case PseudoColor: {
+		XColor xc;
+		int ncolors = 256;
+		XColor colors[ncolors];
+		int closest_color[ncolors];
+		Colormap colormap = DefaultColormap(display->dpy,display->screen);
+
+		xc.flags = DoRed | DoGreen | DoBlue;
+		for (i = 0; i < ncolors; i++)
+			colors[i].pixel = (unsigned long) i;
+		XQueryColors(display->dpy,colormap,colors,ncolors);
+
+		for (i = 0; i < ncolors; i++) {
+			xc.red = (i & 0xe0) << 8;
+			xc.green = (i & 0x1c) << 11;
+			xc.blue = (i & 0x03) << 14;
+			
+			double distance, distance_squared, min_distance = 0;
+			for (j = 0; j < ncolors; j++) {
+				distance = colors[j].red - xc.red;
+				distance_squared = distance * distance;
+				distance = colors[j].green - xc.green;
+				distance_squared += distance * distance;
+				distance = colors[j].blue - xc.blue;
+				distance_squared += distance * distance;
+
+				if ((j == 0) || (distance_squared <= min_distance)) {
+					min_distance = distance_squared;
+					closest_color[i] = j;
+				}
+			}
+		}
+
+		for (j = 0; j < height; j++) {
+			for (i = 0; i < width; i++) {
+				xc.red = (unsigned short) (rgb[ipos++] & 0xe0);
+				xc.green = (unsigned short) (rgb[ipos++] & 0xe0);
+				xc.blue = (unsigned short) (rgb[ipos++] & 0xc0);
+
+				xc.pixel = xc.red | (xc.green >> 3) | (xc.blue >> 6);
+				XPutPixel(image, i, j,
+					colors[closest_color[xc.pixel]].pixel);
+			}
+		}
+		}
+
+		break;
 	default:
 		XFree(visual_info);
 		XDestroyImage(image);
