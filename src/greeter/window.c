@@ -2,10 +2,10 @@
 
 #include "enter.h"
 #include "window.h"
+#include "window.h"
 #include "utils.h"
-#include "image.h"
 
-window_t* window_init(display_t *display, cfg_t *conf)
+window_t* window_new(display_t *display, theme_t *theme)
 {
 	unsigned long color;
 
@@ -18,7 +18,7 @@ window_t* window_init(display_t *display, cfg_t *conf)
 	window->width = display->width;
 	window->height = display->height;
 	window->display = display;
-	window->conf = conf;
+	window->theme = theme;
 
 	color = BlackPixel(display->dpy,display->screen);
 
@@ -27,12 +27,10 @@ window_t* window_init(display_t *display, cfg_t *conf)
 		0, color, color);
 	
 	window->background = XCreatePixmap(display->dpy,window->win,
-			window->width,window->height,display->depth);
+			theme->background->width,theme->background->height,
+			display->depth);
 
-	if (!load_image(display,window->background,"image.png")) {
-		free(window);
-		return NULL;
-	}
+	image_to_pixmap(window,theme->background,window->background);
 
 	return window;
 }
@@ -40,7 +38,8 @@ window_t* window_init(display_t *display, cfg_t *conf)
 void window_show(window_t *window)
 {
 	display_t *display = window->display;
-	
+	theme_t *theme = window->theme;
+
 	XSelectInput(display->dpy, window->win, ExposureMask | KeyPressMask);
 
 	XSetWindowBackgroundPixmap(display->dpy, window->win, window->background);
@@ -49,6 +48,7 @@ void window_show(window_t *window)
 	XMoveWindow(display->dpy, window->win, window->x, window->y);
 
 	XGrabKeyboard(display->dpy, window->win, False, GrabModeAsync, GrabModeAsync, CurrentTime);
-
+	
 	XFlush(display->dpy);
 }
+

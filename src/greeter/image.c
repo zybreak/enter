@@ -6,7 +6,7 @@
 #include <png.h>
 
 #include "enter.h"
-#include "display.h"
+#include "image.h"
 #include "utils.h"
 
 static int read_png(const char *filename, int *width, int *height, unsigned char **rgb, 
@@ -153,7 +153,7 @@ static void compute_shift(unsigned long mask,
 	}
 }
 
-int load_image(display_t *display, Pixmap pixmap, const char *filename)
+XImage* image_load(display_t *display, const char *filename)
 {
 	int i, j;
 	unsigned char *rgb = NULL;
@@ -168,7 +168,7 @@ int load_image(display_t *display, Pixmap pixmap, const char *filename)
 	unsigned long ipos = 0;
 
 	if (!read_png(filename,&width,&height,&rgb,&alpha)) {
-		return FALSE;
+		return NULL;
 	}
 
 	switch(display->depth) {
@@ -283,14 +283,22 @@ int load_image(display_t *display, Pixmap pixmap, const char *filename)
 		XFree(visual_info);
 		XDestroyImage(image);
 
-		return FALSE;
+		return NULL;
 	}
 
-	XPutImage(display->dpy, pixmap, display->gc, image, 0, 0, 0, 0, width, height);
-
 	XFree(visual_info);
-	XDestroyImage(image);
+	free(rgb);
+	free(alpha);
 
-	return TRUE;
+	return image;
+}
+
+Pixmap image_to_pixmap(window_t *window, XImage *image, Pixmap pixmap)
+{
+	display_t *display = window->display;
+
+	XPutImage(display->dpy, pixmap, display->gc, image, 0, 0, 0, 0, image->width, image->height);
+	
+	return pixmap;
 }
 

@@ -4,7 +4,7 @@
 
 # Main title settings.
 title.string
-title.font
+title.font = Verdana:size=18:bold:dpi=75
 title.size
 title.color
 title.position
@@ -14,5 +14,5 @@ title.y
 # Background settings.
 background.style
 background.color
-background.image
+background.image = background.png
 

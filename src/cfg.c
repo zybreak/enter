@@ -55,7 +55,10 @@ int conf_parse(cfg_t *conf, const char *config_file)
 
 	while (fgets(buffer,BUFFER_SIZE-1,fp)) {
 		get_opt_arg(buffer,&opt,&arg);
-		conf_set(conf,opt,arg);
+
+		/* Filter out comments and empty lines.  */
+		if ((*opt!='#') && (*opt))
+			conf_set(conf,opt,arg);
 	}
 
 	fclose(fp);
@@ -72,25 +75,29 @@ char* conf_get(cfg_t *conf, const char *key)
 			return map->value;
 		map = map->next;
 	}
-	return NULL;
+	return "";
 }
 
 void conf_set(cfg_t *conf, const char *key, const char *value)
 {
 	map_t *map = conf->map;
-	
+
 	if (!map) {
 		conf->map = map_new(key,value);
 		return;
 	}
 	
-	while (map) {
+	while (1) {
 		if (!strcmp(map->key,key)) {
 			if (map->value)
 				free(map->value);
 			map->value = strdup(value);
+			return;
+		} else if (!map->next)
 			break;
-		}
+
 		map = map->next;
 	}
+
+	map->next = map_new(key,value);
 }
