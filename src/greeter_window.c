@@ -1,8 +1,8 @@
 #include <stdlib.h>
 
 #include "enter.h"
-#include "window.h"
-#include "window.h"
+#include "greeter_window.h"
+#include "greeter_image.h"
 #include "utils.h"
 
 window_t* window_new(display_t *display, theme_t *theme)
@@ -22,9 +22,12 @@ window_t* window_new(display_t *display, theme_t *theme)
 
 	color = BlackPixel(display->dpy,display->screen);
 
-	window->win = XCreateSimpleWindow(display->dpy, display->root,
+	window->win = display->root;
+		/*
+		XCreateSimpleWindow(display->dpy, display->root,
 		window->x, window->y, window->width, window->height,
 		0, color, color);
+		*/
 	
 	window->background = XCreatePixmap(display->dpy,window->win,
 			theme->background->width,theme->background->height,
@@ -38,7 +41,6 @@ window_t* window_new(display_t *display, theme_t *theme)
 void window_show(window_t *window)
 {
 	display_t *display = window->display;
-	theme_t *theme = window->theme;
 
 	XSelectInput(display->dpy, window->win, ExposureMask | KeyPressMask);
 
@@ -48,7 +50,7 @@ void window_show(window_t *window)
 	XMoveWindow(display->dpy, window->win, window->x, window->y);
 
 	XGrabKeyboard(display->dpy, window->win, False, GrabModeAsync, GrabModeAsync, CurrentTime);
-	
+
 	XFlush(display->dpy);
 }
 

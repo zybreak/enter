@@ -1,3 +1,5 @@
 confdir= $(datadir)/@PACKAGE@
 
-dist_conf_DATA = config.sample
+dist_conf_DATA = \
+	config.sample \
+	theme.sample

@@ -7,7 +7,7 @@
 #include <time.h>
 
 #include "enter.h"
-#include "server.h"
+#include "enter_server.h"
 #include "utils.h"
 
 #define AUTH_DATA_LEN 16

@@ -2,14 +2,15 @@
 
 AC_PREREQ(2.60)
 AC_INIT([enter],[0.0.1], [rob_dobbs@users.sourceforge.net])
-AC_CONFIG_SRCDIR([src/utils.c])
+AC_CONFIG_SRCDIR([src/enter.c])
 
 AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER([src/config.h])
+AM_CONFIG_HEADER([config.h])
 AM_MAINTAINER_MODE
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_RANLIB
 
 # Checks for libraries.
 AC_CHECK_FT2
@@ -55,6 +56,4 @@ AC_OUTPUT([
 	   Makefile
 	   data/Makefile
 	   src/Makefile
-	   src/greeter/Makefile
-	   src/daemon/Makefile
 ])

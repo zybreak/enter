@@ -1,8 +1,8 @@
 #include <stdlib.h>
 
-#include "theme.h"
+#include "greeter_theme.h"
+#include "greeter_image.h"
 #include "utils.h"
-#include "image.h"
 
 theme_t* theme_new(display_t *display, cfg_t *conf)
 {

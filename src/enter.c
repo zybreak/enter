@@ -7,9 +7,9 @@
 #include <syslog.h>
 
 #include "enter.h"
+#include "enter_server.h"
+#include "enter_greeter.h"
 #include "cfg.h"
-#include "server.h"
-#include "greeter.h"
 
 #define PIDFILE "/var/run/" PACKAGE ".pid"
 #define PIDBUF 20
@@ -100,7 +100,7 @@ void write_pidfile(pid_t pid)
 int main(int argc, char **argv)
 {
 	cfg_t *conf;
-	pid_t server_pid,pid,sid;
+	pid_t server_pid, pid, sid;
 	
 	conf = conf_new();
 	

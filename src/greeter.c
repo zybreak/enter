@@ -3,13 +3,16 @@
 #include <stdio.h>
 
 #include "enter.h"
-#include "display.h"
-#include "window.h"
+#include "greeter_display.h"
+#include "greeter_window.h"
 #include "cfg.h"
+#include "utils.h"
 
 static void parse_args(int argc, char **argv, cfg_t *conf)
 {
 	int i;
+	char *theme_path;
+	char theme_file[] = "/theme";
 
 	if (argc<=1) {
 		fprintf(stderr,"no theme specified, try -h\n");
@@ -32,7 +35,14 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 				argv[0]);
 			exit(EXIT_SUCCESS);
 		} else if (i==argc-1) {
-			conf_set(conf,"theme_path",argv[i]);
+			/* This is the last argument,
+			 * use it as the theme path.  */
+			theme_path = xmalloc(strlen(argv[i])+
+					strlen(theme_file)+1);
+			strcpy(theme_path,argv[i]);
+			strcat(theme_path,theme_file);
+			conf_set(conf,"theme_path",theme_path);
+			free(theme_path);
 		} else {
 			printf("unknown argument, try -h\n");
 			exit(EXIT_FAILURE);
@@ -75,8 +85,8 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	
 	window_show(window);
-	
-	while(1);
+
+	display_delete(display);	
 	
 	return EXIT_SUCCESS;	
 }

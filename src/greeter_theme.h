@@ -4,7 +4,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 
-#include "display.h"
+#include "greeter_display.h"
 #include "cfg.h"
 
 typedef struct theme_t {

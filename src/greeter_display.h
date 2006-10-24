@@ -17,5 +17,6 @@ typedef struct display_t {
 } display_t;
 
 display_t* display_init();
+void display_delete(display_t *display);
 
 #endif /*DISPLAY_H_*/

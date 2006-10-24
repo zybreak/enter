@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "display.h"
+#include "greeter_display.h"
 #include "utils.h"
 
 display_t* display_init()
@@ -29,5 +29,10 @@ display_t* display_init()
 	display->colormap = DefaultColormap(display->dpy, display->screen);
 	
 	return display;
+}
+
+void display_delete(display_t *display)
+{
+	XCloseDisplay(display->dpy);
 }
 

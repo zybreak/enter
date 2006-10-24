@@ -3,8 +3,8 @@
 
 #include <X11/Xlib.h>
 
-#include "display.h"
-#include "theme.h"
+#include "greeter_display.h"
+#include "greeter_theme.h"
 
 typedef struct window_t {
 	Window win;

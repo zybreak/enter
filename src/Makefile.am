@@ -1,6 +1,36 @@
-SUBDIRS=greeter daemon
+AUTOMAKE_OPTIONS=nostdinc
 
-EXTRA_DIST = \
-	utils.c utils.h \
-	cfg.c cfg.h \
-	enter.h
+INCLUDES = -I..
+
+noinst_LIBRARIES = libcommon.a
+
+sbin_PROGRAMS = enter enter_greeter
+
+libcommon_a_SOURCES = \
+	utils.c \
+	utils.h \
+	cfg.c \
+	cfg.h
+
+enter_SOURCES = \
+	enter.c enter.h \
+	enter_greeter.c enter_greeter.h \
+	enter_server.c enter_server.h
+
+enter_greeter_SOURCES = \
+	greeter.c enter.h \
+	greeter_display.c greeter_display.h \
+	greeter_image.c greeter_image.h \
+	greeter_theme.c greeter_theme.h \
+	greeter_window.c greeter_window.h
+
+enter_CFLAGS = @X_CFLAGS@ -Wall
+enter_LDFLAGS = @X_LIBS@ -lX11
+enter_LDADD = libcommon.a
+
+enter_greeter_CFLAGS = @FT2_CFLAGS@ @PNG_CFLAGS@ @X_CFLAGS@ -Wall
+enter_greeter_LDFLAGS = \
+	@FT2_LIBS@ @PNG_LIBS@ @X_LIBS@ \
+	-lX11 -lXft
+enter_greeter_LDADD = libcommon.a
+

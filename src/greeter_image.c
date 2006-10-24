@@ -6,7 +6,7 @@
 #include <png.h>
 
 #include "enter.h"
-#include "image.h"
+#include "greeter_image.h"
 #include "utils.h"
 
 static int read_png(const char *filename, int *width, int *height, unsigned char **rgb, 
