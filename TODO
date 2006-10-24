@@ -1,5 +1,3 @@
 * Document functions.
 
-* Find best solution for shared code
-  between greeter and daemon.
-
+* Get font drawing working.

@@ -11,7 +11,6 @@ typedef struct display_t {
 	int height;
 	int depth;
 	Display *dpy;
-	unsigned long gcm;
 	Colormap colormap;
 	Visual* visual;
 } display_t;

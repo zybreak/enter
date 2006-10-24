@@ -12,7 +12,6 @@ typedef struct window_t {
 	int width, height;
 	display_t *display;
 	theme_t *theme;
-	Pixmap background;
 } window_t;
 
 window_t* window_new(display_t *display, theme_t *theme);

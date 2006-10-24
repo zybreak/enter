@@ -119,6 +119,8 @@ static int read_png(const char *filename, int *width, int *height, unsigned char
 		*ptr++ = row_pointers[i][ipos++];
 		*ptr++ = row_pointers[i][ipos++];
 		*ptr++ = row_pointers[i][ipos++];
+		
+		/* This row crashes on some png files.  */
 		*alpha[i * *width + j] = row_pointers[i][ipos++];
 	    }
 	}
@@ -153,7 +155,7 @@ static void compute_shift(unsigned long mask,
 	}
 }
 
-XImage* image_load(display_t *display, const char *filename)
+Pixmap image_load(display_t *display, const char *filename)
 {
 	int i, j;
 	unsigned char *rgb = NULL;
@@ -168,7 +170,7 @@ XImage* image_load(display_t *display, const char *filename)
 	unsigned long ipos = 0;
 
 	if (!read_png(filename,&width,&height,&rgb,&alpha)) {
-		return NULL;
+		return (Pixmap)NULL;
 	}
 
 	switch(display->depth) {
@@ -192,8 +194,10 @@ XImage* image_load(display_t *display, const char *filename)
 	tmp_inf.visualid = XVisualIDFromVisual(display->visual),
 	visual_info = XGetVisualInfo(display->dpy,VisualIDMask,
 			&tmp_inf, &visual_enteries);
-
-	switch (visual_info->class) {
+	int class = visual_info->class;
+	XFree(visual_info);
+	
+	switch (class) {
 	case TrueColor: {
 		unsigned char red_left_shift;
 		unsigned char red_right_shift;
@@ -237,7 +241,7 @@ XImage* image_load(display_t *display, const char *filename)
 		int ncolors = 256;
 		XColor colors[ncolors];
 		int closest_color[ncolors];
-		Colormap colormap = DefaultColormap(display->dpy,display->screen);
+		Colormap colormap = display->colormap;
 
 		xc.flags = DoRed | DoGreen | DoBlue;
 		for (i = 0; i < ncolors; i++)
@@ -280,25 +284,19 @@ XImage* image_load(display_t *display, const char *filename)
 
 		break;
 	default:
-		XFree(visual_info);
 		XDestroyImage(image);
-
-		return NULL;
 	}
 
-	XFree(visual_info);
+	Pixmap pixmap = (Pixmap)NULL;
+	
+	if (image) {
+		pixmap = XCreatePixmap(display->dpy,display->root,image->width,image->height,display->depth);
+		XPutImage(display->dpy, pixmap, display->gc, image, 0, 0, 0, 0, image->width, image->height);
+		XDestroyImage(image);
+	}
+	
 	free(rgb);
 	free(alpha);
 
-	return image;
-}
-
-Pixmap image_to_pixmap(window_t *window, XImage *image, Pixmap pixmap)
-{
-	display_t *display = window->display;
-
-	XPutImage(display->dpy, pixmap, display->gc, image, 0, 0, 0, 0, image->width, image->height);
-	
 	return pixmap;
 }
-

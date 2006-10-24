@@ -3,13 +3,12 @@
 #
 
 # Main title settings.
-title.string
-title.font = Verdana:size=18:bold:dpi=75
-title.size
-title.color
+title.string = Enter
+title.font = verdana-18:bold:dpi=75
+title.color 
 title.position
-title.x
-title.y
+title.x = 10
+title.y = 10
 
 # Background settings.
 background.style

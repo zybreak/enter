@@ -3,8 +3,23 @@
 #include "greeter_display.h"
 #include "utils.h"
 
+static unsigned long get_color(Display *dpy, Window root, const char* colorname)
+{
+    XColor color;
+    XWindowAttributes attributes;
+
+    XGetWindowAttributes(dpy, root, &attributes);
+    color.pixel = 0;
+    
+    XParseColor(dpy, attributes.colormap, colorname, &color);
+    XAllocColor(dpy, attributes.colormap, &color);
+
+    return color.pixel;
+}
+
 display_t* display_init()
 {
+	XGCValues values;
 	display_t *display = (display_t*)xmalloc(sizeof(display_t));
 	
 	display->dpy = XOpenDisplay(NULL);
@@ -22,8 +37,13 @@ display_t* display_init()
 	display->height = XHeightOfScreen(
 			ScreenOfDisplay(display->dpy, display->screen));
 	
-	display->gc = XCreateGC(display->dpy,display->root,0,0);
-	display->gcm = GCForeground|GCBackground|GCGraphicsExposures;
+	values.foreground = get_color(display->dpy, display->root, "black");
+	values.background = get_color(display->dpy, display->root, "white");
+	values.graphics_exposures = False;
+	
+	display->gc = XCreateGC(display->dpy,display->root,
+		GCForeground|GCBackground|GCGraphicsExposures,
+		&values); 
 	
 	display->visual = DefaultVisual(display->dpy, display->screen);
 	display->colormap = DefaultColormap(display->dpy, display->screen);

@@ -12,7 +12,7 @@ typedef struct theme_t {
 	int title_x, title_y;
 	char *title_caption;
 	
-	XImage *background;
+	Pixmap background;
 } theme_t;
 
 theme_t* theme_new(display_t *display, cfg_t *conf);
