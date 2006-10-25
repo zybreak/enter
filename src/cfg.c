@@ -78,6 +78,12 @@ char* conf_get(cfg_t *conf, const char *key)
 	return "";
 }
 
+/* TODO: how should conf_set handle new data?
+ * right now it stores duplicates of its indata, and not the
+ * indata itself to assure it can free it when needed.
+ * Although if the responsibility to free the data is on the user,
+ * this will not be needed. Then ofcource overwriting data is not
+ * so easy anymore.  */
 void conf_set(cfg_t *conf, const char *key, const char *value)
 {
 	map_t *map = conf->map;

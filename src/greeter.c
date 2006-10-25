@@ -1,4 +1,5 @@
 #include <X11/Xlib.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -52,9 +53,7 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 
 static void default_settings(cfg_t *conf)
 {
-	/* Not used at the moment since a theme path is
-	 * demanded as an argument.  */
-	conf_set(conf,"theme_path","path_to_theme");
+	conf_set(conf,"title.color","#FFFFFF");
 }
 
 int main(int argc, char **argv)
@@ -86,8 +85,12 @@ int main(int argc, char **argv)
 	
 	window_show(window);
 	
-	while(1)
-		window_events(window);
+	XEvent event;
+	while(1) {
+		XNextEvent(display->dpy,&event);
+		window_events(window,&event);
+		usleep(1);
+	}
 
 	display_delete(display);	
 	

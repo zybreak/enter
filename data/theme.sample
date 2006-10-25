@@ -3,12 +3,12 @@
 #
 
 # Main title settings.
-title.string = Enter
+title.caption = Enter "gay" login
 title.font = verdana-18:bold:dpi=75
-title.color 
+title.color = #FFFFFF
 title.position
-title.x = 10
-title.y = 10
+title.x = 50
+title.y = 50
 
 # Background settings.
 background.style

@@ -141,8 +141,6 @@ static void compute_shift(unsigned long mask,
 		unsigned char *left_shift,
 		unsigned char *right_shift)
 {
-	*left_shift = 0;
-	*right_shift = 8;
 	if (mask != 0) {
 		while ((mask & 0x01) == 0) {
 			(*left_shift)++;
@@ -199,12 +197,12 @@ Pixmap image_load(display_t *display, const char *filename)
 	
 	switch (class) {
 	case TrueColor: {
-		unsigned char red_left_shift;
-		unsigned char red_right_shift;
-		unsigned char green_left_shift;
-		unsigned char green_right_shift;
-		unsigned char blue_left_shift;
-		unsigned char blue_right_shift;
+		unsigned char red_left_shift = 0;
+		unsigned char red_right_shift = 8;
+		unsigned char green_left_shift = 0;
+		unsigned char green_right_shift = 8;
+		unsigned char blue_left_shift = 0;
+		unsigned char blue_right_shift = 8;
 
 		compute_shift(visual_info->red_mask, &red_left_shift,
 			&red_right_shift);

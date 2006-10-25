@@ -16,6 +16,6 @@ typedef struct window_t {
 
 window_t* window_new(display_t *display, theme_t *theme);
 void window_show(window_t *window);
-void window_events(window_t *window);
+void window_events(window_t *window, XEvent *event);
 
 #endif /*WINDOW_H_*/

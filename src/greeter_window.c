@@ -22,7 +22,8 @@ window_t* window_new(display_t *display, theme_t *theme)
 
 	color = BlackPixel(display->dpy,display->screen);
 
-	window->win = XCreateSimpleWindow(display->dpy, display->root,
+	window->win = /* display->root; */
+		XCreateSimpleWindow(display->dpy, display->root,
 		window->x, window->y, window->width, window->height,
 		0, color, color);
 
@@ -37,7 +38,6 @@ void window_show(window_t *window)
 	XSelectInput(display->dpy, window->win, ExposureMask | KeyPressMask);
 
 	XSetWindowBackgroundPixmap(display->dpy, window->win, theme->background);
-	XClearWindow(display->dpy,window->win);
 
 	XMapWindow(display->dpy, window->win);
 	XMoveWindow(display->dpy, window->win, window->x, window->y);
@@ -47,15 +47,24 @@ void window_show(window_t *window)
 	XFlush(display->dpy);
 }
 
-void window_events(window_t *window)
+void window_events(window_t *window, XEvent *event)
 {
 	display_t *display = window->display;
-	XEvent event;
-	
-	XNextEvent(display->dpy,&event);
-	
-	switch(event.type) {
-	case Expose:
+	theme_t *theme = window->theme;
+
+	switch(event->type) {
+	case Expose: {
+		XftDraw *d = XftDrawCreate(display->dpy,window->win,display->visual,display->colormap);
+		XftDrawString8(d,theme->title_color,theme->title,
+				theme->title_x,theme->title_y,
+				(XftChar8*)theme->title_caption,strlen(theme->title_caption));
+		XftDrawDestroy(d);
+		
+		XFlush(display->dpy);
+		break;
+	}
+	case KeyPress:
+		printf("key press\n");
 		break;
 	}
 }

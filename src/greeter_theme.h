@@ -8,7 +8,10 @@
 #include "cfg.h"
 
 typedef struct theme_t {
+	display_t *display;
+
 	XftFont *title;
+	XftColor *title_color;
 	int title_x, title_y;
 	char *title_caption;
 	
@@ -16,5 +19,6 @@ typedef struct theme_t {
 } theme_t;
 
 theme_t* theme_new(display_t *display, cfg_t *conf);
+void theme_delete(theme_t *theme);
 
 #endif /* __THEME_H__  */
