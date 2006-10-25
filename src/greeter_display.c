@@ -53,6 +53,6 @@ display_t* display_init()
 
 void display_delete(display_t *display)
 {
+	/* TODO: Delete GC. */
 	XCloseDisplay(display->dpy);
 }
-

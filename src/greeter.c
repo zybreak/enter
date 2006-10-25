@@ -85,6 +85,9 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	
 	window_show(window);
+	
+	while(1)
+		window_events(window);
 
 	display_delete(display);	
 	
