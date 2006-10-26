@@ -4,10 +4,12 @@
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 
+typedef struct theme_t theme_t;
+
 #include "greeter_display.h"
 #include "cfg.h"
 
-typedef struct theme_t {
+struct theme_t {
 	display_t *display;
 
 	XftFont *title;
@@ -16,7 +18,7 @@ typedef struct theme_t {
 	char *title_caption;
 	
 	Pixmap background;
-} theme_t;
+};
 
 theme_t* theme_new(display_t *display, cfg_t *conf);
 void theme_delete(theme_t *theme);

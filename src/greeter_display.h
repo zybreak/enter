@@ -3,7 +3,11 @@
 
 #include <X11/Xlib.h>
 
-typedef struct display_t {
+typedef struct display_t display_t;
+
+#include "greeter_theme.h"
+
+struct display_t {
 	Window root;
 	GC gc;
 	int screen;
@@ -13,9 +17,10 @@ typedef struct display_t {
 	Display *dpy;
 	Colormap colormap;
 	Visual* visual;
-} display_t;
+};
 
 display_t* display_init();
 void display_delete(display_t *display);
+void display_background(display_t *display, theme_t *theme);
 
 #endif /*DISPLAY_H_*/

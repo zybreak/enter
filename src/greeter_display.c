@@ -40,3 +40,9 @@ void display_delete(display_t *display)
 	XFreeGC(display->dpy,display->gc);
 	XCloseDisplay(display->dpy);
 }
+
+void display_background(display_t *display, theme_t *theme)
+{
+	XSetWindowBackgroundPixmap(display->dpy, display->root, theme->background);
+}
+

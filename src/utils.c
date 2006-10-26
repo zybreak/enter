@@ -30,3 +30,13 @@ char* strtrim(char *str)
 
 	return begin;
 }
+
+char* estrcat(const char *str1, const char *str2)
+{
+	char *p = xmalloc(strlen(str1)+strlen(str2)+1);
+	strcpy(p,str1);
+	strcat(p,str2);
+
+	return p;
+}
+

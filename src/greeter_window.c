@@ -22,8 +22,8 @@ window_t* window_new(display_t *display, theme_t *theme)
 
 	color = BlackPixel(display->dpy,display->screen);
 
-	window->win = /* display->root; */
-		XCreateSimpleWindow(display->dpy, display->root,
+	/* TODO: wrong dimensions.  */
+	window->win = XCreateSimpleWindow(display->dpy, display->root,
 		window->x, window->y, window->width, window->height,
 		0, color, color);
 
@@ -37,6 +37,7 @@ void window_show(window_t *window)
 
 	XSelectInput(display->dpy, window->win, ExposureMask | KeyPressMask);
 
+	/* TODO: Wrong image.  */
 	XSetWindowBackgroundPixmap(display->dpy, window->win, theme->background);
 
 	XMapWindow(display->dpy, window->win);

@@ -12,7 +12,6 @@
 static void parse_args(int argc, char **argv, cfg_t *conf)
 {
 	int i;
-	char *theme_path;
 	char theme_file[] = "/theme";
 
 	if (argc<=1) {
@@ -38,10 +37,7 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 		} else if (i==argc-1) {
 			/* This is the last argument,
 			 * use it as the theme path.  */
-			theme_path = xmalloc(strlen(argv[i])+
-					strlen(theme_file)+1);
-			strcpy(theme_path,argv[i]);
-			strcat(theme_path,theme_file);
+			char *theme_path = estrcat(argv[i],theme_file);
 			conf_set(conf,"theme_path",theme_path);
 			free(theme_path);
 		} else {
@@ -78,6 +74,8 @@ int main(int argc, char **argv)
 	theme = theme_new(display,conf);
 	if (!theme)
 		return EXIT_FAILURE;
+
+	display_background(display,theme);
 
 	window = window_new(display,theme);
 	if (!window)
