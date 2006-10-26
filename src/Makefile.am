@@ -30,7 +30,7 @@ enter_LDADD = libcommon.a
 
 enter_greeter_CFLAGS = @FT2_CFLAGS@ @PNG_CFLAGS@ @X_CFLAGS@ -Wall
 enter_greeter_LDFLAGS = \
-	@FT2_LIBS@ @PNG_LIBS@ @X_LIBS@ \
-	-lX11 -lXft
+	-lX11 -lXft @PNG_LIBS@ @X_LIBS@ \
+	@FT2_LIBS@
 enter_greeter_LDADD = libcommon.a
 

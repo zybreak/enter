@@ -14,6 +14,8 @@ AC_PROG_RANLIB
 
 # Checks for libraries.
 AC_CHECK_FT2
+AC_CHECK_LIB([X11], [XOpenDisplay])
+AC_CHECK_LIB([Xft], [XftFontOpenName])
 
 # Checks for header files.
 AC_PATH_X

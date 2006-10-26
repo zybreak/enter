@@ -12,7 +12,6 @@
 static void parse_args(int argc, char **argv, cfg_t *conf)
 {
 	int i;
-	char theme_file[] = "/theme";
 
 	if (argc<=1) {
 		fprintf(stderr,"no theme specified, try -h\n");
@@ -37,9 +36,7 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 		} else if (i==argc-1) {
 			/* This is the last argument,
 			 * use it as the theme path.  */
-			char *theme_path = estrcat(argv[i],theme_file);
-			conf_set(conf,"theme_path",theme_path);
-			free(theme_path);
+			conf_set(conf,"theme_path",argv[i]);
 		} else {
 			printf("unknown argument, try -h\n");
 			exit(EXIT_FAILURE);
@@ -64,8 +61,10 @@ int main(int argc, char **argv)
 	parse_args(argc, argv, conf);
 
 	/* Parse theme config file.  */
-	if (!conf_parse(conf,conf_get(conf,"theme_path")))
+	char *theme_path = estrcat(conf_get(conf,"theme_path"),"/theme");
+	if (!conf_parse(conf,theme_path))
 		return EXIT_FAILURE;
+	free(theme_path);
 	
 	display = display_init();
 	if (!display)
