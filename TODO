@@ -1,5 +1,4 @@
 * Document functions.
-* `configure' should generate data/enter.conf.
 * Add content to README and AUTHORS
 * Add code to resize images
 * Add code to enable relative positions in themes
