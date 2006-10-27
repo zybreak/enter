@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	display_background(display,theme);
+	//display_background(display,theme);
 	
 	window = window_new(display,theme);
 	if (!window) {

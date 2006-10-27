@@ -15,10 +15,24 @@ static void redraw(window_t *window)
 	display_t *display = window->display;
 	theme_t *theme = window->theme;
 	
+	XGlyphInfo extents;
 	XftDraw *d = XftDrawCreate(display->dpy,window->win,display->visual,display->colormap);
 	
+	XClearWindow(display->dpy,window->win);
+
 	DRAW_STRING(d,theme->title);
 	DRAW_STRING(d,theme->username);
+	XftTextExtents8(display->dpy,theme->username.font,
+		(XftChar8*)theme->username.caption,
+		strlen(theme->username.caption), &extents);
+
+	int rect_width = /*rect_x + */extents.width;
+	int rect_height = /*rect_y + */extents.height;
+	int rect_x = rect_width*2 + theme->username.x - extents.x;
+	int rect_y = theme->username.y - extents.y;
+
+	XftDrawRect(d,theme->username.color,
+			rect_x,rect_y,rect_width,rect_height);
 
 	XftDrawDestroy(d);
 
