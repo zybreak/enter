@@ -4,7 +4,7 @@ confdir= $(sysconfdir)
 themedir= $(datadir)/@PACKAGE@
 
 dist_conf_DATA = enter.conf
-dist_theme_DATA = \
+nobase_dist_theme_DATA = \
 	themes/default/theme \
 	themes/default/background.png
 
@@ -14,6 +14,8 @@ edit = sed \
        -e 's|@datarootdir[@]|$(datarootdir)|g' \
        -e 's|@prefix[@]|$(prefix)|g'
 
-enter.conf: enter.conf.in
-	$(edit) $< > $@
+enter.conf: Makefile
+	$(edit) $(srcdir)/enter.conf.in > $@
+
+enter.conf: $(srcdir)/enter.conf.in
 
