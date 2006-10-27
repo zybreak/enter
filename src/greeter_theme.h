@@ -5,6 +5,7 @@
 #include <X11/Xft/Xft.h>
 
 typedef struct theme_t theme_t;
+typedef struct item_t item_t;
 
 #include "greeter_display.h"
 #include "cfg.h"
@@ -12,10 +13,12 @@ typedef struct theme_t theme_t;
 struct theme_t {
 	display_t *display;
 
-	XftFont *title;
-	XftColor *title_color;
-	int title_x, title_y;
-	char *title_caption;
+	struct item_t {
+		XftFont *font;
+		XftColor *color;
+		int x, y;
+		char *caption;
+	} title, username, password;
 	
 	Pixmap background;
 };

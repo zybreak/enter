@@ -6,6 +6,7 @@
 typedef struct display_t display_t;
 
 #include "greeter_theme.h"
+#include "cfg.h"
 
 struct display_t {
 	Window root;
@@ -19,7 +20,7 @@ struct display_t {
 	Visual* visual;
 };
 
-display_t* display_init();
+display_t* display_new(cfg_t *conf);
 void display_delete(display_t *display);
 void display_background(display_t *display, theme_t *theme);
 

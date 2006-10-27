@@ -5,6 +5,26 @@
 #include "greeter_image.h"
 #include "utils.h"
 
+#define DRAW_STRING(drawable,item) \
+	XftDrawString8(drawable,item.color,item.font, \
+		item.x,item.y, \
+		(XftChar8*)item.caption,strlen(item.caption));
+
+static void redraw(window_t *window)
+{
+	display_t *display = window->display;
+	theme_t *theme = window->theme;
+	
+	XftDraw *d = XftDrawCreate(display->dpy,window->win,display->visual,display->colormap);
+	
+	DRAW_STRING(d,theme->title);
+	DRAW_STRING(d,theme->username);
+
+	XftDrawDestroy(d);
+
+	XFlush(display->dpy);
+}
+
 window_t* window_new(display_t *display, theme_t *theme)
 {
 	unsigned long color;
@@ -22,7 +42,6 @@ window_t* window_new(display_t *display, theme_t *theme)
 
 	color = BlackPixel(display->dpy,display->screen);
 
-	/* TODO: wrong dimensions.  */
 	window->win = XCreateSimpleWindow(display->dpy, display->root,
 		window->x, window->y, window->width, window->height,
 		0, color, color);
@@ -37,7 +56,6 @@ void window_show(window_t *window)
 
 	XSelectInput(display->dpy, window->win, ExposureMask | KeyPressMask);
 
-	/* TODO: Wrong image.  */
 	XSetWindowBackgroundPixmap(display->dpy, window->win, theme->background);
 
 	XMapWindow(display->dpy, window->win);
@@ -50,22 +68,13 @@ void window_show(window_t *window)
 
 void window_events(window_t *window, XEvent *event)
 {
-	display_t *display = window->display;
-	theme_t *theme = window->theme;
-
 	switch(event->type) {
-	case Expose: {
-		XftDraw *d = XftDrawCreate(display->dpy,window->win,display->visual,display->colormap);
-		XftDrawString8(d,theme->title_color,theme->title,
-				theme->title_x,theme->title_y,
-				(XftChar8*)theme->title_caption,strlen(theme->title_caption));
-		XftDrawDestroy(d);
-		
-		XFlush(display->dpy);
+	case Expose:
+		redraw(window);
 		break;
-	}
 	case KeyPress:
 		printf("key press\n");
 		break;
 	}
 }
+

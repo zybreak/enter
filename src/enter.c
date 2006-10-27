@@ -32,7 +32,7 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 			printf(
 				"usage %s: [options]\n\n"
 				"  -c          specify an alternative config file\n"
-				"  -d          connect to an existing display\n"
+				"  -d          connect to display\n"
 				"  -n          dont run as a daemon\n"
 				"  -v          print version information\n"
 				"  -h          print avaiable arguments\n"
@@ -50,6 +50,7 @@ static void default_settings(cfg_t *conf)
 {
 	conf_set(conf,"config_file","/etc/" PACKAGE ".conf");
 	conf_set(conf,"daemon","true");
+	conf_set(conf,"display",":0");
 }
 
 static void daemonize(pid_t *pid, pid_t *sid)
@@ -115,11 +116,13 @@ int main(int argc, char **argv)
 	if (!strcmp(conf_get(conf,"daemon"),"true")) {
 		daemonize(&pid,&sid);
 	}
-	
+
+	/*	
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
-	
+	*/
+
 	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 	
 	write_pidfile(pid);

@@ -3,11 +3,11 @@
 #include "greeter_display.h"
 #include "utils.h"
 
-display_t* display_init()
+display_t* display_new(cfg_t *conf)
 {
 	display_t *display = (display_t*)xmalloc(sizeof(display_t));
-	
-	display->dpy = XOpenDisplay(NULL);
+
+	display->dpy = XOpenDisplay(conf_get(conf,"display"));
 	if (!display->dpy) {
 		free(display);
 		return NULL;

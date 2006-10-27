@@ -1,17 +1,22 @@
 #
-# This is a sample .theme config file.
+# This is the default enter theme.
 #
 
 # Main title settings.
 title.caption = Enter
 title.font = verdana-18:bold:dpi=75
 title.color = #FFFFFF
-title.position
 title.x = 50
 title.y = 50
 
+# Username
+username.caption = Username
+username.font = verdana-14:bold:dpi=75
+username.color = #FFFFFF
+username.x = 50
+username.y = 200
+
 # Background settings.
-background.style
-background.color
 background.image = background.png
 
+# End of file

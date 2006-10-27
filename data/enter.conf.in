@@ -1,0 +1,9 @@
+#
+# This is a sample config file
+#
+
+server_path=/usr/bin/X
+greeter_path=@sbindir@/enter_greeter
+theme_path=@datarootdir@/@PACKAGE@/default
+
+# End of file
