@@ -1,11 +1,32 @@
 #ifndef __THEME_H__
 #define __THEME_H__
 
+#include "enter.h"
+
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 
 typedef struct theme_t theme_t;
-typedef struct item_t item_t;
+typedef union item_t item_t;
+
+typedef enum e_type {
+	IMAGE,
+	LABEL
+} e_type;
+
+typedef struct label_t {
+	e_type type;
+	XftFont *font;
+	XftColor *color;
+	char *caption;
+	int x, y;
+} label_t;
+
+typedef struct image_t {
+	e_type type;
+	Pixmap image;
+	int x, y;
+} image_t;
 
 #include "greeter_display.h"
 #include "cfg.h"
@@ -13,13 +34,12 @@ typedef struct item_t item_t;
 struct theme_t {
 	display_t *display;
 
-	struct item_t {
-		XftFont *font;
-		XftColor *color;
-		int x, y;
-		char *caption;
-	} title, username, password;
-	
+	union item_t {
+		e_type type;
+		label_t label;
+		image_t image;
+	} *title, *username, *input;
+		
 	Pixmap background;
 };
 

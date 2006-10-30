@@ -5,38 +5,58 @@
 #include "greeter_image.h"
 #include "utils.h"
 
-#define DRAW_STRING(drawable,item) \
-	XftDrawString8(drawable,item.color,item.font, \
-		item.x,item.y, \
-		(XftChar8*)item.caption,strlen(item.caption));
+#define DRAW_STRING(drawable,label) \
+	XftDrawString8(drawable,label.color,label.font, \
+		label.x,label.y, \
+		(XftChar8*)label.caption,strlen(label.caption));
 
 static void redraw(window_t *window)
 {
 	display_t *display = window->display;
 	theme_t *theme = window->theme;
+	label_t *label;
 	
-	XGlyphInfo extents;
 	XftDraw *d = XftDrawCreate(display->dpy,window->win,display->visual,display->colormap);
 	
 	XClearWindow(display->dpy,window->win);
 
-	DRAW_STRING(d,theme->title);
-	DRAW_STRING(d,theme->username);
-	XftTextExtents8(display->dpy,theme->username.font,
-		(XftChar8*)theme->username.caption,
-		strlen(theme->username.caption), &extents);
+	label = &theme->title->label;
+	XftDrawString8(d,label->color,label->font, \
+		label->x,label->y, \
+		(XftChar8*)label->caption,strlen(label->caption));
 
-	int rect_width = /*rect_x + */extents.width;
-	int rect_height = /*rect_y + */extents.height;
-	int rect_x = rect_width*2 + theme->username.x - extents.x;
-	int rect_y = theme->username.y - extents.y;
+	label = &theme->username->label;
+	XftDrawString8(d,label->color,label->font, \
+		label->x,label->y, \
+		(XftChar8*)label->caption,strlen(label->caption));
 
-	XftDrawRect(d,theme->username.color,
-			rect_x,rect_y,rect_width,rect_height);
+	label = &theme->username->label;
+	XftDrawString8(d,label->color,label->font, \
+		400,label->y, \
+		(XftChar8*)window->input,strlen(window->input));
 
 	XftDrawDestroy(d);
 
 	XFlush(display->dpy);
+}
+
+static void keypress(window_t *window, XEvent *event)
+{
+	char ch;
+	KeySym keysym;
+	XComposeStatus cstatus;
+
+	XLookupString(&event->xkey,&ch,1,&keysym,&cstatus);
+
+	if (keysym == XK_BackSpace) {
+		if (window->input_pos > 0)
+			window->input[--window->input_pos] = '\0';
+	} else if (window->input_pos<INPUT_LEN-1) {
+		window->input[window->input_pos++] = ch;
+	} else
+		return;
+
+	redraw(window);
 }
 
 window_t* window_new(display_t *display, theme_t *theme)
@@ -53,6 +73,9 @@ window_t* window_new(display_t *display, theme_t *theme)
 	window->height = display->height;
 	window->display = display;
 	window->theme = theme;
+
+	memset(window->input,'\0',INPUT_LEN);
+	window->input_pos = 0;
 
 	color = BlackPixel(display->dpy,display->screen);
 
@@ -87,7 +110,7 @@ void window_events(window_t *window, XEvent *event)
 		redraw(window);
 		break;
 	case KeyPress:
-		printf("key press\n");
+		keypress(window,event);
 		break;
 	}
 }
