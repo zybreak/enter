@@ -1,0 +1,13 @@
+2006-11-02  Robert Knutsson <rob_dobbs@users.sf.net>
+	* configure.ac, src/Makefile.am, src/enter.c:
+	src/enter.c get its default config location from autoconf.
+
+	* src/enter_server.c:
+	signal_sigusr1: function warning fixes.
+
+	* src/greeter_theme.c, src/greeter_theme.h, src/greeter_window.c:
+	theme_t: removed union between label_t and image_t.
+
+	* data/Makefile.am:
+	Now handles VPATH.
+

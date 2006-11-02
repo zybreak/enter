@@ -9,13 +9,7 @@
 typedef struct theme_t theme_t;
 typedef union item_t item_t;
 
-typedef enum e_type {
-	IMAGE,
-	LABEL
-} e_type;
-
 typedef struct label_t {
-	e_type type;
 	XftFont *font;
 	XftColor *color;
 	char *caption;
@@ -23,7 +17,6 @@ typedef struct label_t {
 } label_t;
 
 typedef struct image_t {
-	e_type type;
 	Pixmap image;
 	int x, y;
 } image_t;
@@ -34,11 +27,8 @@ typedef struct image_t {
 struct theme_t {
 	display_t *display;
 
-	union item_t {
-		e_type type;
-		label_t label;
-		image_t image;
-	} *title, *username, *input;
+	label_t *title, *username;
+	image_t *input;
 		
 	Pixmap background;
 };

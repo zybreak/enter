@@ -20,17 +20,17 @@ static void redraw(window_t *window)
 	
 	XClearWindow(display->dpy,window->win);
 
-	label = &theme->title->label;
+	label = theme->title;
 	XftDrawString8(d,label->color,label->font, \
 		label->x,label->y, \
 		(XftChar8*)label->caption,strlen(label->caption));
 
-	label = &theme->username->label;
+	label = theme->username;
 	XftDrawString8(d,label->color,label->font, \
 		label->x,label->y, \
 		(XftChar8*)label->caption,strlen(label->caption));
 
-	label = &theme->username->label;
+	label = theme->username;
 	XftDrawString8(d,label->color,label->font, \
 		400,label->y, \
 		(XftChar8*)window->input,strlen(window->input));

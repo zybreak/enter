@@ -54,6 +54,9 @@ AC_FUNC_MALLOC
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([memset strdup])
 
+DEBUG_CFLAGS="-Wall -Wmissing-prototypes -Wmissing-declarations -Wextra"
+AC_SUBST([DEBUG_CFLAGS])
+
 AC_OUTPUT([
 	   Makefile
 	   data/Makefile

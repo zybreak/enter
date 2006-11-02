@@ -19,7 +19,7 @@ static int server_started = FALSE;
 
 static int new_cookie(char *cookie)
 {
-	
+	/* TODO: stub.  */
 	return TRUE;
 }
 
@@ -69,7 +69,7 @@ static int server_authenticate(cfg_t *conf, const char *address)
 	return TRUE;
 }
 
-void signal_sigusr1(int signal)
+static void signal_sigusr1(int signal)
 {
 	server_started = TRUE;
 }

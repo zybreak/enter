@@ -30,17 +30,17 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 			exit(EXIT_SUCCESS);
 		} else if (strcmp(argv[i],"-h") == 0) {
 			printf(
-				"usage %s: [options]\n\n"
-				"  -c          specify an alternative config file\n"
-				"  -d          connect to display\n"
-				"  -n          dont run as a daemon\n"
-				"  -v          print version information\n"
-				"  -h          print avaiable arguments\n"
-				"\n",
-				argv[0]);
+			"usage %s: [options]\n\n"
+			"  -c          specify an alternative config file\n"
+			"  -d          connect to display\n"
+			"  -n          dont run as a daemon\n"
+			"  -v          print version information\n"
+			"  -h          print avaiable arguments\n"
+			"\n",
+			argv[0]);
 			exit(EXIT_SUCCESS);
 		} else {
-			printf("unknown argument, try -h");
+			printf("unknown argument, try -h\n");
 			exit(EXIT_SUCCESS);
 		}
 	}
@@ -48,7 +48,7 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 
 static void default_settings(cfg_t *conf)
 {
-	conf_set(conf,"config_file","/etc/" PACKAGE ".conf");
+	conf_set(conf,"config_file",CONFDIR "/enter.conf");
 	conf_set(conf,"daemon","true");
 	conf_set(conf,"display",":0");
 }

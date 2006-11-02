@@ -1,5 +1,3 @@
-CLEANFILES = enter.conf
-
 confdir= $(sysconfdir)
 themedir= $(datadir)/@PACKAGE@
 
@@ -8,6 +6,9 @@ nobase_dist_theme_DATA = \
 	themes/default/theme \
 	themes/default/background.png
 
+CLEANFILES = $(dist_conf_DATA)
+EXTRA_DIST = enter.conf.in
+
 edit = sed \
        -e 's|@sbindir[@]|$(sbindir)|g' \
        -e 's|@PACKAGE[@]|$(PACKAGE)|g' \
@@ -15,7 +16,7 @@ edit = sed \
        -e 's|@prefix[@]|$(prefix)|g'
 
 enter.conf: Makefile
-	$(edit) $(srcdir)/enter.conf.in > $@
+	@$(edit) $(srcdir)/enter.conf.in > $@
 
 enter.conf: $(srcdir)/enter.conf.in
 
