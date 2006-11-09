@@ -9,7 +9,7 @@
 #include "enter.h"
 #include "enter_server.h"
 #include "enter_greeter.h"
-#include "cfg.h"
+#include "conf.h"
 
 #define PIDFILE "/var/run/" PACKAGE ".pid"
 #define PIDBUF 20

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "enter.h"
-#include "cfg.h"
+#include "conf.h"
 #include "utils.h"
 
 #define BUFFER_SIZE 200

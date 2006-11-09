@@ -9,8 +9,8 @@ sbin_PROGRAMS = enter enter_greeter
 libcommon_a_SOURCES = \
 	utils.c \
 	utils.h \
-	cfg.c \
-	cfg.h
+	conf.c \
+	conf.h
 
 enter_SOURCES = \
 	enter.c enter.h \
@@ -21,8 +21,7 @@ enter_greeter_SOURCES = \
 	greeter.c enter.h \
 	greeter_display.c greeter_display.h \
 	greeter_image.c greeter_image.h \
-	greeter_theme.c greeter_theme.h \
-	greeter_window.c greeter_window.h
+	greeter_gui.c greeter_gui.h
 
 enter_CFLAGS = @DEBUG_CFLAGS@ @X_CFLAGS@ -DCONFDIR=\"$(sysconfdir)\"
 enter_LDFLAGS = @X_LIBS@ -lX11

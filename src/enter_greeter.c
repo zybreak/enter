@@ -3,7 +3,7 @@
 #include <syslog.h>
 
 #include "enter.h"
-#include "cfg.h"
+#include "conf.h"
 
 #define CMD_LEN 256
 

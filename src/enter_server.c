@@ -124,7 +124,7 @@ int server_init(cfg_t *conf)
 		
 		if (server_started == FALSE) {
 			syslog(LOG_WARNING,"Server timed out");
-			/* TODO: Maby make sure the other process is dead here?  */
+			/* TODO: Maybe make sure the other process is dead here?  */
 			return FALSE;
 		}
 		

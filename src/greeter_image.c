@@ -120,8 +120,8 @@ static int read_png(const char *filename, int *width, int *height, unsigned char
 		*ptr++ = row_pointers[i][ipos++];
 		*ptr++ = row_pointers[i][ipos++];
 		
-		/* This row crashes on some png files.  */
-		*alpha[i * *width + j] = row_pointers[i][ipos++];
+		/* TODO: This row crashes on some png files.  */
+		*alpha[i * (*width) + j] = row_pointers[i][ipos++];
 	    }
 	}
     }
@@ -153,12 +153,11 @@ static void compute_shift(unsigned long mask,
 	}
 }
 
-Pixmap image_load(display_t *display, const char *filename)
+Pixmap image_load(display_t *display, const char *filename, int *width, int *height)
 {
 	int i, j;
 	unsigned char *rgb = NULL;
 	unsigned char *alpha = NULL;
-	int width, height;
 	char *pixmap_data;
 	int size;
 	XImage *image;
@@ -167,27 +166,27 @@ Pixmap image_load(display_t *display, const char *filename)
 	int visual_enteries;
 	unsigned long ipos = 0;
 
-	if (!read_png(filename,&width,&height,&rgb,&alpha)) {
+	if (!read_png(filename,width,height,&rgb,&alpha)) {
 		return (Pixmap)NULL;
 	}
 
 	switch(display->depth) {
 	case 32:
 	case 24:
-		size = 4 * width * height;
+		size = 4 * (*width) * (*height);
 		break;
 	case 16:
 	case 15:
-		size = 2 * width * height;
+		size = 2 * (*width) * (*height);
 	break;
 	default:
-		size = width * height;
+		size = (*width) * (*height);
 	}
 
 	pixmap_data = (char*)xmalloc(size);
 
 	image = XCreateImage(display->dpy,display->visual,display->depth,ZPixmap,0,
-			pixmap_data, width, height, 8, 0);
+			pixmap_data, *width, *height, 8, 0);
 
 	tmp_inf.visualid = XVisualIDFromVisual(display->visual),
 	visual_info = XGetVisualInfo(display->dpy,VisualIDMask,
@@ -214,8 +213,8 @@ Pixmap image_load(display_t *display, const char *filename)
 		unsigned long pixel;
 		unsigned long red, green, blue;
 		
-		for (j = 0; j < height; j++) {
-			for (i = 0; i < width; i++) {
+		for (j = 0; j < *height; j++) {
+			for (i = 0; i < *width; i++) {
 				red = (unsigned long)
 					rgb[ipos++] >> red_right_shift;
 				green = (unsigned long)
@@ -267,8 +266,8 @@ Pixmap image_load(display_t *display, const char *filename)
 			}
 		}
 
-		for (j = 0; j < height; j++) {
-			for (i = 0; i < width; i++) {
+		for (j = 0; j < *height; j++) {
+			for (i = 0; i < *width; i++) {
 				xc.red = (unsigned short) (rgb[ipos++] & 0xe0);
 				xc.green = (unsigned short) (rgb[ipos++] & 0xe0);
 				xc.blue = (unsigned short) (rgb[ipos++] & 0xc0);

@@ -6,7 +6,7 @@
 typedef struct display_t display_t;
 
 #include "greeter_theme.h"
-#include "cfg.h"
+#include "conf.h"
 
 struct display_t {
 	Window root;

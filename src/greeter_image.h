@@ -5,6 +5,7 @@
 
 #include "greeter_display.h"
 
-Pixmap image_load(display_t *display, const char *filename);
+Pixmap image_load(display_t *display, const char *filename,
+					int *width, int *height);
 
 #endif /* __IMAGE_H__  */

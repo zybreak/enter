@@ -1,3 +1,11 @@
+2006-11-10  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/cfg.[ch]:
+	renamed to conf.[ch]
+	* src/greeter_theme.[ch]:
+	removed theme_t, image_t, label_t  and src/greeter_theme.[ch]
+	* src/greeter_window.[ch]:
+	renamed to greeter_gui.[ch]. added gui_label_t and gui_input_t
+
 2006-11-02  Robert Knutsson <rob_dobbs@users.sf.net>
 	* configure.ac, src/Makefile.am, src/enter.c:
 	src/enter.c get its default config location from autoconf.

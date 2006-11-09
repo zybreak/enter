@@ -2,21 +2,32 @@
 # This is the default enter theme.
 #
 
-# Main title settings.
+# Main title label
 title.caption = Enter
 title.font = verdana-18:bold:dpi=75
 title.color = #FFFFFF
 title.x = 50
 title.y = 50
 
-# Username
+# Username label
 username.caption = Username
 username.font = verdana-14:bold:dpi=75
 username.color = #FFFFFF
 username.x = 50
 username.y = 200
 
-# Background settings.
+# Username input field
+username_input.x = 100
+username_input.y = 200
+username_input.image = input.png
+username_input.text.font = verdana-14:bold:dpi=75
+username_input.text.color = #FFFFFF
+username_input.text.x = 100
+username_input.text.y = 200
+username_input.text.width
+username_input.text.height
+
+# Background settings
 background.image = background.png
 
 # End of file

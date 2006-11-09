@@ -5,8 +5,8 @@
 
 #include "enter.h"
 #include "greeter_display.h"
-#include "greeter_window.h"
-#include "cfg.h"
+#include "greeter_gui.h"
+#include "conf.h"
 #include "utils.h"
 
 static void parse_args(int argc, char **argv, cfg_t *conf)
@@ -54,15 +54,13 @@ static void default_settings(cfg_t *conf)
 int main(int argc, char **argv)
 {
 	display_t *display;
-	window_t *window;
-	theme_t *theme;
+	gui_t *gui;
 	cfg_t *conf = conf_new();
 
 	default_settings(conf);
 	
 	parse_args(argc, argv, conf);
 
-	/* Parse theme config file.  */
 	char *theme_path = estrcat(conf_get(conf,"theme_path"),"/theme");
 	if (!conf_parse(conf,theme_path)) {
 		fprintf(stderr,"could not parse config \"%s\"\n",theme_path);
@@ -76,26 +74,20 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	
-	theme = theme_new(display,conf);
-	if (!theme) {
-		fprintf(stderr,"could not load theme\n");
-		return EXIT_FAILURE;
-	}
-
 	//display_background(display,theme);
 	
-	window = window_new(display,theme);
-	if (!window) {
-		fprintf(stderr,"could not open window\n");
+	gui = gui_new(display,conf);
+	if (!gui) {
+		fprintf(stderr,"could not open gui\n");
 		return EXIT_FAILURE;
 	}
 	
-	window_show(window);
+	gui_show(gui);
 	
 	XEvent event;
 	while(1) {
 		XNextEvent(display->dpy,&event);
-		window_events(window,&event);
+		gui_events(gui,&event);
 		usleep(1);
 	}
 
