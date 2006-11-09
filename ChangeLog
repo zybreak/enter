@@ -1,4 +1,8 @@
 2006-11-10  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/greeter_display.[ch]:
+	removed display_background().
+
+2006-11-10  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/cfg.[ch]:
 	renamed to conf.[ch]
 	* src/greeter_theme.[ch]:

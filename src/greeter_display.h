@@ -5,7 +5,6 @@
 
 typedef struct display_t display_t;
 
-#include "greeter_theme.h"
 #include "conf.h"
 
 struct display_t {
@@ -22,6 +21,5 @@ struct display_t {
 
 display_t* display_new(cfg_t *conf);
 void display_delete(display_t *display);
-void display_background(display_t *display, theme_t *theme);
 
 #endif /*DISPLAY_H_*/

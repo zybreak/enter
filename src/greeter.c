@@ -74,8 +74,6 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	
-	//display_background(display,theme);
-	
 	gui = gui_new(display,conf);
 	if (!gui) {
 		fprintf(stderr,"could not open gui\n");
