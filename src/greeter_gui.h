@@ -4,28 +4,13 @@
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 
+typedef struct gui_t gui_t;
+
 #include "greeter_display.h"
+#include "greeter_gui_widgets.h"
 #include "conf.h"
 
-#define TEXT_LEN 64
-
-typedef struct gui_input_t {
-	Pixmap image;
-	int x, y, w, h;
-	int text_x, text_y, text_w, text_h;
-	XftFont *font;
-	XftColor *color;
-	char text[TEXT_LEN];
-} gui_input_t;
-
-typedef struct gui_label_t {
-	XftFont *font;
-	XftColor *color;
-	char caption[TEXT_LEN];
-	int x,y;
-} gui_label_t;
-
-typedef struct gui_t {
+struct gui_t {
 	Window win;
 	Pixmap background;
 	XftDraw *draw;
@@ -41,7 +26,7 @@ typedef struct gui_t {
 		USERNAME,
 		PASSWORD
 	} visible, focus;
-} gui_t;
+};
 
 gui_t* gui_new(display_t *display, cfg_t *config);
 void gui_delete(gui_t *gui);

@@ -1,4 +1,7 @@
 2006-11-10  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/greeter_gui_widgets.[ch], src/greeter_gui.[ch]:
+	moved widget code from greeter_gui to greeter_gui_widgets.
+2006-11-10  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter_gui.c, src/greeter_display.c,
 	  src/conf.c, src/conf.h, src/greeter.c:
 	plugged memleaks.

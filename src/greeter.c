@@ -16,6 +16,7 @@ typedef enum {
 } mode_t;
 
 static mode_t greeter_mode;
+static const char *username, *password;
 
 static void parse_args(int argc, char **argv, cfg_t *conf)
 {
@@ -59,11 +60,14 @@ static void default_settings(cfg_t *conf)
 	conf_set(conf,"display",":0");
 }
 
-void greeter_authenticate(const char *username, const char *password)
+void greeter_authenticate(const char *usr, const char *pwd)
 {
+	username = usr;
+	password = pwd;
+	greeter_mode = AUTH;
+	
 	printf("Logging in \"%s\" (%s)\n",username,
 					password);
-	greeter_mode = AUTH;
 }
 
 int main(int argc, char **argv)
@@ -105,6 +109,8 @@ int main(int argc, char **argv)
 		gui_events(gui,&event);
 		usleep(1);
 	}
+
+	/* TODO: authenticate and login user.  */
 
 	gui_delete(gui);
 	conf_delete(conf);

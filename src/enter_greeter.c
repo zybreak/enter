@@ -2,6 +2,10 @@
 #include <unistd.h>
 #include <syslog.h>
 
+
+#include <stdio.h>
+
+
 #include "enter.h"
 #include "conf.h"
 
@@ -26,6 +30,7 @@ int greeter_init(cfg_t *conf)
 		syslog(LOG_WARNING,"Could not fork process");
 		return FALSE;
 	} else if (pid == 0) {
+		printf("\"%s %s %s %s\"\n",*cmd,*(cmd+1),*(cmd+2),*(cmd+3));
 		execve(cmd[0],cmd,NULL);
 		syslog(LOG_WARNING,"Could not start greeter application");
 		return FALSE;

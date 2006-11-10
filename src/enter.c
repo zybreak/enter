@@ -53,21 +53,22 @@ static void default_settings(cfg_t *conf)
 	conf_set(conf,"display",":0");
 }
 
-static void daemonize(pid_t *pid, pid_t *sid)
+static void daemonize()
 {
-	*pid = fork();
-	if (*pid < 0) {
+	pid_t pid, sid;
+	pid = fork();
+	if (pid < 0) {
 		perror("Could not fork process");
 		exit(EXIT_FAILURE);
-	} else if (*pid > 0) {
+	} else if (pid > 0) {
 		exit(EXIT_SUCCESS);
 	}
 	
 	umask(0);
 	
-	*sid = setsid();
+	sid = setsid();
 	
-	if (*sid < 0) {
+	if (sid < 0) {
 		fprintf(stderr,"could not set sid\n");
 		exit(EXIT_FAILURE);
 	}
@@ -117,15 +118,13 @@ int main(int argc, char **argv)
 		daemonize(&pid,&sid);
 	}
 
-	/*	
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
-	*/
 
 	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 	
-	write_pidfile(pid);
+	write_pidfile(getpid());
 	
 	syslog(LOG_INFO,"Starting X server.");
 	server_pid = server_init(conf);
