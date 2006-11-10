@@ -39,5 +39,6 @@ void display_delete(display_t *display)
 {
 	XFreeGC(display->dpy,display->gc);
 	XCloseDisplay(display->dpy);
+	free(display);
 }
 

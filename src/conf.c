@@ -39,6 +39,21 @@ cfg_t* conf_new(void)
 	return conf;
 }
 
+void conf_delete(cfg_t *conf)
+{
+	map_t *map = conf->map;
+	while (map) {
+		map_t *next = map->next;
+		
+		free(map->key);
+		free(map->value);
+		free(map);
+
+		map = next;
+	}
+	free(conf);
+}
+
 int conf_parse(cfg_t *conf, const char *config_file)
 {
 	char buffer[BUFFER_SIZE];

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "enter.h"
+#include "greeter.h"
 #include "greeter_gui.h"
 #include "greeter_image.h"
 #include "utils.h"
@@ -84,14 +85,18 @@ static gui_input_t* gui_input_new(display_t *display, const char *image, int x, 
 
 static void gui_label_delete(gui_label_t *label, display_t *display)
 {
+	XftFontClose(display->dpy,label->font);
 	XftColorFree(display->dpy,display->visual,display->colormap,label->color);
+	free(label->color);
 	free(label);
 }
 
 static void gui_input_delete(gui_input_t *input, display_t *display)
 {
 	XFreePixmap(display->dpy,input->image);
+	XftFontClose(display->dpy,input->font);
 	XftColorFree(display->dpy,display->visual,display->colormap,input->color);
+	free(input->color);
 	free(input);
 }
 
@@ -183,8 +188,7 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 		}
 	} else if (keysym == XK_Return) {
 		if (gui->visible == PASSWORD || gui->focus == PASSWORD) {
-			/* TODO: Ooh, a user wants to authenticate?  */
-			printf("Logging in \"%s\" (%s)\n",gui->user_input->text,
+			greeter_authenticate(gui->user_input->text,
 					gui->passwd_input->text);
 		} else if (gui->visible == USERNAME) {
 			gui->focus = gui->visible = PASSWORD;

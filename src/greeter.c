@@ -4,10 +4,18 @@
 #include <stdio.h>
 
 #include "enter.h"
+#include "greeter.h"
 #include "greeter_display.h"
 #include "greeter_gui.h"
 #include "conf.h"
 #include "utils.h"
+
+typedef enum {
+	INPUT,
+	AUTH
+} mode_t;
+
+static mode_t greeter_mode;
 
 static void parse_args(int argc, char **argv, cfg_t *conf)
 {
@@ -51,11 +59,19 @@ static void default_settings(cfg_t *conf)
 	conf_set(conf,"display",":0");
 }
 
+void greeter_authenticate(const char *username, const char *password)
+{
+	printf("Logging in \"%s\" (%s)\n",username,
+					password);
+	greeter_mode = AUTH;
+}
+
 int main(int argc, char **argv)
 {
 	display_t *display;
 	gui_t *gui;
 	cfg_t *conf = conf_new();
+	XEvent event;
 
 	default_settings(conf);
 	
@@ -81,14 +97,17 @@ int main(int argc, char **argv)
 	}
 	
 	gui_show(gui);
+
+	greeter_mode = INPUT;
 	
-	XEvent event;
-	while(1) {
+	while(greeter_mode == INPUT) {
 		XNextEvent(display->dpy,&event);
 		gui_events(gui,&event);
 		usleep(1);
 	}
 
+	gui_delete(gui);
+	conf_delete(conf);
 	display_delete(display);
 
 	return EXIT_SUCCESS;

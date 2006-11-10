@@ -12,6 +12,7 @@ typedef struct cfg_t {
 } cfg_t;
 
 cfg_t* conf_new(void);
+void conf_delete(cfg_t *conf);
 int conf_parse(cfg_t *conf, const char *config_file);
 char* conf_get(cfg_t *conf, const char *key);
 void conf_set(cfg_t *conf, const char *key, const char *value);
