@@ -16,16 +16,34 @@ username.color = #FFFFFF
 username.x = 50
 username.y = 200
 
+# Password label
+password.caption = Password
+password.font = verdana-14:bold:dpi=75
+password.color = #FFFFFF
+password.x = 150
+password.y = 200
+
 # Username input field
 username_input.x = 100
 username_input.y = 200
 username_input.image = input.png
 username_input.text.font = verdana-14:bold:dpi=75
 username_input.text.color = #FFFFFF
-username_input.text.x = 100
-username_input.text.y = 200
+username_input.text.x =
+username_input.text.y =
 username_input.text.width
 username_input.text.height
+
+# Password input field
+password_input.x = 200
+password_input.y = 200
+password_input.image = input.png
+password_input.text.font = verdana-14:bold:dpi=75
+password_input.text.color = #FFFFFF
+password_input.text.x =
+password_input.text.y =
+password_input.text.width
+password_input.text.height
 
 # Background settings
 background.image = background.png

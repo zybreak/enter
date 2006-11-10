@@ -1,4 +1,8 @@
 2006-11-10  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/greeter_gui.c:
+	now handles both username- and password input.
+
+2006-11-10  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter_display.[ch]:
 	removed display_background().
 
@@ -22,4 +26,3 @@
 
 	* data/Makefile.am:
 	Now handles VPATH.
-

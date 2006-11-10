@@ -11,9 +11,9 @@ static gui_label_t* gui_label_new(display_t *display, const char *font,
 		const char *color, int x, int y, const char *caption)
 {
 	gui_label_t *label = xmalloc(sizeof(*label));
+	XGlyphInfo extent;
 
 	label->x = x;
-	label->y = y;
 	strncpy(label->caption,caption,TEXT_LEN-1);
 	
 	label->font = XftFontOpenName(display->dpy, display->screen, font);
@@ -22,6 +22,10 @@ static gui_label_t* gui_label_new(display_t *display, const char *font,
 		free(label);
 		return NULL;
 	}
+
+	XftTextExtents8(display->dpy,label->font,(XftChar8*)"l",1,&extent);
+
+	label->y = y-extent.height;
 	
 	label->color = xmalloc(sizeof(*label->color));
 	XftColorAllocName(display->dpy,display->visual,display->colormap,
@@ -35,13 +39,16 @@ static gui_input_t* gui_input_new(display_t *display, const char *image, int x, 
 		int text_x, int text_y, int text_w, int text_h)
 {
 	gui_input_t *input = xmalloc(sizeof(*input));
+	XGlyphInfo extent;
 
 	input->x = x;
-	input->y = y;
-	input->text_x = text_x;
-	input->text_y = text_y;
-	input->text_w = text_w;
-	input->text_h = text_h;
+	memset(input->text,'\0',TEXT_LEN);
+
+	/* If no text_x or text_x was supplied, use the x/y
+	 * values of the input.  */	
+	input->text_x = (text_x>0)?text_x:x;
+	input->text_y = (text_y>0)?text_y:y;
+	
 	memset(input->text,'\0',TEXT_LEN);
 
 	input->image = image_load(display,image,&(input->w),&(input->h));
@@ -50,6 +57,11 @@ static gui_input_t* gui_input_new(display_t *display, const char *image, int x, 
 		free(input);
 		return NULL;
 	}
+
+	/* If no text_w or text_h was supplied, use the width/height
+	 * values of the image.  */	
+	input->text_w = (text_w>0)?text_w:input->w;
+	input->text_h = (text_h>0)?text_h:input->h;
 	
 	input->font = XftFontOpenName(display->dpy, display->screen, font);
 	
@@ -58,6 +70,10 @@ static gui_input_t* gui_input_new(display_t *display, const char *image, int x, 
 		free(input);
 		return NULL;
 	}
+	
+	XftTextExtents8(display->dpy,input->font,(XftChar8*)"l",1,&extent);
+
+	input->y = y-extent.height;
 	
 	input->color = xmalloc(sizeof(*input->color));
 	XftColorAllocName(display->dpy,display->visual,display->colormap,
@@ -88,17 +104,27 @@ static void gui_label_draw(gui_label_t *label, gui_t *gui)
 		(XftChar8*)label->caption,strlen(label->caption));
 }
 
-static void gui_input_draw(gui_input_t *input, gui_t *gui)
+static void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden)
 {
 	display_t *display = gui->display;
 	XftDraw *draw = gui->draw;
-
+	int i, len;
+	len = strlen(input->text);
+	char text[len+1];
+	
 	XCopyArea(display->dpy, input->image, gui->win, display->gc,
 			0, 0, input->w, input->h, input->x,input->y);
-	
+
+	for (i=0;i<len;i++) {
+		/* Hide the text when hidden is true,
+		 * as to not display any passwords.  */
+		text[i] = (hidden)?'*':input->text[i];
+	}
+	text[len] = '\0';
+
 	XftDrawString8(draw,input->color,input->font, 
 		input->text_x,input->text_y,
-		(XftChar8*)input->text,strlen(input->text));
+		(XftChar8*)text,len);
 }
 
 static void gui_draw(gui_t *gui)
@@ -108,8 +134,16 @@ static void gui_draw(gui_t *gui)
 	XClearWindow(display->dpy,gui->win);
 	
 	gui_label_draw(gui->title, gui);
-	gui_label_draw(gui->username, gui);
-	gui_input_draw(gui->user_input, gui);
+	
+	if (gui->visible == ALL || gui->visible == USERNAME) {
+		gui_label_draw(gui->username, gui);
+		gui_input_draw(gui->user_input, gui, FALSE);
+	}
+	
+	if (gui->visible == ALL || gui->visible == PASSWORD) {
+		gui_label_draw(gui->password, gui);
+		gui_input_draw(gui->passwd_input, gui, TRUE);
+	}
 
 	XFlush(display->dpy);
 }
@@ -119,15 +153,48 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 	char ch;
 	KeySym keysym;
 	XComposeStatus cstatus;
+	gui_input_t *input;
+	int text_len;
 
 	XLookupString(&event->xkey,&ch,1,&keysym,&cstatus);
 
-	if (keysym == XK_BackSpace) {
-		int len = strlen(gui->user_input->text);
-		if (len > 0)
-			gui->user_input->text[len-1] = '\0';
+	if (gui->visible == ALL) {
+		if (gui->focus == USERNAME)
+			input = gui->user_input;
+		else
+			input = gui->passwd_input;
+	} else if (gui->visible == USERNAME) {
+		input = gui->user_input;
 	} else {
-		strncat(gui->user_input->text,&ch,TEXT_LEN-1);
+		input = gui->passwd_input;
+	}
+	
+	text_len = strlen(input->text);
+
+	if (keysym == XK_BackSpace) {
+		if (text_len > 0)
+			input->text[text_len-1] = '\0';
+	} else if (keysym == XK_Tab) {
+		if (gui->visible == ALL) {
+			if (gui->focus == USERNAME)
+				gui->focus = PASSWORD;
+			else
+				gui->focus = USERNAME;
+		}
+	} else if (keysym == XK_Return) {
+		if (gui->visible == PASSWORD || gui->focus == PASSWORD) {
+			/* TODO: Ooh, a user wants to authenticate?  */
+			printf("Logging in \"%s\" (%s)\n",gui->user_input->text,
+					gui->passwd_input->text);
+		} else if (gui->visible == USERNAME) {
+			gui->focus = gui->visible = PASSWORD;
+		} else if (gui->visible == ALL) {
+			if (gui->focus == USERNAME)
+				gui->focus = PASSWORD;
+		}
+	} else {
+		if (text_len < TEXT_LEN-1)
+			input->text[text_len] = ch;
 	}
 
 	gui_draw(gui);
@@ -140,6 +207,9 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 	int w, h;
 
 	memset(gui,'\0',sizeof(*gui));
+
+	gui->visible = USERNAME;
+	gui->focus = USERNAME;
 	gui->x = 0;
 	gui->y = 0;
 	gui->width = display->width;
@@ -183,6 +253,16 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 		return NULL;
 	}
 
+	gui->password = gui_label_new(display, conf_get(conf,"password.font"),
+					conf_get(conf,"password.color"),
+					atoi(conf_get(conf,"password.x")),
+					atoi(conf_get(conf,"password.y")),
+					conf_get(conf,"password.caption"));
+	if (!gui->password) {
+		gui_delete(gui);
+		return NULL;
+	}
+
 	snprintf(buf,BUF_LEN-1,"%s/%s",conf_get(conf,"theme_path"),
 			conf_get(conf,"username_input.image"));
 	gui->user_input = gui_input_new(display, buf,
@@ -196,6 +276,23 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 					atoi(conf_get(conf,"username_input.text.height")));
 
 	if (!gui->user_input) {
+		gui_delete(gui);
+		return NULL;
+	}
+
+	snprintf(buf,BUF_LEN-1,"%s/%s",conf_get(conf,"theme_path"),
+			conf_get(conf,"password_input.image"));
+	gui->passwd_input = gui_input_new(display, buf,
+					atoi(conf_get(conf,"password_input.x")),
+					atoi(conf_get(conf,"password_input.y")),
+					conf_get(conf,"password_input.text.font"),
+					conf_get(conf,"password_input.text.color"),
+					atoi(conf_get(conf,"password_input.text.x")),
+					atoi(conf_get(conf,"password_input.text.y")),
+					atoi(conf_get(conf,"password_input.text.width")),
+					atoi(conf_get(conf,"password_input.text.height")));
+
+	if (!gui->passwd_input) {
 		gui_delete(gui);
 		return NULL;
 	}

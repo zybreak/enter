@@ -35,6 +35,12 @@ typedef struct gui_t {
 
 	gui_label_t *title, *username, *password;
 	gui_input_t *user_input, *passwd_input;
+
+	enum {
+		ALL,
+		USERNAME,
+		PASSWORD
+	} visible, focus;
 } gui_t;
 
 gui_t* gui_new(display_t *display, cfg_t *config);
