@@ -107,9 +107,11 @@ void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden)
 {
 	display_t *display = gui->display;
 	XftDraw *draw = gui->draw;
-	int i, len;
-	len = strlen(input->text);
+	XGlyphInfo extents;
+	int i;
+	int len = strlen(input->text);
 	char text[len+1];
+	char *p;
 	
 	XCopyArea(display->dpy, input->image, gui->win, display->gc,
 			0, 0, input->w, input->h, input->x,input->y);
@@ -121,8 +123,23 @@ void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden)
 	}
 	text[len] = '\0';
 
+	XftTextExtents8(display->dpy,input->font,(XftChar8*)"W",1,&extents);
+
+	p = text+len;
+	int w = 0;
+
+	/* Only print the text that fits in the box.  */
+	while (p != text) {
+		XftTextExtents8(display->dpy,input->font,
+				(XftChar8*)&p[0],1,&extents);
+		w += extents.xOff;
+		if (w > input->text_w)
+			break;
+		p--;
+	}
+
 	XftDrawString8(draw,input->color,input->font, 
 		input->text_x,input->text_y,
-		(XftChar8*)text,len);
+		(XftChar8*)p,strlen(p));
 }
 
