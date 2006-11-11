@@ -32,7 +32,7 @@ char* strtrim(char *str)
 }
 
 /* TODO: Maybe make it more like printf, with VA_ARGS and all.  */
-char* estrcat(const char *str1, const char *str2)
+char* xstrcat(const char *str1, const char *str2)
 {
 	char *p = xmalloc(strlen(str1)+strlen(str2)+1);
 	strcpy(p,str1);

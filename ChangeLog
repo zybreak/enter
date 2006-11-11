@@ -1,6 +1,15 @@
+2006-11-11  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/utils.[ch]:
+	renamed estrcat to xstrcat for consistency.
+	* src/greeter_gui.[ch], src/greeter.[ch]:
+	added login code.
+	* src/enter.c:
+	now respawns enter_greeter
+
 2006-11-10  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter_gui_widgets.[ch], src/greeter_gui.[ch]:
 	moved widget code from greeter_gui to greeter_gui_widgets.
+
 2006-11-10  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter_gui.c, src/greeter_display.c,
 	  src/conf.c, src/conf.h, src/greeter.c:

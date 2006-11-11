@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <syslog.h>
 
@@ -79,7 +80,7 @@ static void daemonize()
 	}
 }
 
-void write_pidfile(pid_t pid)
+static void write_pidfile(pid_t pid)
 {
 	char buf[PIDBUF];
 	int length;
@@ -99,10 +100,19 @@ void write_pidfile(pid_t pid)
 	return;
 }
 
+static void remove_pidfile()
+{
+	remove(PIDFILE);
+}
+
 int main(int argc, char **argv)
 {
 	cfg_t *conf;
-	pid_t server_pid, pid, sid;
+	pid_t server_pid, greeter_pid;
+
+	if (getuid() != 0) {
+		exit(EXIT_FAILURE);
+	}
 	
 	conf = conf_new();
 	
@@ -115,7 +125,7 @@ int main(int argc, char **argv)
 	}
 	
 	if (!strcmp(conf_get(conf,"daemon"),"true")) {
-		daemonize(&pid,&sid);
+		daemonize();
 	}
 
 	close(STDIN_FILENO);
@@ -132,11 +142,24 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 	
-	syslog(LOG_INFO,"Starting greeter application.");
-	if (greeter_init(conf) == FALSE) {
-		exit(EXIT_FAILURE);
+	while (1) {
+		syslog(LOG_INFO,"Starting greeter application.");
+		greeter_pid = greeter_init(conf);
+		if (greeter_pid == FALSE) {
+			exit(EXIT_FAILURE);
+		}
+		
+		pid_t p = waitpid(greeter_pid,NULL,0);
+		if (p == -1) {
+			syslog(LOG_WARNING,"Could not wait for greeter.");
+			closelog();
+			return EXIT_FAILURE;
+		}
 	}
-	
+
+	remove_pidfile();
+
+	syslog(LOG_INFO,"Shutting down.");
 	closelog();
 	
 	return EXIT_SUCCESS;

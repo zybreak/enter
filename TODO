@@ -2,4 +2,4 @@
 * Add content to README and AUTHORS
 * Add code to resize images
 * Add code to enable relative positions of labels/images/areas in themes
-* Make objects opaque?
+* Fix syslog messages.

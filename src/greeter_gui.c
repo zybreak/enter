@@ -64,8 +64,18 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 		}
 	} else if (keysym == XK_Return) {
 		if (gui->visible == PASSWORD || gui->focus == PASSWORD) {
+			/* Authenticate user.  */
 			greeter_authenticate(gui->user_input->text,
-					gui->passwd_input->text);
+					gui->passwd_input->text,
+					gui->conf);
+			/* It failed.  */
+			memset(gui->user_input->text,'\0',TEXT_LEN);
+			memset(gui->passwd_input->text,'\0',TEXT_LEN);
+			if (gui->visible == PASSWORD)
+				gui->visible = USERNAME;
+			gui->focus = USERNAME;
+			perror("could not login");
+
 		} else if (gui->visible == USERNAME) {
 			gui->focus = gui->visible = PASSWORD;
 		} else if (gui->visible == ALL) {
@@ -95,6 +105,7 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 	gui->width = display->width;
 	gui->height = display->height;
 	gui->display = display;
+	gui->conf = conf;
 
 	unsigned long color = BlackPixel(display->dpy,display->screen);
 

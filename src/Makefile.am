@@ -25,12 +25,10 @@ enter_greeter_SOURCES = \
 	greeter_gui.c greeter_gui.h
 
 enter_CFLAGS = @DEBUG_CFLAGS@ @X_CFLAGS@ -DCONFDIR=\"$(sysconfdir)\"
-enter_LDFLAGS = @X_LIBS@ -lX11
+enter_LDFLAGS = @X_LIBS@
 enter_LDADD = libcommon.a
 
 enter_greeter_CFLAGS = @DEBUG_CFLAGS@ @FT2_CFLAGS@ @PNG_CFLAGS@ @X_CFLAGS@
-enter_greeter_LDFLAGS = \
-	-lX11 -lXft @PNG_LIBS@ @X_LIBS@ \
-	@FT2_LIBS@
+enter_greeter_LDFLAGS = @X_LIBS@ @PNG_LIBS@ @FT2_LIBS@
 enter_greeter_LDADD = libcommon.a
 

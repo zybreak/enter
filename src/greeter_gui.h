@@ -17,6 +17,7 @@ struct gui_t {
 	int x, y;
 	int width, height;
 	display_t *display;
+	cfg_t *conf;
 
 	gui_label_t *title, *username, *password;
 	gui_input_t *user_input, *passwd_input;

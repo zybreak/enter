@@ -2,21 +2,15 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <grp.h>
 
 #include "enter.h"
 #include "greeter.h"
 #include "greeter_display.h"
 #include "greeter_gui.h"
-#include "conf.h"
 #include "utils.h"
-
-typedef enum {
-	INPUT,
-	AUTH
-} mode_t;
-
-static mode_t greeter_mode;
-static const char *username, *password;
 
 static void parse_args(int argc, char **argv, cfg_t *conf)
 {
@@ -60,14 +54,58 @@ static void default_settings(cfg_t *conf)
 	conf_set(conf,"display",":0");
 }
 
-void greeter_authenticate(const char *usr, const char *pwd)
+void greeter_authenticate(const char *usr, const char *pwd, cfg_t *conf)
 {
-	username = usr;
-	password = pwd;
-	greeter_mode = AUTH;
-	
-	printf("Logging in \"%s\" (%s)\n",username,
-					password);
+	printf("Logging in \"%s\" (%s)\n",usr,
+					pwd);
+
+	struct passwd *p = getpwnam(usr);
+	endpwent();
+
+	if (!p) {
+		/* Oops. read errno  */
+		return;
+	}
+
+	if (!*p->pw_shell) {
+		setusershell();
+		p->pw_shell = getusershell();
+		endusershell();
+	}
+
+	if (chdir(p->pw_dir) < 0) {
+		/* Oops. but hey. who cares right.  */
+	}
+
+	if (initgroups(p->pw_name,p->pw_gid) != 0) {
+		return;
+	}
+
+	if (setgid(p->pw_gid) != 0) {
+		return;
+	}
+
+	if (setuid(p->pw_uid) != 0) {
+		return;
+	}
+
+	char *args[] = {
+		p->pw_shell,
+		"-login",
+		xstrcat(p->pw_dir,"/.xinitrc"),
+		NULL
+	};
+
+	char *env[] = {
+		xstrcat("HOME=",p->pw_dir),
+		xstrcat("SHELL=",p->pw_shell),
+		xstrcat("USER=",p->pw_name),
+		xstrcat("LOGNAME=",p->pw_name),
+		xstrcat("DISPLAY=",conf_get(conf,"display")),
+		NULL
+	};
+
+	execve(args[0],args,env);
 }
 
 int main(int argc, char **argv)
@@ -81,7 +119,7 @@ int main(int argc, char **argv)
 	
 	parse_args(argc, argv, conf);
 
-	char *theme_path = estrcat(conf_get(conf,"theme_path"),"/theme");
+	char *theme_path = xstrcat(conf_get(conf,"theme_path"),"/theme");
 	if (!conf_parse(conf,theme_path)) {
 		fprintf(stderr,"could not parse config \"%s\"\n",theme_path);
 		return EXIT_FAILURE;
@@ -102,15 +140,11 @@ int main(int argc, char **argv)
 	
 	gui_show(gui);
 
-	greeter_mode = INPUT;
-	
-	while(greeter_mode == INPUT) {
+	while(1) {
 		XNextEvent(display->dpy,&event);
 		gui_events(gui,&event);
 		usleep(1);
 	}
-
-	/* TODO: authenticate and login user.  */
 
 	gui_delete(gui);
 	conf_delete(conf);

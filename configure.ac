@@ -16,6 +16,7 @@ AC_PROG_RANLIB
 AC_CHECK_FT2
 AC_CHECK_LIB([X11], [XOpenDisplay])
 AC_CHECK_LIB([Xft], [XftFontOpenName])
+AC_CHECK_LIB([Xau], [XauWriteAuth])
 
 # Checks for header files.
 AC_PATH_X
@@ -41,6 +42,7 @@ AC_SUBST([PNG_CFLAGS],[`libpng-config --cflags`])
 AC_SUBST([PNG_LIBS],[`libpng-config --libs`])
 
 AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS([stdlib.h string.h syslog.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -52,13 +54,12 @@ AC_TYPE_SIZE_T
 AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([memset strdup])
+AC_CHECK_FUNCS([endpwent getusershell memset strdup])
 
 DEBUG_CFLAGS="-Wall -Wmissing-prototypes -Wmissing-declarations"
 AC_SUBST([DEBUG_CFLAGS])
 
-AC_OUTPUT([
-	   Makefile
-	   data/Makefile
-	   src/Makefile
-])
+AC_CONFIG_FILES([Makefile
+                 data/Makefile
+                 src/Makefile])
+AC_OUTPUT

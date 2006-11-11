@@ -26,7 +26,7 @@ static int new_cookie(char *cookie)
 static int server_authenticate(cfg_t *conf, const char *address)
 {
 	FILE *auth_file;
-	Xauth *auth = (Xauth*)xmalloc(sizeof(*auth));
+	Xauth *auth = xmalloc(sizeof(*auth));
 	
 	auth->family = FamilyLocal;
 	
