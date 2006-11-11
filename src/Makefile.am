@@ -18,7 +18,7 @@ enter_SOURCES = \
 	enter_server.c enter_server.h
 
 enter_greeter_SOURCES = \
-	greeter.c enter.h \
+	greeter.c greeter.h \
 	greeter_display.c greeter_display.h \
 	greeter_image.c greeter_image.h \
 	greeter_gui_widgets.c greeter_gui_widgets.h \
