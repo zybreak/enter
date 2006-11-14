@@ -21,7 +21,7 @@ media {
 }
 
 auth {
-	userbox {
+	username_input {
 		media {
 			solid {
 				height = 30
@@ -48,7 +48,7 @@ auth {
 		width = 30
 		height = 150
 	}
-	passbox {
+	password_input {
 		media {
 			solid {
 				height = 30
