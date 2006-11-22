@@ -23,7 +23,7 @@ struct gui_t {
 	gui_input_t *user_input, *passwd_input;
 
 	enum {
-		ALL,
+		BOTH,
 		USERNAME,
 		PASSWORD
 	} visible, focus;

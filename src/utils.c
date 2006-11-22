@@ -31,7 +31,6 @@ char* strtrim(char *str)
 	return begin;
 }
 
-/* TODO: Maybe make it more like printf, with VA_ARGS and all.  */
 char* xstrcat(const char *str1, const char *str2)
 {
 	char *p = xmalloc(strlen(str1)+strlen(str2)+1);

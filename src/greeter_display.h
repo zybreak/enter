@@ -3,11 +3,7 @@
 
 #include <X11/Xlib.h>
 
-typedef struct display_t display_t;
-
-#include "conf.h"
-
-struct display_t {
+typedef struct display_t {
 	Window root;
 	GC gc;
 	int screen;
@@ -17,9 +13,9 @@ struct display_t {
 	Display *dpy;
 	Colormap colormap;
 	Visual* visual;
-};
+} display_t;
 
-display_t* display_new(cfg_t *conf);
+display_t* display_new();
 void display_delete(display_t *display);
 
 #endif /*DISPLAY_H_*/

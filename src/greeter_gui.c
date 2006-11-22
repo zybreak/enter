@@ -16,12 +16,12 @@ static void gui_draw(gui_t *gui)
 	
 	gui_label_draw(gui->title, gui);
 	
-	if (gui->visible == ALL || gui->visible == USERNAME) {
+	if (gui->visible == BOTH || gui->visible == USERNAME) {
 		gui_label_draw(gui->username, gui);
 		gui_input_draw(gui->user_input, gui, FALSE);
 	}
 	
-	if (gui->visible == ALL || gui->visible == PASSWORD) {
+	if (gui->visible == BOTH || gui->visible == PASSWORD) {
 		gui_label_draw(gui->password, gui);
 		gui_input_draw(gui->passwd_input, gui, TRUE);
 	}
@@ -39,7 +39,7 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 
 	XLookupString(&event->xkey,&ch,1,&keysym,&cstatus);
 
-	if (gui->visible == ALL) {
+	if (gui->visible == BOTH) {
 		if (gui->focus == USERNAME)
 			input = gui->user_input;
 		else
@@ -56,7 +56,7 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 		if (text_len > 0)
 			input->text[text_len-1] = '\0';
 	} else if (keysym == XK_Tab) {
-		if (gui->visible == ALL) {
+		if (gui->visible == BOTH) {
 			if (gui->focus == USERNAME)
 				gui->focus = PASSWORD;
 			else
@@ -74,11 +74,10 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 			if (gui->visible == PASSWORD)
 				gui->visible = USERNAME;
 			gui->focus = USERNAME;
-			perror("could not login");
 
 		} else if (gui->visible == USERNAME) {
 			gui->focus = gui->visible = PASSWORD;
-		} else if (gui->visible == ALL) {
+		} else if (gui->visible == BOTH) {
 			if (gui->focus == USERNAME)
 				gui->focus = PASSWORD;
 		}
@@ -94,7 +93,6 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 {
 	gui_t *gui = xmalloc(sizeof(*gui));
 	char buf[BUF_LEN];
-	int w, h;
 
 	memset(gui,'\0',sizeof(*gui));
 
@@ -116,13 +114,21 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 	gui->draw = XftDrawCreate(display->dpy,gui->win,display->visual,
 						display->colormap);
 
+	char *s = conf_get(conf, "enter.visible");
+	if (!strcmp(s, "both")) {
+		gui->visible = BOTH;
+	}
+
 	snprintf(buf,BUF_LEN-1,"%s/%s",conf_get(conf,"theme_path"),
-			conf_get(conf,"background.image"));
-	gui->background = image_load(display,buf, &w, &h);
-	if (!gui->background) {
+			conf_get(conf,"enter.background"));
+
+	image_t *image = image_load(display, buf);
+	if (!image) {
 		gui_delete(gui);
 		return NULL;
 	}
+	gui->background = image_pixmap(image);
+	image_free(image);
 
 	gui->title = gui_label_new(display, conf_get(conf,"title.font"),
 					conf_get(conf,"title.color"),
@@ -187,8 +193,6 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 		gui_delete(gui);
 		return NULL;
 	}
-
-	/* TODO: load the rest of the graphics.  */
 
 	return gui;
 }

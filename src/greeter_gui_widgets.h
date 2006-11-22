@@ -1,19 +1,19 @@
 #ifndef GUI_WIDGETS_H_
 #define GUI_WIDGETS_H_
 
-#include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 
 typedef struct gui_input_t gui_input_t;
 typedef struct gui_label_t gui_label_t;
 
 #include "greeter_display.h"
+#include "greeter_image.h"
 #include "greeter_gui.h"
 
 #define TEXT_LEN 64
 
 struct gui_input_t {
-	Pixmap image;
+	image_t *image;
 	int x, y, w, h;
 	int text_x, text_y, text_w, text_h;
 	XftFont *font;

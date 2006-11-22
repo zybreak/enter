@@ -1,11 +1,11 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.60)
-AC_INIT([enter],[0.0.1], [rob_dobbs@users.sourceforge.net])
+AC_INIT([enter],[0.0.1],[rob_dobbs@users.sourceforge.net])
 AC_CONFIG_SRCDIR([src/enter.c])
 
 AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 AM_MAINTAINER_MODE
 
 # Checks for programs.
@@ -37,9 +37,9 @@ fi
 AC_SUBST([X_CFLAGS])
 AC_SUBST([X_LIBS])
 
-dnl TODO: Add better check for libpng.
-AC_SUBST([PNG_CFLAGS],[`libpng-config --cflags`])
-AC_SUBST([PNG_LIBS],[`libpng-config --libs`])
+dnl TODO: Add better check for imlib.
+AC_SUBST([IMLIB_CFLAGS],[`imlib2-config --cflags`])
+AC_SUBST([IMLIB_LIBS],[`imlib2-config --libs`])
 
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT

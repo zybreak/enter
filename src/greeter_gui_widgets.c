@@ -1,5 +1,6 @@
+#include <X11/Xlib.h>
+
 #include "greeter_gui_widgets.h"
-#include "greeter_image.h"
 #include "utils.h"
 
 gui_label_t* gui_label_new(display_t *display, const char *font,
@@ -20,7 +21,7 @@ gui_label_t* gui_label_new(display_t *display, const char *font,
 
 	XftTextExtents8(display->dpy,label->font,(XftChar8*)"l",1,&extent);
 
-	label->y = y-extent.height;
+	label->y = y+extent.height;
 	
 	label->color = xmalloc(sizeof(*label->color));
 	XftColorAllocName(display->dpy,display->visual,display->colormap,
@@ -39,15 +40,12 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 	input->x = x;
 	memset(input->text,'\0',TEXT_LEN);
 
-	/* If no text_x or text_x was supplied, use the x/y
-	 * values of the input.  */	
-	input->text_x = (text_x>0)?text_x:x;
-	input->text_y = (text_y>0)?text_y:y;
+	input->text_x = x+text_x;
+	input->text_y = y+text_y;
 	
 	memset(input->text,'\0',TEXT_LEN);
 
-	input->image = image_load(display,image,&(input->w),&(input->h));
-
+	input->image = image_load(display, image);
 	if (!input->image) {
 		free(input);
 		return NULL;
@@ -61,7 +59,7 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 	input->font = XftFontOpenName(display->dpy, display->screen, font);
 	
 	if (!input->font) {
-		XFreePixmap(display->dpy, input->image);
+		image_free(input->image);
 		free(input);
 		return NULL;
 	}
@@ -87,7 +85,7 @@ void gui_label_delete(gui_label_t *label, display_t *display)
 
 void gui_input_delete(gui_input_t *input, display_t *display)
 {
-	XFreePixmap(display->dpy,input->image);
+	image_free(input->image);
 	XftFontClose(display->dpy,input->font);
 	XftColorFree(display->dpy,display->visual,display->colormap,input->color);
 	free(input->color);
@@ -112,9 +110,8 @@ void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden)
 	int len = strlen(input->text);
 	char text[len+1];
 	char *p;
-	
-	XCopyArea(display->dpy, input->image, gui->win, display->gc,
-			0, 0, input->w, input->h, input->x,input->y);
+
+	image_draw(gui->win, input->image, input->x, input->y);
 
 	for (i=0;i<len;i++) {
 		/* Hide the text when hidden is true,

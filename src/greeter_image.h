@@ -5,7 +5,13 @@
 
 #include "greeter_display.h"
 
-Pixmap image_load(display_t *display, const char *filename,
-					int *width, int *height);
+typedef struct image_t image_t;
+
+void image_free(image_t *image);
+int image_width(image_t *image);
+int image_height(image_t *image);
+void image_draw(Drawable drawable, image_t *image, int x, int y);
+Pixmap image_pixmap(image_t *image);
+image_t* image_load(display_t *display, const char *filename);
 
 #endif /* __IMAGE_H__  */

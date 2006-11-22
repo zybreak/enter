@@ -22,15 +22,12 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 	}
 	
 	for (i=1;i<argc;i++) {
-		if ((strcmp(argv[i],"-d") == 0) && (i+1 < argc)) {
-			conf_set(conf,"display",argv[++i]);
-		} else if (strcmp(argv[i],"-v") == 0) {
+		if (strcmp(argv[i],"-v") == 0) {
 			printf("%s version %s\n",PACKAGE,VERSION);
 			exit(EXIT_SUCCESS);
 		} else if (strcmp(argv[i],"-h") == 0) {
 			printf(
 				"usage %s: [options] THEME\n\n"
-				"  -d          connect to display\n"
 				"  -v          print version information\n"
 				"  -h          print avaiable arguments\n"
 				"\n",
@@ -50,15 +47,10 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 static void default_settings(cfg_t *conf)
 {
 	conf_set(conf,"title.color","#FFFFFF");
-	/* TODO: Should be `getenv("DISPLAY")' */
-	conf_set(conf,"display",":0");
 }
 
 void greeter_authenticate(const char *usr, const char *pwd, cfg_t *conf)
 {
-	printf("Logging in \"%s\" (%s)\n",usr,
-					pwd);
-
 	struct passwd *p = getpwnam(usr);
 	endpwent();
 
@@ -74,7 +66,7 @@ void greeter_authenticate(const char *usr, const char *pwd, cfg_t *conf)
 	}
 
 	if (chdir(p->pw_dir) < 0) {
-		/* Oops. but hey. who cares right.  */
+		/* Oops. but hey. who cares right?  */
 	}
 
 	if (initgroups(p->pw_name,p->pw_gid) != 0) {
@@ -126,7 +118,7 @@ int main(int argc, char **argv)
 	}
 	free(theme_path);
 	
-	display = display_new(conf);
+	display = display_new();
 	if (!display) {
 		fprintf(stderr,"could not open display\n");
 		return EXIT_FAILURE;

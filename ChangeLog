@@ -1,3 +1,7 @@
+2006-11-22  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/greeter_image.c:
+	replaced libpng code with imlib.
+
 2006-11-11  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/utils.[ch]:
 	renamed estrcat to xstrcat for consistency.
