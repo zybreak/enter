@@ -5,11 +5,11 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <syslog.h>
 
 #include "enter.h"
 #include "enter_server.h"
 #include "enter_greeter.h"
+#include "log.h"
 #include "conf.h"
 
 #define PIDFILE "/var/run/" PACKAGE ".pid"
@@ -60,7 +60,7 @@ static void daemonize()
 	pid_t pid, sid;
 	pid = fork();
 	if (pid < 0) {
-		perror("Could not fork process");
+		log_print(LOG_EMERG, "could not fork process");
 		exit(EXIT_FAILURE);
 	} else if (pid > 0) {
 		exit(EXIT_SUCCESS);
@@ -71,14 +71,20 @@ static void daemonize()
 	sid = setsid();
 	
 	if (sid < 0) {
-		fprintf(stderr,"could not set sid\n");
+		log_print(LOG_EMERG, "could not set sid");
 		exit(EXIT_FAILURE);
 	}
 	
 	if (chdir("/") < 0) {
-		fprintf(stderr,"could not change working directory\n");
+		log_print(LOG_EMERG, "could not change working directory");
 		exit(EXIT_FAILURE);
 	}
+	
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
+
+	log_daemon(TRUE);
 }
 
 static void write_pidfile(pid_t pid)
@@ -88,7 +94,7 @@ static void write_pidfile(pid_t pid)
 	FILE *fp = fopen(PIDFILE,"w");
 
 	if (!fp) {
-		syslog(LOG_ERR,"Could not write pidfile: %s.",PIDFILE);
+		log_print(LOG_ERR, "Could not write pidfile: %s.",PIDFILE);
 		return;
 	}
 
@@ -112,7 +118,7 @@ int main(int argc, char **argv)
 	pid_t server_pid, greeter_pid;
 
 	if (getuid() != 0) {
-		fprintf(stderr,"Root priviledges needed to run\n");
+		log_print(LOG_EMERG,"Root priviledges needed to run");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -129,39 +135,37 @@ int main(int argc, char **argv)
 	if (!strcmp(conf_get(conf,"daemon"),"true")) {
 		daemonize();
 	}
-
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
-	
+		
 	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 	
 	write_pidfile(getpid());
 	
-	syslog(LOG_INFO,"Starting X server.");
+	log_print(LOG_INFO,"Starting X server.");
 	server_pid = server_init(conf);
 	if (server_pid == FALSE) {
+		log_print(LOG_WARNING,"Could not start server");
 		exit(EXIT_FAILURE);
 	}
 	
 	while (1) {
-		syslog(LOG_INFO,"Starting greeter application.");
+		log_print(LOG_INFO,"Starting greeter application.");
 		greeter_pid = greeter_init(conf);
 		if (greeter_pid == FALSE) {
+			log_print(LOG_WARNING,
+					"Could not start greeter application");
 			exit(EXIT_FAILURE);
 		}
 		
-		pid_t p = waitpid(greeter_pid,NULL,0);
+		pid_t p = waitpid(greeter_pid, NULL, 0);
 		if (p == -1) {
-			syslog(LOG_WARNING,"Could not wait for greeter.");
-			closelog();
+			log_print(LOG_WARNING,"Could not wait for greeter.");
 			return EXIT_FAILURE;
 		}
 	}
 
 	remove_pidfile();
 
-	syslog(LOG_INFO,"Shutting down.");
+	log_print(LOG_INFO,"Shutting down.");
 	closelog();
 	
 	return EXIT_SUCCESS;

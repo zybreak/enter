@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.60)
-AC_INIT([enter],[0.0.1],[rob_dobbs@users.sourceforge.net])
+AC_INIT([enter],[0.0.2],[rob_dobbs@users.sourceforge.net])
 AC_CONFIG_SRCDIR([src/enter.c])
 
 AM_INIT_AUTOMAKE

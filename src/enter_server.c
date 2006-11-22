@@ -3,11 +3,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
-#include <syslog.h>
 #include <time.h>
 
 #include "enter.h"
 #include "enter_server.h"
+#include "log.h"
 #include "utils.h"
 
 #define AUTH_DATA_LEN 16
@@ -56,13 +56,13 @@ static int server_authenticate(cfg_t *conf, const char *address)
 	/* Write authentication file.  */
 	auth_file = fopen(conf_get(conf,"auth_file"),"w");
 	if (!auth_file) {
-		syslog(LOG_CRIT, "Failed to write auth file for X Server.");
+		log_print(LOG_ERR, "No auth file supplied.");
 		return FALSE;
 	}
 	
 	if (!XauWriteAuth(auth_file,auth)) {
 		fclose(auth_file);
-		syslog(LOG_CRIT, "Failed to write auth file for X Server.");
+		log_print(LOG_ERR, "Failed to write auth file for X Server.");
 		return FALSE;
 	}
 	
@@ -106,12 +106,12 @@ int server_init(cfg_t *conf)
 	server_pid = fork();
 	switch(server_pid) {
 		case -1:
-			syslog(LOG_WARNING,"Could not fork process");
+			log_print(LOG_WARNING,"Could not fork process");
 			return FALSE;
 		case 0:
 			signal(SIGUSR1,SIG_IGN);
 			execve(cmd[0],cmd,NULL);
-			syslog(LOG_WARNING,"Could not start server");
+			/* If we reach this line, the exec call failed.  */
 			return FALSE;
 		default:
 			start_time = time(NULL);
@@ -123,11 +123,13 @@ int server_init(cfg_t *conf)
 			}
 		
 			if (server_started == FALSE) {
-				syslog(LOG_WARNING,"Server timed out");
-				/* TODO: Maybe make sure the other process is dead here?  */
+				log_print(LOG_WARNING,"Server timed out");
+				/* TODO: Maybe make sure the other process is
+				 * dead here?  */
 				return FALSE;
 			}
-		
+
 			return server_pid;
-	}	
+	}
 }
+

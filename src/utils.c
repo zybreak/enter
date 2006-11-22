@@ -1,15 +1,15 @@
 #include <ctype.h>
-#include <syslog.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "log.h"
 #include "utils.h"
 
 void* xmalloc(size_t size)
 {
 	void* p = malloc(size);
 	if (!p) {
-		syslog(LOG_EMERG,"Could not allocate memory.");
+		log_print(LOG_EMERG,"Could not allocate memory.");
 		exit(EXIT_FAILURE);
 	}
 	return p;

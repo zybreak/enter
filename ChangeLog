@@ -1,4 +1,10 @@
 2006-11-22  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/log.[ch]:
+	added logging wrapper.
+	* data/enter.conf.in:
+	corrected path to theme.
+
+2006-11-22  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter_image.c:
 	replaced libpng code with imlib.
 

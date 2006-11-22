@@ -7,10 +7,9 @@ noinst_LIBRARIES = libcommon.a
 sbin_PROGRAMS = enter enter_greeter
 
 libcommon_a_SOURCES = \
-	utils.c \
-	utils.h \
-	conf.c \
-	conf.h
+	utils.c utils.h \
+	conf.c conf.h \
+	log.c log.h
 
 enter_SOURCES = \
 	enter.c enter.h \
