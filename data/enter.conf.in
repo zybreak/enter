@@ -4,6 +4,6 @@
 
 server_path=/usr/bin/X
 greeter_path=@sbindir@/enter_greeter
-theme_path=@datarootdir@/@PACKAGE@/default
+theme_path=@datarootdir@/@PACKAGE@/themes/default
 
 # End of file

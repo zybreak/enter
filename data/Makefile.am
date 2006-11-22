@@ -4,7 +4,8 @@ themedir= $(datadir)/@PACKAGE@
 dist_conf_DATA = enter.conf
 nobase_dist_theme_DATA = \
 	themes/default/theme \
-	themes/default/background.png
+	themes/default/background.png \
+	themes/default/input.png
 
 CLEANFILES = $(dist_conf_DATA)
 EXTRA_DIST = enter.conf.in
