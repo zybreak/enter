@@ -10,6 +10,7 @@
 #include "greeter.h"
 #include "greeter_display.h"
 #include "greeter_gui.h"
+#include "log.h"
 #include "utils.h"
 
 static void parse_args(int argc, char **argv, cfg_t *conf)
@@ -112,22 +113,24 @@ int main(int argc, char **argv)
 	
 	parse_args(argc, argv, conf);
 
+	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
+
 	char *theme_path = xstrcat(conf_get(conf,"theme_path"),"/theme");
 	if (!conf_parse(conf,theme_path)) {
-		fprintf(stderr,"could not parse config \"%s\"\n",theme_path);
+		log_print(LOG_EMERG,"could not parse config \"%s\"\n",theme_path);
 		return EXIT_FAILURE;
 	}
 	free(theme_path);
 
 	display = display_new();
 	if (!display) {
-		fprintf(stderr,"could not open display\n");
+		log_print(LOG_EMERG,"could not open display\n");
 		return EXIT_FAILURE;
 	}
 	
 	gui = gui_new(display,conf);
 	if (!gui) {
-		fprintf(stderr,"could not open gui\n");
+		log_print(LOG_EMERG,"could not open gui\n");
 		return EXIT_FAILURE;
 	}
 	

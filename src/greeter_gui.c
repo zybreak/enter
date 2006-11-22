@@ -4,6 +4,7 @@
 #include "greeter.h"
 #include "greeter_gui.h"
 #include "greeter_image.h"
+#include "log.h"
 #include "utils.h"
 
 #define BUF_LEN 64
@@ -124,6 +125,7 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 
 	image_t *image = image_load(display, buf);
 	if (!image) {
+		log_print(LOG_ERR, "could not load image \"buf\"");
 		gui_delete(gui);
 		return NULL;
 	}
@@ -136,6 +138,7 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 					atoi(conf_get(conf,"title.y")),
 					conf_get(conf,"title.caption"));
 	if (!gui->title) {
+		log_print(LOG_ERR, "could not load title");
 		gui_delete(gui);
 		return NULL;
 	}
@@ -146,6 +149,7 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 					atoi(conf_get(conf,"username.y")),
 					conf_get(conf,"username.caption"));
 	if (!gui->username) {
+		log_print(LOG_ERR, "could not load username");
 		gui_delete(gui);
 		return NULL;
 	}
@@ -156,6 +160,7 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 					atoi(conf_get(conf,"password.y")),
 					conf_get(conf,"password.caption"));
 	if (!gui->password) {
+		log_print(LOG_ERR, "could not load password");
 		gui_delete(gui);
 		return NULL;
 	}
@@ -173,6 +178,7 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 					atoi(conf_get(conf,"username_input.text.height")));
 
 	if (!gui->user_input) {
+		log_print(LOG_ERR, "could not load user_input");
 		gui_delete(gui);
 		return NULL;
 	}
@@ -190,6 +196,7 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 					atoi(conf_get(conf,"password_input.text.height")));
 
 	if (!gui->passwd_input) {
+		log_print(LOG_ERR, "could not load passwd_input");
 		gui_delete(gui);
 		return NULL;
 	}
