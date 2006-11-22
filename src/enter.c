@@ -79,10 +79,14 @@ static void daemonize()
 		log_print(LOG_EMERG, "could not change working directory");
 		exit(EXIT_FAILURE);
 	}
-	
+	/*
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
+	*/
+	freopen("/dev/null", "r", stdin);
+	freopen("/dev/null", "w", stdout);
+	freopen("/dev/null", "w", stderr);
 
 	log_daemon(TRUE);
 }
