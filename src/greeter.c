@@ -27,11 +27,12 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 			exit(EXIT_SUCCESS);
 		} else if (strcmp(argv[i],"-h") == 0) {
 			printf(
-				"usage %s: [options] THEME\n\n"
+				"Usage %s: [OPTIONS] THEME\n\n"
 				"  -v          print version information\n"
 				"  -h          print avaiable arguments\n"
-				"\n",
-				argv[0]);
+				"\n"
+				"Report bugs to <%s>.\n",
+				argv[0], PACKAGE_BUGREPORT);
 			exit(EXIT_SUCCESS);
 		} else if (i==argc-1) {
 			/* This is the last argument,
@@ -93,7 +94,7 @@ void greeter_authenticate(const char *usr, const char *pwd, cfg_t *conf)
 		xstrcat("SHELL=",p->pw_shell),
 		xstrcat("USER=",p->pw_name),
 		xstrcat("LOGNAME=",p->pw_name),
-		xstrcat("DISPLAY=",conf_get(conf,"display")),
+		xstrcat("DISPLAY=",getenv("DISPLAY")),
 		NULL
 	};
 
@@ -117,7 +118,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	free(theme_path);
-	
+
 	display = display_new();
 	if (!display) {
 		fprintf(stderr,"could not open display\n");

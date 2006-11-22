@@ -109,7 +109,6 @@ int server_init(cfg_t *conf)
 			syslog(LOG_WARNING,"Could not fork process");
 			return FALSE;
 		case 0:
-			setenv("DISPLAY",conf_get(conf,"display"),1);
 			signal(SIGUSR1,SIG_IGN);
 			execve(cmd[0],cmd,NULL);
 			syslog(LOG_WARNING,"Could not start server");

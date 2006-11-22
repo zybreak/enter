@@ -31,14 +31,15 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 			exit(EXIT_SUCCESS);
 		} else if (strcmp(argv[i],"-h") == 0) {
 			printf(
-			"usage %s: [options]\n\n"
+			"Usage: %s: [OPTIONS]\n\n"
 			"  -c          specify an alternative config file\n"
 			"  -d          connect to display\n"
 			"  -n          dont run as a daemon\n"
 			"  -v          print version information\n"
 			"  -h          print avaiable arguments\n"
-			"\n",
-			argv[0]);
+			"\n"
+			"Report bugs to <%s>.\n",
+			argv[0], PACKAGE_BUGREPORT);
 			exit(EXIT_SUCCESS);
 		} else {
 			printf("unknown argument, try -h\n");
@@ -111,6 +112,7 @@ int main(int argc, char **argv)
 	pid_t server_pid, greeter_pid;
 
 	if (getuid() != 0) {
+		fprintf(stderr,"Root priviledges needed to run\n");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -131,7 +133,7 @@ int main(int argc, char **argv)
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
-
+	
 	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 	
 	write_pidfile(getpid());
