@@ -1,3 +1,11 @@
+2006-11-25  Robert Knutsson <rob_dobbs@users.sf.net>
+	* greeter_gui.c:
+	deletes window in gui_delete
+	* greeter_display.c:
+	reads DISPLAY from config instead of environment.
+	* greeter.c, greeter_auth.c:
+	moved authentication code to greeter_auth.c
+
 2006-11-22  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/enter.c:
 	fixed broken pipe problem.
@@ -57,3 +65,4 @@
 
 	* data/Makefile.am:
 	Now handles VPATH.
+

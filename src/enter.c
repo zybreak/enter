@@ -79,11 +79,7 @@ static void daemonize()
 		log_print(LOG_EMERG, "could not change working directory");
 		exit(EXIT_FAILURE);
 	}
-	/*
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
-	*/
+
 	freopen("/dev/null", "r", stdin);
 	freopen("/dev/null", "w", stdout);
 	freopen("/dev/null", "w", stderr);
@@ -139,11 +135,11 @@ int main(int argc, char **argv)
 	if (!strcmp(conf_get(conf,"daemon"),"true")) {
 		daemonize();
 	}
-		
+
 	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 	
 	write_pidfile(getpid());
-	
+
 	log_print(LOG_INFO,"Starting X server.");
 	server_pid = server_init(conf);
 	if (server_pid == FALSE) {

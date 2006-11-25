@@ -21,13 +21,14 @@ enter_greeter_SOURCES = \
 	greeter_display.c greeter_display.h \
 	greeter_image.c greeter_image.h \
 	greeter_gui_widgets.c greeter_gui_widgets.h \
-	greeter_gui.c greeter_gui.h
+	greeter_gui.c greeter_gui.h \
+	greeter_auth.c greeter_auth.h
 
 enter_CFLAGS = @DEBUG_CFLAGS@ @X_CFLAGS@ -DCONFDIR=\"$(sysconfdir)\"
 enter_LDFLAGS = @X_LIBS@
 enter_LDADD = libcommon.a
 
 enter_greeter_CFLAGS = @DEBUG_CFLAGS@ @FT2_CFLAGS@ @IMLIB_CFLAGS@ @X_CFLAGS@
-enter_greeter_LDFLAGS = @X_LIBS@ @IMLIB_LIBS@ @FT2_LIBS@
+enter_greeter_LDFLAGS = @X_LIBS@ @IMLIB_LIBS@ @FT2_LIBS@ -lcrypt
 enter_greeter_LDADD = libcommon.a
 

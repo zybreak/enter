@@ -66,12 +66,19 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 	} else if (keysym == XK_Return) {
 		if (gui->visible == PASSWORD || gui->focus == PASSWORD) {
 			/* Authenticate user.  */
-			greeter_authenticate(gui->user_input->text,
-					gui->passwd_input->text,
-					gui->conf);
-			/* It failed.  */
+			auth_t *auth = auth_new(gui->conf,
+					gui->user_input->text,
+					gui->passwd_input->text);
+			
 			memset(gui->user_input->text,'\0',TEXT_LEN);
 			memset(gui->passwd_input->text,'\0',TEXT_LEN);
+
+			/* User authenticated successfully.  */
+			if (auth) {
+				greeter_auth(auth);
+				return;
+			}
+
 			if (gui->visible == PASSWORD)
 				gui->visible = USERNAME;
 			gui->focus = USERNAME;
@@ -208,8 +215,6 @@ void gui_delete(gui_t *gui)
 {
 	display_t *display = gui->display;
 	
-	XftDrawDestroy(gui->draw);
-
 	if (gui->background)
 		XFreePixmap(display->dpy,gui->background);
 
@@ -228,6 +233,9 @@ void gui_delete(gui_t *gui)
 	if (gui->passwd_input)
 		gui_input_delete(gui->passwd_input,display);
 
+	XftDrawDestroy(gui->draw);
+	XDestroyWindow(display->dpy, gui->win);
+	
 	free(gui);
 }
 

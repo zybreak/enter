@@ -1,8 +1,8 @@
 #ifndef __GREETER_H__
 #define __GREETER_H__
 
-#include "conf.h"
+#include "greeter_auth.h"
 
-void greeter_authenticate(const char *usr, const char *pwd, cfg_t *conf);
+void greeter_auth(auth_t *_auth);
 
 #endif

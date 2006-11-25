@@ -3,11 +3,11 @@
 #include "greeter_display.h"
 #include "utils.h"
 
-display_t* display_new()
+display_t* display_new(cfg_t *conf)
 {
 	display_t *display = (display_t*)xmalloc(sizeof(display_t));
 
-	display->dpy = XOpenDisplay(getenv("DISPLAY"));
+	display->dpy = XOpenDisplay(conf_get(conf, "display"));
 	if (!display->dpy) {
 		free(display);
 		return NULL;
@@ -25,6 +25,7 @@ display_t* display_new()
 	values.foreground = WhitePixel(display->dpy,display->screen);
 	values.background = BlackPixel(display->dpy,display->screen);
 	values.graphics_exposures = False;
+
 	display->gc = XCreateGC(display->dpy,display->root,
 		GCForeground|GCBackground|GCGraphicsExposures,
 		&values); 

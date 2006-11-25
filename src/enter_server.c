@@ -17,10 +17,19 @@
 
 static int server_started = FALSE;
 
-static int new_cookie(char *cookie)
+static int generate_cookie(char *cookie)
 {
-	/* TODO: stub.  */
-	return TRUE;
+#if 0
+	struct MD5Context ctx;
+	time_t time;
+
+	MD5Init(&ctx);
+
+	time = time(NULL);
+	MD5Update(&ctx, );
+#endif
+
+	return 0;
 }
 
 static int server_authenticate(cfg_t *conf, const char *address)
@@ -34,10 +43,10 @@ static int server_authenticate(cfg_t *conf, const char *address)
 	auth->address_length = strlen(address);
 	auth->address = xmalloc(auth->address_length+1);
 	memcpy(auth->address,address,auth->address_length);
-	
-	/* TODO: Copy the display number.  */
-	auth->number_length = 0;
-	auth->number = 0;
+
+	/* Copy the display number.  */	
+	auth->number = conf_get(conf, "display");
+	auth->number_length = strlen(auth->number);
 	
 	/* Copy the cookie name.  */
 	auth->name_length = strlen(AUTH_NAME);
@@ -45,9 +54,9 @@ static int server_authenticate(cfg_t *conf, const char *address)
 	
 	/* Generate cookie.  */
 	auth->data_length = AUTH_DATA_LEN;
-	auth->data = (char*)xmalloc(auth->data_length+1);
-	if (new_cookie(auth->data) == FALSE) {
-		free(auth->data);
+	auth->data = xmalloc(auth->data_length+1);
+	auth->data_length = generate_cookie(auth->data);
+	if (!auth->data) {
 		free(auth->name);
 		free(auth);
 		return FALSE;

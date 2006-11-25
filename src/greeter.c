@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
-#include <pwd.h>
-#include <grp.h>
 
 #include "enter.h"
 #include "greeter.h"
@@ -12,6 +10,14 @@
 #include "greeter_gui.h"
 #include "log.h"
 #include "utils.h"
+
+/* This holds the user credidentials.  */
+static auth_t *auth = NULL;
+
+void greeter_auth(auth_t *_auth)
+{
+	auth = _auth;
+}
 
 static void parse_args(int argc, char **argv, cfg_t *conf)
 {
@@ -49,57 +55,11 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 static void default_settings(cfg_t *conf)
 {
 	conf_set(conf,"title.color","#FFFFFF");
-}
+	char *display = getenv("DISPLAY");
+	if (!display)
+		display = ":0";
 
-void greeter_authenticate(const char *usr, const char *pwd, cfg_t *conf)
-{
-	struct passwd *p = getpwnam(usr);
-	endpwent();
-
-	if (!p) {
-		/* Oops. read errno  */
-		return;
-	}
-
-	if (!*p->pw_shell) {
-		setusershell();
-		p->pw_shell = getusershell();
-		endusershell();
-	}
-
-	if (chdir(p->pw_dir) < 0) {
-		/* Oops. but hey. who cares right?  */
-	}
-
-	if (initgroups(p->pw_name,p->pw_gid) != 0) {
-		return;
-	}
-
-	if (setgid(p->pw_gid) != 0) {
-		return;
-	}
-
-	if (setuid(p->pw_uid) != 0) {
-		return;
-	}
-
-	char *args[] = {
-		p->pw_shell,
-		"-login",
-		xstrcat(p->pw_dir,"/.xinitrc"),
-		NULL
-	};
-
-	char *env[] = {
-		xstrcat("HOME=",p->pw_dir),
-		xstrcat("SHELL=",p->pw_shell),
-		xstrcat("USER=",p->pw_name),
-		xstrcat("LOGNAME=",p->pw_name),
-		xstrcat("DISPLAY=",getenv("DISPLAY")),
-		NULL
-	};
-
-	execve(args[0],args,env);
+	conf_set(conf,"display",display);
 }
 
 int main(int argc, char **argv)
@@ -122,7 +82,7 @@ int main(int argc, char **argv)
 	}
 	free(theme_path);
 
-	display = display_new();
+	display = display_new(conf);
 	if (!display) {
 		log_print(LOG_EMERG,"could not open display\n");
 		return EXIT_FAILURE;
@@ -136,7 +96,7 @@ int main(int argc, char **argv)
 	
 	gui_show(gui);
 
-	while(1) {
+	while(!auth) {
 		XNextEvent(display->dpy,&event);
 		gui_events(gui,&event);
 		usleep(1);
@@ -145,6 +105,13 @@ int main(int argc, char **argv)
 	gui_delete(gui);
 	conf_delete(conf);
 	display_delete(display);
+	closelog();
 
-	return EXIT_SUCCESS;
+	/* Login user. */
+	auth_login(auth);
+
+	/* If we reach here,
+	 * the login failed for some unexpected reason.  */
+
+	return EXIT_FAILURE;
 }

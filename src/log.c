@@ -18,8 +18,11 @@ void log_print(int level, char *format, ...)
 	va_list args;
 
 	va_start(args, format);
-	if (!daemon)
-		vfprintf(stdout, format, args);
+	if (!daemon) {
+		vfprintf(stderr, format, args);
+		fprintf(stderr,"\n");
+	}
+
 	vsyslog(level, format, args);
 	
 	va_end(args);
