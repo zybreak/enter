@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.60)
-AC_INIT([enter],[0.0.2],[rob_dobbs@users.sourceforge.net])
+AC_INIT([enter],[0.0.3],[rob_dobbs@users.sourceforge.net])
 AC_CONFIG_SRCDIR([src/enter.c])
 
 AM_INIT_AUTOMAKE
@@ -17,6 +17,7 @@ AC_CHECK_FT2
 AC_CHECK_LIB([X11], [XOpenDisplay])
 AC_CHECK_LIB([Xft], [XftFontOpenName])
 AC_CHECK_LIB([Xau], [XauWriteAuth])
+AC_CHECK_LIB([Imlib2], [imlib_context_new])
 
 # Checks for header files.
 AC_PATH_X
@@ -37,13 +38,12 @@ fi
 AC_SUBST([X_CFLAGS])
 AC_SUBST([X_LIBS])
 
-dnl TODO: Add better check for imlib.
 AC_SUBST([IMLIB_CFLAGS],[`imlib2-config --cflags`])
 AC_SUBST([IMLIB_LIBS],[`imlib2-config --libs`])
 
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([stdlib.h string.h syslog.h unistd.h])
+AC_CHECK_HEADERS([stdlib.h string.h syslog.h unistd.h shadow.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -54,7 +54,8 @@ AC_TYPE_SIZE_T
 AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS([endpwent getusershell memset strdup setenv])
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS([endpwent getusershell memset strdup setenv getspnam])
 
 DEBUG_CFLAGS="-Wall -Wmissing-prototypes -Wmissing-declarations"
 AC_SUBST([DEBUG_CFLAGS])

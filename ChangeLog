@@ -5,6 +5,8 @@
 	reads DISPLAY from config instead of environment.
 	* greeter.c, greeter_auth.c:
 	moved authentication code to greeter_auth.c
+	* configure.ac:
+	added Imlib2 check.
 
 2006-11-22  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/enter.c:
