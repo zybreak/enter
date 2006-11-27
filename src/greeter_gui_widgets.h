@@ -7,7 +7,7 @@ typedef struct gui_input_t gui_input_t;
 typedef struct gui_label_t gui_label_t;
 
 #include "greeter_display.h"
-#include "greeter_image.h"
+#include "greeter_gui_image.h"
 #include "greeter_gui.h"
 
 #define TEXT_LEN 64
@@ -24,7 +24,7 @@ typedef struct gui_label_t gui_label_t;
 	((input)->text->caption)
 
 struct gui_input_t {
-	image_t *image;
+	gui_image_t *image;
 	int x, y, w, h;
 	gui_label_t *text;
 };

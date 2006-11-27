@@ -118,6 +118,8 @@ int main(int argc, char **argv)
 	case LOGIN:
 		auth_login(auth);
 		break;
+	default:
+		break;
 	}
 
 	/* If we reach here,

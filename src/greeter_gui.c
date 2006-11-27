@@ -3,7 +3,7 @@
 #include "enter.h"
 #include "greeter.h"
 #include "greeter_gui.h"
-#include "greeter_image.h"
+#include "greeter_gui_image.h"
 #include "log.h"
 #include "utils.h"
 
@@ -84,7 +84,7 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 
 		} else if (gui->focus == USERNAME) {
 			if (gui->visible == USERNAME)
-				gui->visible == PASSWORD;
+				gui->visible = PASSWORD;
 			gui->focus = PASSWORD;
 		}
 	} else {
@@ -147,14 +147,14 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 	snprintf(buf,BUF_LEN-1,"%s/%s",conf_get(conf,"theme_path"),
 			conf_get(conf,"enter.background"));
 
-	image_t *image = image_load(display, buf);
+	gui_image_t *image = gui_image_load(display, buf);
 	if (!image) {
 		log_print(LOG_ERR, "could not load image \"buf\"");
 		gui_delete(gui);
 		return NULL;
 	}
-	gui->background = image_pixmap(image);
-	image_delete(image);
+	gui->background = gui_image_pixmap(image);
+	gui_image_delete(image);
 
 	gui->title = gui_label_new(display, conf_get(conf,"title.font"),
 					conf_get(conf,"title.color"),

@@ -42,7 +42,7 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 	input->x = x;
 	input->y = y;
 
-	input->image = image_load(display, image);
+	input->image = gui_image_load(display, image);
 	if (!input->image) {
 		free(input);
 		return NULL;
@@ -50,13 +50,13 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 	
 	t_x = (text_x>0)?x+text_x:x;
 	t_y = (text_y>0)?y+text_y:y;
-	t_w = (text_w>0)?text_w:image_width(input->image);
-	t_h = (text_h>0)?text_h:image_height(input->image);
+	t_w = (text_w>0)?text_w:gui_image_width(input->image);
+	t_h = (text_h>0)?text_h:gui_image_height(input->image);
 
 	input->text = gui_label_new(display, font, color, t_x, t_y,
 					t_w, t_h, "");
 	if (!input->text) {
-		image_delete(input->image);
+		gui_image_delete(input->image);
 		free(input);
 		return NULL;
 	}
@@ -74,7 +74,7 @@ void gui_label_delete(gui_label_t *label, display_t *display)
 
 void gui_input_delete(gui_input_t *input, display_t *display)
 {
-	image_delete(input->image);
+	gui_image_delete(input->image);
 	gui_label_delete(input->text, display);
 	free(input);
 }
@@ -110,9 +110,7 @@ void gui_label_draw(gui_label_t *label, gui_t *gui)
 
 void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden)
 {
-	display_t *display = gui->display;
-
-	image_draw(gui->win, input->image, input->x, input->y);
+	gui_image_draw(gui->win, input->image, input->x, input->y);
 
 	char old[TEXT_LEN];
 	strncpy(old, gui_input_text(input), TEXT_LEN);

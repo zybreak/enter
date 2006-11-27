@@ -1,5 +1,10 @@
 2006-11-27  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter_image.c:
+	renamed file to greeter_gui_image.c,
+	and renamed image_t to gui_image_t.
+
+2006-11-27  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/greeter_image.c:
 	renamed image_free to image_delete.
 	* src/greeter_gui.c:
 	handle MappingNotify XEvent.
