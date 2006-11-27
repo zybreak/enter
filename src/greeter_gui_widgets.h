@@ -12,24 +12,33 @@ typedef struct gui_label_t gui_label_t;
 
 #define TEXT_LEN 64
 
+#define gui_input_x(input) \
+	((input)->x)
+#define gui_input_y(input) \
+	((input)->y)
+#define gui_input_width(input) \
+	((input)->w)
+#define gui_input_height(input) \
+	((input)->h)
+#define gui_input_text(input) \
+	((input)->text->caption)
+
 struct gui_input_t {
 	image_t *image;
 	int x, y, w, h;
-	int text_x, text_y, text_w, text_h;
-	XftFont *font;
-	XftColor *color;
-	char text[TEXT_LEN];
+	gui_label_t *text;
 };
 
 struct gui_label_t {
 	XftFont *font;
 	XftColor *color;
 	char caption[TEXT_LEN];
-	int x,y;
+	int x, y, w, h;
 };
 
 gui_label_t* gui_label_new(display_t *display, const char *font,
-		const char *color, int x, int y, const char *caption);
+		const char *color, int x, int y, int w, int h,
+		const char *caption);
 gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 		const char *font, const char *color, 
 		int text_x, int text_y, int text_w, int text_h);

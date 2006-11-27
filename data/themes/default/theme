@@ -18,14 +18,14 @@ username.caption = Username
 username.font = verdana-14:bold:dpi=75
 username.color = #FFFFFF
 username.x = 50
-username.y = 190
+username.y = 200
 
 # Password label
 password.caption = Password
 password.font = verdana-14:bold:dpi=75
 password.color = #FFFFFF
 password.x = 50
-password.y = 290
+password.y = 300
 
 # Username input field
 username_input.x = 150

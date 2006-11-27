@@ -14,9 +14,16 @@
 /* This holds the user credidentials.  */
 static auth_t *auth = NULL;
 
+/* This is a state variable.  */
+static enum {
+	WAIT,
+	LOGIN
+} action = WAIT;
+
 void greeter_auth(auth_t *_auth)
 {
 	auth = _auth;
+	action = LOGIN;
 }
 
 static void parse_args(int argc, char **argv, cfg_t *conf)
@@ -96,7 +103,7 @@ int main(int argc, char **argv)
 	
 	gui_show(gui);
 
-	while(!auth) {
+	while(action == WAIT) {
 		XNextEvent(display->dpy,&event);
 		gui_events(gui,&event);
 		usleep(1);
@@ -107,11 +114,14 @@ int main(int argc, char **argv)
 	display_delete(display);
 	closelog();
 
-	/* Login user. */
-	auth_login(auth);
+	switch (action) {
+	case LOGIN:
+		auth_login(auth);
+		break;
+	}
 
 	/* If we reach here,
-	 * the login failed for some unexpected reason.  */
+	 * we failed for some unexpected reason.  */
 
 	return EXIT_FAILURE;
 }

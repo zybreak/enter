@@ -1,3 +1,16 @@
+2006-11-27  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/greeter_image.c:
+	renamed image_free to image_delete.
+	* src/greeter_gui.c:
+	handle MappingNotify XEvent.
+	* src/greeter_gui_widgets.c:
+	removed duplicate code in gui_input_t,
+	which now uses gui_label_t.
+
+2006-11-26  Robert Knutsson <rob_dobbs@users.sf.net>
+	* data/themes/default/input.png:
+	added transparency.
+
 2006-11-25  Robert Knutsson <rob_dobbs@users.sf.net>
 	* greeter_gui.c:
 	deletes window in gui_delete

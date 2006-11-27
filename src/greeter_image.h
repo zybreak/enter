@@ -7,7 +7,7 @@
 
 typedef struct image_t image_t;
 
-void image_free(image_t *image);
+void image_delete(image_t *image);
 int image_width(image_t *image);
 int image_height(image_t *image);
 void image_draw(Drawable drawable, image_t *image, int x, int y);

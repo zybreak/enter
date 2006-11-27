@@ -4,14 +4,11 @@
 #include "utils.h"
 
 gui_label_t* gui_label_new(display_t *display, const char *font,
-		const char *color, int x, int y, const char *caption)
+		const char *color, int x, int y, int w, int h, const char *caption)
 {
 	gui_label_t *label = xmalloc(sizeof(*label));
 	XGlyphInfo extent;
 
-	label->x = x;
-	strncpy(label->caption,caption,TEXT_LEN-1);
-	
 	label->font = XftFontOpenName(display->dpy, display->screen, font);
 	
 	if (!label->font) {
@@ -19,10 +16,15 @@ gui_label_t* gui_label_new(display_t *display, const char *font,
 		return NULL;
 	}
 
+	strncpy(label->caption,caption,TEXT_LEN-1);
+	
 	XftTextExtents8(display->dpy,label->font,(XftChar8*)"l",1,&extent);
 
+	label->x = x;
 	label->y = y+extent.height;
-	
+	label->w = w;
+	label->h = h;
+
 	label->color = xmalloc(sizeof(*label->color));
 	XftColorAllocName(display->dpy,display->visual,display->colormap,
 							color, label->color);
@@ -34,43 +36,30 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 		const char *font, const char *color, 
 		int text_x, int text_y, int text_w, int text_h)
 {
+	int t_x, t_y, t_w, t_h;
 	gui_input_t *input = xmalloc(sizeof(*input));
-	XGlyphInfo extent;
 
 	input->x = x;
-	memset(input->text,'\0',TEXT_LEN);
-
-	input->text_x = x+text_x;
-	input->text_y = y+text_y;
-	
-	memset(input->text,'\0',TEXT_LEN);
+	input->y = y;
 
 	input->image = image_load(display, image);
 	if (!input->image) {
 		free(input);
 		return NULL;
 	}
+	
+	t_x = (text_x>0)?x+text_x:x;
+	t_y = (text_y>0)?y+text_y:y;
+	t_w = (text_w>0)?text_w:image_width(input->image);
+	t_h = (text_h>0)?text_h:image_height(input->image);
 
-	/* If no text_w or text_h was supplied, use the width/height
-	 * values of the image.  */	
-	input->text_w = (text_w>0)?text_w:input->w;
-	input->text_h = (text_h>0)?text_h:input->h;
-	
-	input->font = XftFontOpenName(display->dpy, display->screen, font);
-	
-	if (!input->font) {
-		image_free(input->image);
+	input->text = gui_label_new(display, font, color, t_x, t_y,
+					t_w, t_h, "");
+	if (!input->text) {
+		image_delete(input->image);
 		free(input);
 		return NULL;
 	}
-	
-	XftTextExtents8(display->dpy,input->font,(XftChar8*)"l",1,&extent);
-
-	input->y = y-extent.height;
-	
-	input->color = xmalloc(sizeof(*input->color));
-	XftColorAllocName(display->dpy,display->visual,display->colormap,
-							color, input->color);
 
 	return input;
 }
@@ -85,58 +74,56 @@ void gui_label_delete(gui_label_t *label, display_t *display)
 
 void gui_input_delete(gui_input_t *input, display_t *display)
 {
-	image_free(input->image);
-	XftFontClose(display->dpy,input->font);
-	XftColorFree(display->dpy,display->visual,display->colormap,input->color);
-	free(input->color);
+	image_delete(input->image);
+	gui_label_delete(input->text, display);
 	free(input);
 }
 
 void gui_label_draw(gui_label_t *label, gui_t *gui)
 {
+	display_t *display = gui->display;
 	XftDraw *draw = gui->draw;
+	char *p;
+	XGlyphInfo extents;
+
+	p = label->caption;
+	XftTextExtents8(display->dpy, label->font,
+			(XftChar8*)p, strlen(p), &extents);
+
+	int w = extents.xOff;
+
+	/* If no width was specified, print everything.  */
+	if (label->w == 0)
+		w = -1;
+
+	while (*p && w >= label->w) {
+		XftTextExtents8(display->dpy, label->font,
+				(XftChar8*)p, 1, &extents);
+		w -= extents.xOff;
+		p++;
+	}
 
 	XftDrawString8(draw,label->color,label->font, 
 		label->x,label->y,
-		(XftChar8*)label->caption,strlen(label->caption));
+		(XftChar8*)p,strlen(p));
 }
 
 void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden)
 {
 	display_t *display = gui->display;
-	XftDraw *draw = gui->draw;
-	XGlyphInfo extents;
-	int i;
-	int len = strlen(input->text);
-	char text[len+1];
-	char *p;
 
 	image_draw(gui->win, input->image, input->x, input->y);
 
-	for (i=0;i<len;i++) {
-		/* Hide the text when hidden is true,
-		 * as to not display any passwords.  */
-		text[i] = (hidden)?'*':input->text[i];
-	}
-	text[len] = '\0';
+	char old[TEXT_LEN];
+	strncpy(old, gui_input_text(input), TEXT_LEN);
 
-	XftTextExtents8(display->dpy,input->font,(XftChar8*)"W",1,&extents);
-
-	p = text+len;
-	int w = 0;
-
-	/* Only print the text that fits in the box.  */
-	while (p != text) {
-		XftTextExtents8(display->dpy,input->font,
-				(XftChar8*)&p[0],1,&extents);
-		w += extents.xOff;
-		if (w > input->text_w)
-			break;
-		p--;
+	if (hidden) {
+		memset(gui_input_text(input), '*',
+				strlen(gui_input_text(input)));
 	}
 
-	XftDrawString8(draw,input->color,input->font, 
-		input->text_x,input->text_y,
-		(XftChar8*)p,strlen(p));
+	gui_label_draw(input->text, gui);
+
+	strncpy(gui_input_text(input), old, TEXT_LEN);
 }
 

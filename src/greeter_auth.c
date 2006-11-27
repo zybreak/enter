@@ -47,20 +47,23 @@ auth_t* auth_new(cfg_t *conf, const char *username, const char *password)
 
 void auth_login(auth_t *auth)
 {
+	/* If theres no shell accociated with the user in
+	 * /etc/passwd, assign the user a shell from /etc/shells.  */
 	if (!*auth->pwd->pw_shell) {
 		setusershell();
 		auth->pwd->pw_shell = getusershell();
 		endusershell();
 	}
 
-	if (initgroups(auth->pwd->pw_name, auth->pwd->pw_gid))
+	/* Read the group database /etc/group.  */
+	if (initgroups(auth->pwd->pw_name, auth->pwd->pw_gid) == -1)
 		return;
 
-	if (setgid(auth->pwd->pw_gid)) {
+	if (setgid(auth->pwd->pw_gid) == -1) {
 		return;
 	}
 
-	if (setuid(auth->pwd->pw_uid)) {
+	if (setuid(auth->pwd->pw_uid) == -1) {
 		return;
 	}
 

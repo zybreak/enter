@@ -15,7 +15,7 @@ struct image_t {
 	display_t *display;
 };
 
-void image_free(image_t *image)
+void image_delete(image_t *image)
 {
 	imlib_context_set_image(image->im_image);
 	imlib_free_image();

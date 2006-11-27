@@ -36,27 +36,26 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 	KeySym keysym;
 	XComposeStatus cstatus;
 	gui_input_t *input;
-	int text_len;
+	display_t *display = gui->display;
 
 	XLookupString(&event->xkey,&ch,1,&keysym,&cstatus);
 
-	if (gui->visible == BOTH) {
-		if (gui->focus == USERNAME)
-			input = gui->user_input;
-		else
-			input = gui->passwd_input;
-	} else if (gui->visible == USERNAME) {
+	/* Assign `input' to the currently focused
+	 * input box.  */
+	if (gui->focus == USERNAME) {
 		input = gui->user_input;
 	} else {
 		input = gui->passwd_input;
 	}
 	
-	text_len = strlen(input->text);
+	char *input_text = gui_input_text(input);
+	int text_len = strlen(input_text);
 
 	if (keysym == XK_BackSpace) {
 		if (text_len > 0)
-			input->text[text_len-1] = '\0';
+			input_text[text_len-1] = '\0';
 	} else if (keysym == XK_Tab) {
+		/* If both input boxes are visible, change focus.  */
 		if (gui->visible == BOTH) {
 			if (gui->focus == USERNAME)
 				gui->focus = PASSWORD;
@@ -64,14 +63,14 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 				gui->focus = USERNAME;
 		}
 	} else if (keysym == XK_Return) {
-		if (gui->visible == PASSWORD || gui->focus == PASSWORD) {
+		if (gui->focus == PASSWORD) {
 			/* Authenticate user.  */
-			auth_t *auth = auth_new(gui->conf,
-					gui->user_input->text,
-					gui->passwd_input->text);
+			char *usr = gui_input_text(gui->user_input);
+			char *pwd = gui_input_text(gui->passwd_input);
+			auth_t *auth = auth_new(gui->conf, usr, pwd);
 			
-			memset(gui->user_input->text,'\0',TEXT_LEN);
-			memset(gui->passwd_input->text,'\0',TEXT_LEN);
+			memset(usr,'\0',TEXT_LEN);
+			memset(pwd,'\0',TEXT_LEN);
 
 			/* User authenticated successfully.  */
 			if (auth) {
@@ -83,18 +82,36 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 				gui->visible = USERNAME;
 			gui->focus = USERNAME;
 
-		} else if (gui->visible == USERNAME) {
-			gui->focus = gui->visible = PASSWORD;
-		} else if (gui->visible == BOTH) {
-			if (gui->focus == USERNAME)
-				gui->focus = PASSWORD;
+		} else if (gui->focus == USERNAME) {
+			if (gui->visible == USERNAME)
+				gui->visible == PASSWORD;
+			gui->focus = PASSWORD;
 		}
 	} else {
-		if (text_len < TEXT_LEN-1)
-			input->text[text_len] = ch;
+		if (text_len < TEXT_LEN-1) {
+			input_text[text_len] = ch;
+			input_text[text_len+1] = '\0';
+		}
 	}
 
-	gui_draw(gui);
+	XClearArea(display->dpy, gui->win, gui_input_x(gui->user_input),
+			gui_input_y(gui->user_input),
+			gui_input_width(gui->user_input),
+			gui_input_height(gui->user_input), False);
+	gui_input_draw(gui->user_input, gui, FALSE);
+	
+	XClearArea(display->dpy, gui->win, gui_input_x(gui->passwd_input),
+			gui_input_y(gui->passwd_input),
+			gui_input_width(gui->passwd_input),
+			gui_input_height(gui->passwd_input), False);
+	gui_input_draw(gui->passwd_input, gui, TRUE);
+
+	XFlush(display->dpy);
+}
+
+static void gui_mappingnotify(gui_t *gui, XEvent *event)
+{
+	XRefreshKeyboardMapping(&event->xmapping);
 }
 
 gui_t* gui_new(display_t *display, cfg_t *conf)
@@ -137,12 +154,13 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 		return NULL;
 	}
 	gui->background = image_pixmap(image);
-	image_free(image);
+	image_delete(image);
 
 	gui->title = gui_label_new(display, conf_get(conf,"title.font"),
 					conf_get(conf,"title.color"),
 					atoi(conf_get(conf,"title.x")),
 					atoi(conf_get(conf,"title.y")),
+					0, 0,
 					conf_get(conf,"title.caption"));
 	if (!gui->title) {
 		log_print(LOG_ERR, "could not load title");
@@ -154,6 +172,7 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 					conf_get(conf,"username.color"),
 					atoi(conf_get(conf,"username.x")),
 					atoi(conf_get(conf,"username.y")),
+					0, 0,
 					conf_get(conf,"username.caption"));
 	if (!gui->username) {
 		log_print(LOG_ERR, "could not load username");
@@ -165,6 +184,7 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 					conf_get(conf,"password.color"),
 					atoi(conf_get(conf,"password.x")),
 					atoi(conf_get(conf,"password.y")),
+					0, 0,
 					conf_get(conf,"password.caption"));
 	if (!gui->password) {
 		log_print(LOG_ERR, "could not load password");
@@ -175,14 +195,14 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 	snprintf(buf,BUF_LEN-1,"%s/%s",conf_get(conf,"theme_path"),
 			conf_get(conf,"username_input.image"));
 	gui->user_input = gui_input_new(display, buf,
-					atoi(conf_get(conf,"username_input.x")),
-					atoi(conf_get(conf,"username_input.y")),
-					conf_get(conf,"username_input.text.font"),
-					conf_get(conf,"username_input.text.color"),
-					atoi(conf_get(conf,"username_input.text.x")),
-					atoi(conf_get(conf,"username_input.text.y")),
-					atoi(conf_get(conf,"username_input.text.width")),
-					atoi(conf_get(conf,"username_input.text.height")));
+			atoi(conf_get(conf,"username_input.x")),
+			atoi(conf_get(conf,"username_input.y")),
+			conf_get(conf,"username_input.text.font"),
+			conf_get(conf,"username_input.text.color"),
+			atoi(conf_get(conf,"username_input.text.x")),
+			atoi(conf_get(conf,"username_input.text.y")),
+			atoi(conf_get(conf,"username_input.text.width")),
+			atoi(conf_get(conf,"username_input.text.height")));
 
 	if (!gui->user_input) {
 		log_print(LOG_ERR, "could not load user_input");
@@ -193,14 +213,14 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 	snprintf(buf,BUF_LEN-1,"%s/%s",conf_get(conf,"theme_path"),
 			conf_get(conf,"password_input.image"));
 	gui->passwd_input = gui_input_new(display, buf,
-					atoi(conf_get(conf,"password_input.x")),
-					atoi(conf_get(conf,"password_input.y")),
-					conf_get(conf,"password_input.text.font"),
-					conf_get(conf,"password_input.text.color"),
-					atoi(conf_get(conf,"password_input.text.x")),
-					atoi(conf_get(conf,"password_input.text.y")),
-					atoi(conf_get(conf,"password_input.text.width")),
-					atoi(conf_get(conf,"password_input.text.height")));
+			atoi(conf_get(conf,"password_input.x")),
+			atoi(conf_get(conf,"password_input.y")),
+			conf_get(conf,"password_input.text.font"),
+			conf_get(conf,"password_input.text.color"),
+			atoi(conf_get(conf,"password_input.text.x")),
+			atoi(conf_get(conf,"password_input.text.y")),
+			atoi(conf_get(conf,"password_input.text.width")),
+			atoi(conf_get(conf,"password_input.text.height")));
 
 	if (!gui->passwd_input) {
 		log_print(LOG_ERR, "could not load passwd_input");
@@ -263,6 +283,9 @@ void gui_events(gui_t *gui, XEvent *event)
 		break;
 	case KeyPress:
 		gui_keypress(gui,event);
+		break;
+	case MappingNotify:
+		gui_mappingnotify(gui, event);
 		break;
 	}
 }
