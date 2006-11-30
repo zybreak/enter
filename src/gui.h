@@ -6,8 +6,8 @@
 
 typedef struct gui_t gui_t;
 
-#include "greeter_display.h"
-#include "greeter_gui_widgets.h"
+#include "display.h"
+#include "gui_widgets.h"
 #include "conf.h"
 
 struct gui_t {

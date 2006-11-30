@@ -1,7 +1,7 @@
 * Document functions.
 * Add content to README and AUTHORS
 * Add code to enable relative positions of labels/images/areas in themes
-* Add better check for imlib in autoconf.ac
 * Fix compiler warnings
 * Add double buffering
 * Add authentication code
+* Remove map_t from cfg_t

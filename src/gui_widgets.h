@@ -6,9 +6,9 @@
 typedef struct gui_input_t gui_input_t;
 typedef struct gui_label_t gui_label_t;
 
-#include "greeter_display.h"
-#include "greeter_gui_image.h"
-#include "greeter_gui.h"
+#include "display.h"
+#include "gui_image.h"
+#include "gui.h"
 
 #define TEXT_LEN 64
 

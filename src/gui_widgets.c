@@ -1,6 +1,6 @@
 #include <X11/Xlib.h>
 
-#include "greeter_gui_widgets.h"
+#include "gui_widgets.h"
 #include "utils.h"
 
 gui_label_t* gui_label_new(display_t *display, const char *font,

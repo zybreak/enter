@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "greeter_display.h"
+#include "display.h"
 #include "utils.h"
 
 display_t* display_new(cfg_t *conf)

@@ -7,46 +7,13 @@
 #include <unistd.h>
 
 #include "enter.h"
-#include "enter_server.h"
-#include "enter_greeter.h"
+#include "server.h"
+#include "greeter.h"
 #include "log.h"
 #include "conf.h"
 
 #define PIDFILE "/var/run/" PACKAGE ".pid"
 #define PIDBUF 20
-
-static void parse_args(int argc, char **argv, cfg_t *conf)
-{
-	int i;
-	
-	for (i=1;i<argc;i++) {
-		if ((strcmp(argv[i],"-c") == 0) && (i+1 < argc)) {
-			conf_set(conf,"config_file",argv[++i]);
-		} else if ((strcmp(argv[i],"-d") == 0) && (i+1 < argc)) {
-			conf_set(conf,"display",argv[++i]);
-		} else if (strcmp(argv[i],"-n") == 0) {
-			conf_set(conf,"daemon","false");
-		} else if (strcmp(argv[i],"-v") == 0) {
-			printf("%s version %s\n",PACKAGE,VERSION);
-			exit(EXIT_SUCCESS);
-		} else if (strcmp(argv[i],"-h") == 0) {
-			printf(
-			"Usage: %s: [OPTIONS]\n\n"
-			"  -c          specify an alternative config file\n"
-			"  -d          connect to display\n"
-			"  -n          dont run as a daemon\n"
-			"  -v          print version information\n"
-			"  -h          print avaiable arguments\n"
-			"\n"
-			"Report bugs to <%s>.\n",
-			argv[0], PACKAGE_BUGREPORT);
-			exit(EXIT_SUCCESS);
-		} else {
-			printf("unknown argument, try -h\n");
-			exit(EXIT_SUCCESS);
-		}
-	}
-}
 
 static void default_settings(cfg_t *conf)
 {
@@ -55,14 +22,15 @@ static void default_settings(cfg_t *conf)
 	conf_set(conf,"display",":0");
 }
 
-static void daemonize()
+static int daemonize()
 {
 	pid_t pid, sid;
 	pid = fork();
 	if (pid < 0) {
 		log_print(LOG_EMERG, "could not fork process");
-		exit(EXIT_FAILURE);
+		return FALSE;
 	} else if (pid > 0) {
+		/* Kill the parent thread.  */
 		exit(EXIT_SUCCESS);
 	}
 	
@@ -72,19 +40,20 @@ static void daemonize()
 	
 	if (sid < 0) {
 		log_print(LOG_EMERG, "could not set sid");
-		exit(EXIT_FAILURE);
+		return FALSE;
 	}
 	
 	if (chdir("/") < 0) {
 		log_print(LOG_EMERG, "could not change working directory");
-		exit(EXIT_FAILURE);
+		return FALSE;
 	}
 
+	/* Do not use `close' as this causes broken pipe's with the children.  */
 	freopen("/dev/null", "r", stdin);
 	freopen("/dev/null", "w", stdout);
 	freopen("/dev/null", "w", stderr);
 
-	log_daemon(TRUE);
+	return TRUE;
 }
 
 static void write_pidfile(pid_t pid)
@@ -116,6 +85,8 @@ int main(int argc, char **argv)
 {
 	cfg_t *conf;
 	pid_t server_pid, greeter_pid;
+	
+	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 
 	if (getuid() != 0) {
 		log_print(LOG_EMERG,"Root priviledges needed to run");
@@ -126,17 +97,18 @@ int main(int argc, char **argv)
 	
 	default_settings(conf);
 	
-	parse_args(argc,argv,conf);
-	
 	if (conf_parse(conf,conf_get(conf,"config_file")) == FALSE) {
+		log_print(LOG_EMERG, "Could not read config file: \"%s\"",
+					conf_get(conf, "config_file"));
 		exit(EXIT_FAILURE);
 	}
 	
 	if (!strcmp(conf_get(conf,"daemon"),"true")) {
-		daemonize();
+		if (daemonize() == FALSE) {
+			log_print(LOG_EMERG, "Could not daemonize enter.");
+			exit(EXIT_FAILURE);
+		}
 	}
-
-	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 	
 	write_pidfile(getpid());
 
@@ -159,15 +131,17 @@ int main(int argc, char **argv)
 		pid_t p = waitpid(greeter_pid, NULL, 0);
 		if (p == -1) {
 			log_print(LOG_WARNING,"Could not wait for greeter.");
-			return EXIT_FAILURE;
+			exit(EXIT_FAILURE);
 		}
 	}
 
-	remove_pidfile();
 
 	log_print(LOG_INFO,"Shutting down.");
+	
+	remove_pidfile();
+	conf_delete(conf);
 	closelog();
 	
-	return EXIT_SUCCESS;
+	exit(EXIT_SUCCESS);
 }
 

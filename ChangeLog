@@ -1,3 +1,9 @@
+2006-11-30  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/Makefile.am:
+	only compile one binary instead of two seperate.
+	* src/greeter_*:
+	removed the greeter_ part of the filename.
+
 2006-11-27  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter_image.c:
 	renamed file to greeter_gui_image.c,

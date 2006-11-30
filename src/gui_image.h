@@ -3,7 +3,7 @@
 
 #include <X11/Xlib.h>
 
-#include "greeter_display.h"
+#include "display.h"
 
 typedef struct gui_image_t gui_image_t;
 

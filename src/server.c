@@ -1,19 +1,21 @@
 #include <X11/Xauth.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
+#include <errno.h>
 
 #include "enter.h"
-#include "enter_server.h"
+#include "server.h"
 #include "log.h"
 #include "utils.h"
 
 #define AUTH_DATA_LEN 16
 #define AUTH_NAME "MIT-MAGIC-COOKIE-1"
 #define CMD_LEN 256
-#define SPAWN_TIMEOUT 5
+#define SERVER_TIMEOUT 5
 
 static int server_started = FALSE;
 
@@ -83,6 +85,49 @@ static void signal_sigusr1(int signal)
 	server_started = TRUE;
 }
 
+int server_delete(int pid)
+{
+	if (killpg(pid, SIGTERM) < 0) {
+		log_print(LOG_WARNING, "Could not kill server: %s", strerror(errno));
+		return 0;
+	}
+
+	time_t start_time = time(NULL);
+	int pidfound;
+
+	while (pidfound != pid) {
+		pidfound = waitpid(pid, NULL, WNOHANG);
+
+		if (time(NULL)-start_time > SERVER_TIMEOUT)
+			break;
+
+		usleep(100000);
+	}
+
+	if (pidfound != pid) {
+		if (killpg(pid, SIGKILL) < 0) {
+			log_print(LOG_WARNING, "Could not kill server: %s", strerror(errno));
+			return 0;
+		}
+	}
+
+	while (pidfound != pid) {
+		pidfound = waitpid(pid, NULL, WNOHANG);
+
+		if (time(NULL)-start_time > SERVER_TIMEOUT)
+			break;
+
+		usleep(100000);
+	}
+
+	if (pidfound != pid) {
+		log_print(LOG_WARNING, "Could not kill server: %s", strerror(errno));
+		return 0;
+	}
+
+	return 1;
+}
+
 int server_init(cfg_t *conf)
 {
 	char *cmd[CMD_LEN];
@@ -93,7 +138,7 @@ int server_init(cfg_t *conf)
 	server_started = FALSE;
 	
 	/* Handle signals.
-	 * SIGURS1 is sent when the X server is ready.  */
+	 * SIGUSR1 is sent when the X server is ready.  */
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = signal_sigusr1;
@@ -126,7 +171,7 @@ int server_init(cfg_t *conf)
 			start_time = time(NULL);
 		
 			while (server_started == FALSE) {
-				if (time(NULL)-start_time > SPAWN_TIMEOUT)
+				if (time(NULL)-start_time > SERVER_TIMEOUT)
 					break;
 				usleep(100000);
 			}
@@ -138,7 +183,8 @@ int server_init(cfg_t *conf)
 				return FALSE;
 			}
 
-			return server_pid;
 	}
+
+	return server_pid;
 }
 

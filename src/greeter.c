@@ -6,8 +6,8 @@
 
 #include "enter.h"
 #include "greeter.h"
-#include "greeter_display.h"
-#include "greeter_gui.h"
+#include "display.h"
+#include "gui.h"
 #include "log.h"
 #include "utils.h"
 
@@ -26,68 +26,27 @@ void greeter_auth(auth_t *_auth)
 	action = LOGIN;
 }
 
-static void parse_args(int argc, char **argv, cfg_t *conf)
-{
-	int i;
-
-	if (argc<=1) {
-		fprintf(stderr,"no theme specified, try -h\n");
-		exit(EXIT_FAILURE);
-	}
-	
-	for (i=1;i<argc;i++) {
-		if (strcmp(argv[i],"-v") == 0) {
-			printf("%s version %s\n",PACKAGE,VERSION);
-			exit(EXIT_SUCCESS);
-		} else if (strcmp(argv[i],"-h") == 0) {
-			printf(
-				"Usage %s: [OPTIONS] THEME\n\n"
-				"  -v          print version information\n"
-				"  -h          print avaiable arguments\n"
-				"\n"
-				"Report bugs to <%s>.\n",
-				argv[0], PACKAGE_BUGREPORT);
-			exit(EXIT_SUCCESS);
-		} else if (i==argc-1) {
-			/* This is the last argument,
-			 * use it as the theme path.  */
-			conf_set(conf,"theme_path",argv[i]);
-		} else {
-			printf("unknown argument, try -h\n");
-			exit(EXIT_FAILURE);
-		}
-	}
-}
-
-static void default_settings(cfg_t *conf)
-{
-	conf_set(conf,"title.color","#FFFFFF");
-	char *display = getenv("DISPLAY");
-	if (!display)
-		display = ":0";
-
-	conf_set(conf,"display",display);
-}
-
-int main(int argc, char **argv)
+static int greeter_new(cfg_t *conf)
 {
 	display_t *display;
 	gui_t *gui;
-	cfg_t *conf = conf_new();
 	XEvent event;
+	cfg_t *theme = conf_new();
 
-	default_settings(conf);
-	
-	parse_args(argc, argv, conf);
-
-	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
-
-	char *theme_path = xstrcat(conf_get(conf,"theme_path"),"/theme");
-	if (!conf_parse(conf,theme_path)) {
-		log_print(LOG_EMERG,"could not parse config \"%s\"\n",theme_path);
+	char *theme_path = xstrcat(conf_get(
+				conf,"theme_path"),"/theme");
+	if (!conf_parse(theme,theme_path)) {
+		log_print(LOG_EMERG,
+			"could not parse theme \"%s\"\n",
+			theme_path);
 		return EXIT_FAILURE;
 	}
 	free(theme_path);
+
+	conf_set(theme, "display",
+			conf_get(conf, "display"));
+	conf_set(theme, "theme_path",
+			conf_get(conf, "theme_path"));
 
 	display = display_new(conf);
 	if (!display) {
@@ -95,7 +54,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	
-	gui = gui_new(display,conf);
+	gui = gui_new(display,theme);
 	if (!gui) {
 		log_print(LOG_EMERG,"could not open gui\n");
 		return EXIT_FAILURE;
@@ -110,9 +69,8 @@ int main(int argc, char **argv)
 	}
 
 	gui_delete(gui);
-	conf_delete(conf);
 	display_delete(display);
-	closelog();
+	conf_delete(theme);
 
 	switch (action) {
 	case LOGIN:
@@ -127,3 +85,18 @@ int main(int argc, char **argv)
 
 	return EXIT_FAILURE;
 }
+
+int greeter_init(cfg_t *conf)
+{
+	pid_t pid = fork();
+	if (pid == -1) {
+		log_print(LOG_WARNING, "Could not fork process");
+		return FALSE;
+	} else if (pid == 0) {
+		greeter_new(conf);
+		exit(0);
+	}
+
+	return pid;
+}
+

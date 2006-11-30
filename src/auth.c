@@ -5,10 +5,8 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "greeter_auth.h"
+#include "auth.h"
 #include "utils.h"
-
-#include "log.h"
 
 struct auth_t {
 	const char *display;
@@ -26,6 +24,7 @@ auth_t* auth_new(cfg_t *conf, const char *username, const char *password)
 		return NULL;
 	}
 
+	/* copy the string because conf_delete will free it.  */
 	auth->display = strdup(conf_get(conf,"display"));
 
 	struct spwd *shadow = getspnam(auth->pwd->pw_name);
@@ -86,8 +85,6 @@ void auth_login(auth_t *auth)
 		xstrcat("DISPLAY=",auth->display),
 		NULL
 	};
-
-	log_print(LOG_INFO, "display: %s", auth->display);
 
 	execve(args[0],args,env);
 

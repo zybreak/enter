@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include "enter.h"
-#include "greeter_gui_image.h"
+#include "gui_image.h"
 #include "utils.h"
 
 struct gui_image_t {

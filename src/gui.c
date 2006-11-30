@@ -2,8 +2,8 @@
 
 #include "enter.h"
 #include "greeter.h"
-#include "greeter_gui.h"
-#include "greeter_gui_image.h"
+#include "gui.h"
+#include "gui_image.h"
 #include "log.h"
 #include "utils.h"
 
