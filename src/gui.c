@@ -1,3 +1,4 @@
+#include <X11/keysymdef.h>
 #include <stdlib.h>
 
 #include "enter.h"

@@ -6,6 +6,7 @@
 	* src/gui.c:
 	displays error msg at unsuccessful login.
 	fixed bug when `enter.visible' isn't `both'.
+	added include "X11/keysymdef.h".
 
 2006-11-27  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter_image.c:
