@@ -42,7 +42,7 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 	input->x = x;
 	input->y = y;
 
-	input->image = gui_image_load(display, image);
+	input->image = gui_image_new(display, image, x, y);
 	if (!input->image) {
 		free(input);
 		return NULL;
@@ -60,6 +60,9 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 		free(input);
 		return NULL;
 	}
+
+	input->w = gui_image_width(input->image);
+	input->h = gui_image_height(input->image);
 
 	return input;
 }
@@ -110,7 +113,7 @@ void gui_label_draw(gui_label_t *label, gui_t *gui)
 
 void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden)
 {
-	gui_image_draw(gui->win, input->image, input->x, input->y);
+	gui_image_draw(gui->win, input->image);
 
 	char old[TEXT_LEN];
 	strncpy(old, gui_input_text(input), TEXT_LEN);
@@ -123,5 +126,31 @@ void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden)
 	gui_label_draw(input->text, gui);
 
 	strncpy(gui_input_text(input), old, TEXT_LEN);
+}
+
+void gui_label_clear(gui_label_t *label, gui_t *gui)
+{
+	int w, h;
+	XGlyphInfo extent;
+	display_t *display = gui->display;
+	
+	XftTextExtents8(display->dpy,label->font,(XftChar8*)label->caption,
+			strlen(label->caption),&extent);
+
+	w = (label->w > 0)?label->w:extent.xOff;
+	h = (label->h > 0)?label->h:extent.height;
+
+	XClearArea(display->dpy, gui->win, label->x,
+			label->y - extent.height,
+			w, h, False);
+}
+
+void gui_input_clear(gui_input_t *input, gui_t *gui)
+{
+	display_t *display = gui->display;
+	XClearArea(display->dpy, gui->win, input->x,
+			input->y,
+			input->w,
+			input->h, False);
 }
 

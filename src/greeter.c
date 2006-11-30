@@ -11,19 +11,12 @@
 #include "log.h"
 #include "utils.h"
 
-/* This holds the user credidentials.  */
-static auth_t *auth = NULL;
-
 /* This is a state variable.  */
-static enum {
-	WAIT,
-	LOGIN
-} action = WAIT;
+static int mode = LISTEN;
 
-void greeter_auth(auth_t *_auth)
+void greeter_mode(int _mode)
 {
-	auth = _auth;
-	action = LOGIN;
+	mode = _mode;
 }
 
 static int greeter_new(cfg_t *conf)
@@ -62,7 +55,7 @@ static int greeter_new(cfg_t *conf)
 	
 	gui_show(gui);
 
-	while(action == WAIT) {
+	while(mode == LISTEN) {
 		XNextEvent(display->dpy,&event);
 		gui_events(gui,&event);
 		usleep(1);
@@ -71,17 +64,6 @@ static int greeter_new(cfg_t *conf)
 	gui_delete(gui);
 	display_delete(display);
 	conf_delete(theme);
-
-	switch (action) {
-	case LOGIN:
-		auth_login(auth);
-		break;
-	default:
-		break;
-	}
-
-	/* If we reach here,
-	 * we failed for some unexpected reason.  */
 
 	return EXIT_FAILURE;
 }

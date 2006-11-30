@@ -3,6 +3,9 @@
 	only compile one binary instead of two seperate.
 	* src/greeter_*:
 	removed the greeter_ part of the filename.
+	* src/gui.c:
+	displays error msg at unsuccessful login.
+	fixed bug when `enter.visible' isn't `both'.
 
 2006-11-27  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter_image.c:

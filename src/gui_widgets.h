@@ -23,6 +23,9 @@ typedef struct gui_label_t gui_label_t;
 #define gui_input_text(input) \
 	((input)->text->caption)
 
+#define gui_label_set_caption(label, str) \
+	strncpy((label)->caption, (str), TEXT_LEN-1)
+
 struct gui_input_t {
 	gui_image_t *image;
 	int x, y, w, h;
@@ -46,5 +49,7 @@ void gui_label_delete(gui_label_t *label, display_t *display);
 void gui_input_delete(gui_input_t *input, display_t *display);
 void gui_label_draw(gui_label_t *label, gui_t *gui);
 void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden);
+void gui_label_clear(gui_label_t *label, gui_t *gui);
+void gui_input_clear(gui_input_t *input, gui_t *gui);
 
 #endif /*GUI_WIDGETS_H_*/

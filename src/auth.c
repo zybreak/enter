@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "enter.h"
 #include "auth.h"
 #include "utils.h"
 
@@ -44,7 +45,7 @@ auth_t* auth_new(cfg_t *conf, const char *username, const char *password)
 
 }
 
-void auth_login(auth_t *auth)
+int auth_login(auth_t *auth)
 {
 	/* If theres no shell accociated with the user in
 	 * /etc/passwd, assign the user a shell from /etc/shells.  */
@@ -56,14 +57,14 @@ void auth_login(auth_t *auth)
 
 	/* Read the group database /etc/group.  */
 	if (initgroups(auth->pwd->pw_name, auth->pwd->pw_gid) == -1)
-		return;
+		return FALSE;
 
 	if (setgid(auth->pwd->pw_gid) == -1) {
-		return;
+		return FALSE;
 	}
 
 	if (setuid(auth->pwd->pw_uid) == -1) {
-		return;
+		return FALSE;
 	}
 
 	chdir(auth->pwd->pw_dir);
@@ -88,5 +89,6 @@ void auth_login(auth_t *auth)
 
 	execve(args[0],args,env);
 
+	return FALSE;
 }
 

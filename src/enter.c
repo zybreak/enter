@@ -15,6 +15,39 @@
 #define PIDFILE "/var/run/" PACKAGE ".pid"
 #define PIDBUF 20
 
+static void parse_args(int argc, char **argv, cfg_t *conf)
+{
+	int i;
+
+	for (i=1;i<argc;i++) {
+		if ((strcmp(argv[i],"-c") == 0) && (i+1 < argc)) {
+			conf_set(conf,"config_file",argv[++i]);
+		} else if ((strcmp(argv[i],"-d") == 0) && (i+1 < argc)) {
+			conf_set(conf,"display",argv[++i]);
+		} else if (strcmp(argv[i],"-n") == 0) {
+			conf_set(conf,"daemon","false");
+		} else if (strcmp(argv[i],"-v") == 0) {
+			printf("%s version %s\n",PACKAGE,VERSION);
+			exit(EXIT_SUCCESS);
+		} else if (strcmp(argv[i],"-h") == 0) {
+			printf(
+			"Usage: %s: [OPTIONS]\n\n"
+			"  -c          specify an alternative config file\n"
+			"  -d          connect to display\n"
+			"  -n          dont run as a daemon\n"
+			"  -v          print version information\n"
+			"  -h          print avaiable arguments\n"
+			"\n"
+			"Report bugs to <%s>.\n",
+			argv[0], PACKAGE_BUGREPORT);
+			exit(EXIT_SUCCESS);
+		} else {
+			printf("unknown argument, try -h\n");
+			exit(EXIT_SUCCESS);
+		}
+	}
+}
+
 static void default_settings(cfg_t *conf)
 {
 	conf_set(conf,"config_file",CONFDIR "/enter.conf");
@@ -98,6 +131,8 @@ int main(int argc, char **argv)
 	conf = conf_new();
 	
 	default_settings(conf);
+
+	parse_args(argc, argv, conf);
 	
 	if (conf_parse(conf,conf_get(conf,"config_file")) == FALSE) {
 		log_print(LOG_EMERG, "Could not read config file: \"%s\"",

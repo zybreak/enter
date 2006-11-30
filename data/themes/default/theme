@@ -20,6 +20,13 @@ username.color = #FFFFFF
 username.x = 50
 username.y = 200
 
+# Msg label
+msg.caption = 
+msg.font = verdana-14:bold:dpi=75
+msg.color = #FF0000
+msg.x = 50
+msg.y = 500
+
 # Password label
 password.caption = Password
 password.font = verdana-14:bold:dpi=75

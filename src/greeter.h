@@ -3,7 +3,12 @@
 
 #include "auth.h"
 
-void greeter_auth(auth_t *_auth);
+enum {
+	LISTEN,
+	LOGIN
+};
+
+void greeter_mode(int _mode);
 int greeter_init(cfg_t *conf);
 
 #endif

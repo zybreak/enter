@@ -93,7 +93,7 @@ int server_delete(int pid)
 	}
 
 	time_t start_time = time(NULL);
-	int pidfound;
+	int pidfound = 0;
 
 	while (pidfound != pid) {
 		pidfound = waitpid(pid, NULL, WNOHANG);

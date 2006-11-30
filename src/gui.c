@@ -7,6 +7,14 @@
 #include "log.h"
 #include "utils.h"
 
+#define label_new(label) \
+	gui_label_new(display, conf_get(conf,label ".font"), \
+			conf_get(conf,label ".color"), \
+			atoi(conf_get(conf,label ".x")), \
+			atoi(conf_get(conf,label ".y")), \
+			0, 0, \
+			conf_get(conf,label ".caption"))
+
 #define BUF_LEN 64
 
 static void gui_draw(gui_t *gui)
@@ -16,6 +24,7 @@ static void gui_draw(gui_t *gui)
 	XClearWindow(display->dpy,gui->win);
 	
 	gui_label_draw(gui->title, gui);
+	gui_label_draw(gui->msg, gui);
 	
 	if (gui->visible == BOTH || gui->visible == USERNAME) {
 		gui_label_draw(gui->username, gui);
@@ -54,39 +63,41 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 	if (keysym == XK_BackSpace) {
 		if (text_len > 0)
 			input_text[text_len-1] = '\0';
-	} else if (keysym == XK_Tab) {
+	} else if (keysym == XK_Tab && gui->visible == BOTH) {
 		/* If both input boxes are visible, change focus.  */
-		if (gui->visible == BOTH) {
-			if (gui->focus == USERNAME)
-				gui->focus = PASSWORD;
-			else
-				gui->focus = USERNAME;
-		}
-	} else if (keysym == XK_Return) {
-		if (gui->focus == PASSWORD) {
-			/* Authenticate user.  */
-			char *usr = gui_input_text(gui->user_input);
-			char *pwd = gui_input_text(gui->passwd_input);
-			auth_t *auth = auth_new(gui->conf, usr, pwd);
-			
-			memset(usr,'\0',TEXT_LEN);
-			memset(pwd,'\0',TEXT_LEN);
-
-			/* User authenticated successfully.  */
-			if (auth) {
-				greeter_auth(auth);
-				return;
-			}
-
-			if (gui->visible == PASSWORD)
-				gui->visible = USERNAME;
-			gui->focus = USERNAME;
-
-		} else if (gui->focus == USERNAME) {
-			if (gui->visible == USERNAME)
-				gui->visible = PASSWORD;
+		if (gui->focus == USERNAME)
 			gui->focus = PASSWORD;
+		else
+			gui->focus = USERNAME;
+	} else if (keysym == XK_Return && gui->focus == PASSWORD) {
+		/* Authenticate user.  */
+		char *usr = gui_input_text(gui->user_input);
+		char *pwd = gui_input_text(gui->passwd_input);
+		auth_t *auth = auth_new(gui->conf, usr, pwd);
+			
+		memset(usr,'\0',TEXT_LEN);
+		memset(pwd,'\0',TEXT_LEN);
+
+		if (auth  && auth_login(auth)) {
+			/* User authenticated successfully.  */
+			greeter_mode(LOGIN);
+			return;
+		} else {
+			/* User authentication failed.  */
+			gui_label_clear(gui->msg, gui);
+			gui_label_set_caption(gui->msg,
+					"Wrong password or username.");
+			gui_label_draw(gui->msg, gui);
 		}
+		
+		if (gui->visible == PASSWORD)
+			gui->visible = USERNAME;
+		gui->focus = USERNAME;
+
+	} else if (keysym == XK_Return && gui->focus == USERNAME) {
+		if (gui->visible == USERNAME)
+			gui->visible = PASSWORD;
+		gui->focus = PASSWORD;
 	} else {
 		if (text_len < TEXT_LEN-1) {
 			input_text[text_len] = ch;
@@ -94,17 +105,20 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 		}
 	}
 
-	XClearArea(display->dpy, gui->win, gui_input_x(gui->user_input),
-			gui_input_y(gui->user_input),
-			gui_input_width(gui->user_input),
-			gui_input_height(gui->user_input), False);
-	gui_input_draw(gui->user_input, gui, FALSE);
+	gui_label_clear(gui->username, gui);
+	gui_label_clear(gui->password, gui);
+	gui_input_clear(gui->user_input, gui);
+	gui_input_clear(gui->passwd_input, gui);
 	
-	XClearArea(display->dpy, gui->win, gui_input_x(gui->passwd_input),
-			gui_input_y(gui->passwd_input),
-			gui_input_width(gui->passwd_input),
-			gui_input_height(gui->passwd_input), False);
-	gui_input_draw(gui->passwd_input, gui, TRUE);
+	if (gui->visible == BOTH || gui->visible == USERNAME) {
+		gui_input_draw(gui->user_input, gui, FALSE);
+		gui_label_draw(gui->username, gui);
+	}
+
+	if (gui->visible == BOTH || gui->visible == PASSWORD) {
+		gui_input_draw(gui->passwd_input, gui, TRUE);
+		gui_label_draw(gui->password, gui);
+	}
 
 	XFlush(display->dpy);
 }
@@ -147,7 +161,7 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 	snprintf(buf,BUF_LEN-1,"%s/%s",conf_get(conf,"theme_path"),
 			conf_get(conf,"enter.background"));
 
-	gui_image_t *image = gui_image_load(display, buf);
+	gui_image_t *image = gui_image_new(display, buf, 0, 0);
 	if (!image) {
 		log_print(LOG_ERR, "could not load image \"buf\"");
 		gui_delete(gui);
@@ -164,6 +178,13 @@ gui_t* gui_new(display_t *display, cfg_t *conf)
 					conf_get(conf,"title.caption"));
 	if (!gui->title) {
 		log_print(LOG_ERR, "could not load title");
+		gui_delete(gui);
+		return NULL;
+	}
+
+	gui->msg = label_new("msg");
+	if (!gui->msg) {
+		log_print(LOG_ERR, "could not load msg");
 		gui_delete(gui);
 		return NULL;
 	}
@@ -240,6 +261,9 @@ void gui_delete(gui_t *gui)
 
 	if (gui->title)
 		gui_label_delete(gui->title,display);
+
+	if (gui->msg)
+		gui_label_delete(gui->msg,display);
 
 	if (gui->username)
 		gui_label_delete(gui->username,display);
