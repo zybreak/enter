@@ -12,8 +12,9 @@ enter_SOURCES = \
 	conf.c conf.h \
 	log.c log.h \
 	display.c display.h \
-	gui_widgets.c gui_widgets.h \
 	gui_image.c gui_image.h \
+	gui_label.c gui_label.h \
+	gui_input.c gui_input.h \
 	gui.c gui.h \
 	auth.c auth.h
 

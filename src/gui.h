@@ -6,8 +6,10 @@
 
 typedef struct gui_t gui_t;
 
+#include "gui_label.h"
+#include "gui_input.h"
+
 #include "display.h"
-#include "gui_widgets.h"
 #include "conf.h"
 
 struct gui_t {
