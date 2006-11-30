@@ -62,7 +62,6 @@ int conf_parse(cfg_t *conf, const char *config_file)
 	FILE *fp = fopen(config_file,"r");
 	
 	if (!fp) {
-		perror("Could not read config");
 		return FALSE;
 	}
 	

@@ -53,6 +53,8 @@ static int daemonize()
 	freopen("/dev/null", "w", stdout);
 	freopen("/dev/null", "w", stderr);
 
+	log_daemon(TRUE);
+
 	return TRUE;
 }
 
