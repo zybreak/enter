@@ -30,7 +30,7 @@ static int greeter_new(cfg_t *conf)
 				conf,"theme_path"),"/theme");
 	if (!conf_parse(theme,theme_path)) {
 		log_print(LOG_EMERG,
-			"could not parse theme \"%s\"\n",
+			"could not parse theme \"%s\"",
 			theme_path);
 		return EXIT_FAILURE;
 	}
@@ -43,13 +43,13 @@ static int greeter_new(cfg_t *conf)
 
 	display = display_new(conf);
 	if (!display) {
-		log_print(LOG_EMERG,"could not open display\n");
+		log_print(LOG_EMERG,"could not open display");
 		return EXIT_FAILURE;
 	}
 	
 	gui = gui_new(display,theme);
 	if (!gui) {
-		log_print(LOG_EMERG,"could not open gui\n");
+		log_print(LOG_EMERG,"could not open gui");
 		return EXIT_FAILURE;
 	}
 	
@@ -64,6 +64,13 @@ static int greeter_new(cfg_t *conf)
 	gui_delete(gui);
 	display_delete(display);
 	conf_delete(theme);
+
+	switch (mode) {
+	case LOGIN:
+		log_print(LOG_INFO,"Logging in user");
+		auth_login();
+		break;
+	}
 
 	return EXIT_FAILURE;
 }

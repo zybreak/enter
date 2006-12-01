@@ -71,15 +71,16 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 		else
 			gui->focus = USERNAME;
 	} else if (keysym == XK_Return && gui->focus == PASSWORD) {
-		/* Authenticate user.  */
 		char *usr = gui_input_text(gui->user_input);
 		char *pwd = gui_input_text(gui->passwd_input);
-		auth_t *auth = auth_new(gui->conf, usr, pwd);
+
+		/* Authenticate user.  */
+		int auth = auth_authenticate(gui->conf, usr, pwd);
 			
 		memset(usr,'\0',TEXT_LEN);
 		memset(pwd,'\0',TEXT_LEN);
 
-		if (auth  && auth_login(auth)) {
+		if (auth == TRUE) {
 			/* User authenticated successfully.  */
 			greeter_mode(LOGIN);
 			return;

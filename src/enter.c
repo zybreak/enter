@@ -32,11 +32,11 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 		} else if (strcmp(argv[i],"-h") == 0) {
 			printf(
 			"Usage: %s: [OPTIONS]\n\n"
-			"  -c          specify an alternative config file\n"
-			"  -d          connect to display\n"
+			"  -c CONFIG   use config file CONFIG\n"
+			"  -d DISPLAY  connect to display DISPLAY\n"
 			"  -n          dont run as a daemon\n"
 			"  -v          print version information\n"
-			"  -h          print avaiable arguments\n"
+			"  -h          print this help info\n"
 			"\n"
 			"Report bugs to <%s>.\n",
 			argv[0], PACKAGE_BUGREPORT);
@@ -121,18 +121,19 @@ int main(int argc, char **argv)
 	cfg_t *conf;
 	pid_t server_pid, greeter_pid;
 	
-	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
-
-	if (getuid() != 0) {
-		log_print(LOG_EMERG,"Root priviledges needed to run");
-		exit(EXIT_FAILURE);
-	}
-	
 	conf = conf_new();
 	
 	default_settings(conf);
 
 	parse_args(argc, argv, conf);
+
+	/* Check if we have enough priviledges.  */
+	if (getuid() != 0) {
+		log_print(LOG_EMERG,"Not enough priviledges to run");
+		exit(EXIT_FAILURE);
+	}
+	
+	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 	
 	if (conf_parse(conf,conf_get(conf,"config_file")) == FALSE) {
 		log_print(LOG_EMERG, "Could not read config file: \"%s\"",

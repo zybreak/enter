@@ -1,3 +1,11 @@
+2006-12-01  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/gui_widgets.c:
+	splitted into gui_input.c and gui_label.c
+	* src/enter.c:
+	dont need root to display help no more.
+	* src/auth.c:
+	changed to singleton.
+
 2006-11-30  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/Makefile.am:
 	only compile one binary instead of two seperate.
