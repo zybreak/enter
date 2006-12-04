@@ -14,25 +14,23 @@ AC_PROG_RANLIB
 
 # Checks for libraries.
 AC_CHECK_FT2
-AC_CHECK_LIB([X11], [XOpenDisplay])
-AC_CHECK_LIB([Xft], [XftFontOpenName])
-AC_CHECK_LIB([Xau], [XauWriteAuth])
-AC_CHECK_LIB([Imlib2], [imlib_context_new])
+AC_CHECK_LIB([Xft], [XftFontOpenName],,
+			AC_MSG_ERROR([You need to have libXft.]))
+AC_CHECK_LIB([Xau], [XauWriteAuth],,
+			AC_MSG_ERROR([You need to have libXau.]))
+AC_CHECK_LIB([Imlib2], [imlib_context_new],,
+			AC_MSG_ERROR([You need to have Imlib2.]))
 
 # Checks for header files.
 AC_PATH_X
-if test x"$no_x" != x; then
+if test x"$no_x" == x"yes"; then
 	AC_MSG_ERROR([Cannot find X Windows include files or libraries!])
 fi
 
-if test x"$x_includes" == x; then
-	X_CFLAGS=""
-else
+if test x"$x_includes" != x; then
 	X_CFLAGS="-I$x_includes";
 fi
-if test x"$x_includes" == x; then
-	X_LIBS=""
-else
+if test x"$x_libraries" != x; then
 	X_LIBS="-L$x_libraries";
 fi
 AC_SUBST([X_CFLAGS])
@@ -55,7 +53,7 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([endpwent getusershell memset strdup setenv getspnam])
+AC_CHECK_FUNCS([endpwent getusershell memset strdup setenv getspnam strerror])
 
 DEBUG_CFLAGS="-Wall -Wmissing-prototypes -Wmissing-declarations"
 AC_SUBST([DEBUG_CFLAGS])
