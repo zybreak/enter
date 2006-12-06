@@ -4,10 +4,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "enter.h"
 #include "auth.h"
 #include "utils.h"
+#include "log.h"
 
 static struct auth_t {
 	const char *display;
@@ -40,7 +43,7 @@ int auth_authenticate(cfg_t *conf, const char *username, const char *password)
 	return FALSE;
 }
 
-void auth_login(void)
+static void auth_spawn(void)
 {
 	/* If theres no shell accociated with the user in
 	 * /etc/passwd, assign the user a shell from /etc/shells.  */
@@ -83,5 +86,26 @@ void auth_login(void)
 	};
 
 	execve(args[0],args,env);
+}
+
+int auth_login(void)
+{
+	pid_t pid = fork();
+
+	if (pid == -1) {
+		log_print(LOG_WARNING, "Could not fork process");
+		return FALSE;
+	} else if (pid == 0) {
+		auth_spawn();
+		return FALSE;
+	}
+
+	pid_t p = waitpid(pid, NULL, 0);
+	if (p == -1) {
+		log_print(LOG_WARNING,"Could not wait for greeter.");
+		return FALSE;
+	}
+
+	return TRUE;
 }
 

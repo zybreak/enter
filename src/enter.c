@@ -118,10 +118,7 @@ static void remove_pidfile()
 
 int main(int argc, char **argv)
 {
-	cfg_t *conf;
-	pid_t server_pid, greeter_pid;
-	
-	conf = conf_new();
+	cfg_t *conf = conf_new();
 	
 	default_settings(conf);
 
@@ -149,35 +146,34 @@ int main(int argc, char **argv)
 	}
 	
 	write_pidfile(getpid());
+	atexit(remove_pidfile);
 
 	log_print(LOG_INFO,"Starting X server.");
-	server_pid = server_init(conf);
+	pid_t server_pid = server_start(conf);
 	if (server_pid == FALSE) {
 		log_print(LOG_WARNING,"Could not start server");
 		exit(EXIT_FAILURE);
 	}
-	
+
+	greeter_t *greeter = greeter_new(conf);
+
 	while (1) {
 		log_print(LOG_INFO,"Starting greeter application.");
-		greeter_pid = greeter_init(conf);
-		if (greeter_pid == FALSE) {
+		int status = greeter_run(greeter);
+		if (status == FALSE) {
 			log_print(LOG_WARNING,
-					"Could not start greeter application");
-			exit(EXIT_FAILURE);
-		}
-		
-		pid_t p = waitpid(greeter_pid, NULL, 0);
-		if (p == -1) {
-			log_print(LOG_WARNING,"Could not wait for greeter.");
-			exit(EXIT_FAILURE);
+					"Greeter exited with error");
+			break;
 		}
 	}
 
 
 	log_print(LOG_INFO,"Shutting down.");
 	
-	remove_pidfile();
+	greeter_delete(greeter);
 	conf_delete(conf);
+	
+	server_stop();
 	closelog();
 	
 	exit(EXIT_SUCCESS);

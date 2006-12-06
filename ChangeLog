@@ -1,3 +1,11 @@
+2006-12-06  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/greeter.c:
+	changed greeter from a singleton to a regular class.
+	the connection to the X display is now open during a
+	user session.
+	* src/server.c:
+	added code to shutdown the server.
+
 2006-12-04  Robert Knutsson <rob_dobbs@users.sf.net>
 	* configure.ac:
 	fixed a bug with x_includes.

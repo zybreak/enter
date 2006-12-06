@@ -3,7 +3,7 @@
 
 #include "conf.h"
 
-int server_delete(int pid);
-int server_init(cfg_t *conf);
+int server_stop(void);
+int server_start(cfg_t *conf);
 
 #endif /*SERVER_H_*/

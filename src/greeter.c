@@ -11,81 +11,108 @@
 #include "log.h"
 #include "utils.h"
 
-/* This is a state variable.  */
-static int mode = LISTEN;
-
-void greeter_mode(int _mode)
-{
-	mode = _mode;
-}
-
-static int greeter_new(cfg_t *conf)
-{
-	display_t *display;
+struct greeter_t {
+	int mode;
 	gui_t *gui;
+	display_t *display;
+	cfg_t *theme;
+};
+
+int greeter_run(greeter_t *greeter)
+{
 	XEvent event;
-	cfg_t *theme = conf_new();
-
-	char *theme_path = xstrcat(conf_get(
-				conf,"theme_path"),"/theme");
-	if (!conf_parse(theme,theme_path)) {
-		log_print(LOG_EMERG,
-			"could not parse theme \"%s\"",
-			theme_path);
-		return EXIT_FAILURE;
-	}
-	free(theme_path);
-
-	conf_set(theme, "display",
-			conf_get(conf, "display"));
-	conf_set(theme, "theme_path",
-			conf_get(conf, "theme_path"));
-
-	display = display_new(conf);
-	if (!display) {
-		log_print(LOG_EMERG,"could not open display");
-		return EXIT_FAILURE;
-	}
 	
-	gui = gui_new(display,theme);
-	if (!gui) {
-		log_print(LOG_EMERG,"could not open gui");
-		return EXIT_FAILURE;
-	}
-	
-	gui_show(gui);
+	gui_show(greeter->gui);
 
-	while(mode == LISTEN) {
-		XNextEvent(display->dpy,&event);
-		gui_events(gui,&event);
+	greeter->mode = LISTEN;
+	while(greeter->mode == LISTEN) {
+		XNextEvent(greeter->display->dpy, &event);
+		gui_events(greeter->gui, &event);
 		usleep(1);
 	}
 
-	gui_delete(gui);
-	display_delete(display);
-	conf_delete(theme);
+	gui_hide(greeter->gui);
 
-	switch (mode) {
+	switch (greeter->mode) {
 	case LOGIN:
-		log_print(LOG_INFO,"Logging in user");
-		auth_login();
+		log_print(LOG_INFO, "Logging in user");
+		return auth_login();
 		break;
 	}
 
-	return EXIT_FAILURE;
+	return TRUE;
 }
 
-int greeter_init(cfg_t *conf)
+void greeter_mode(greeter_t *greeter, int _mode)
 {
-	pid_t pid = fork();
-	if (pid == -1) {
-		log_print(LOG_WARNING, "Could not fork process");
-		return FALSE;
-	} else if (pid == 0) {
-		greeter_new(conf);
-		exit(0);
+	greeter->mode = _mode;
+}
+
+greeter_t* greeter_new(cfg_t *conf)
+{
+	greeter_t *greeter = xmalloc(sizeof(*greeter));
+
+	greeter->mode = LISTEN;
+
+	char *theme_path = conf_get(conf, "theme_path");
+	if (!theme_path) {
+		log_print(LOG_WARNING, "Could not find any theme.");
+		
+		free(greeter);
+		
+		return NULL;
 	}
 
-	return pid;
+	char *theme_file = xstrcat(theme_path,"/theme");
+	greeter->theme = conf_new();
+
+	if (!conf_parse(greeter->theme, theme_file)) {
+		log_print(LOG_EMERG,
+			"Could not parse theme \"%s\"",
+			theme_file);
+
+		free(theme_file);
+		conf_delete(greeter->theme);
+		free(greeter);
+
+		return NULL;;
+	}
+	free(theme_file);
+
+	conf_set(greeter->theme, "display",
+			conf_get(conf, "display"));
+	conf_set(greeter->theme, "theme_path",
+			conf_get(conf, "theme_path"));
+
+	greeter->display = display_new(conf);
+	if (!greeter->display) {
+		log_print(LOG_WARNING, "Could not open display");
+
+		conf_delete(greeter->theme);
+		free(greeter);
+
+		return NULL;
+	}
+	
+	greeter->gui = gui_new(greeter, greeter->display, greeter->theme);
+	if (!greeter->gui) {
+		log_print(LOG_WARNING, "Could not open gui");
+
+		conf_delete(greeter->theme);
+		display_delete(greeter->display);
+		free(greeter);
+		
+		return NULL;
+	}
+
+	return greeter;
+}
+
+void greeter_delete(greeter_t *greeter)
+{
+	gui_delete(greeter->gui);
+	display_delete(greeter->display);
+	conf_delete(greeter->theme);
+	free(greeter);
 }
 

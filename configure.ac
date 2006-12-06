@@ -53,7 +53,8 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([endpwent getusershell memset strdup setenv getspnam strerror])
+AC_CHECK_FUNCS([endpwent getusershell memset 
+		strdup setenv getspnam strerror atexit])
 
 DEBUG_CFLAGS="-Wall -Wmissing-prototypes -Wmissing-declarations"
 AC_SUBST([DEBUG_CFLAGS])

@@ -18,6 +18,7 @@
 #define SERVER_TIMEOUT 5
 
 static int server_started = FALSE;
+static pid_t server_pid = 0;
 
 static int generate_cookie(char *cookie)
 {
@@ -85,18 +86,22 @@ static void signal_sigusr1(int signal)
 	server_started = TRUE;
 }
 
-int server_delete(int pid)
+int server_stop(void)
 {
-	if (killpg(pid, SIGTERM) < 0) {
-		log_print(LOG_WARNING, "Could not kill server: %s", strerror(errno));
-		return 0;
+	if (server_started == FALSE)
+		return TRUE;
+
+	if (killpg(server_pid, SIGTERM) < 0) {
+		log_print(LOG_WARNING, "Could not kill server (%d): %s",
+						server_pid, strerror(errno));
+		return FALSE;
 	}
 
 	time_t start_time = time(NULL);
 	int pidfound = 0;
 
-	while (pidfound != pid) {
-		pidfound = waitpid(pid, NULL, WNOHANG);
+	while (pidfound != server_pid) {
+		pidfound = waitpid(server_pid, NULL, WNOHANG);
 
 		if (time(NULL)-start_time > SERVER_TIMEOUT)
 			break;
@@ -104,15 +109,15 @@ int server_delete(int pid)
 		usleep(100000);
 	}
 
-	if (pidfound != pid) {
-		if (killpg(pid, SIGKILL) < 0) {
+	if (pidfound != server_pid) {
+		if (killpg(server_pid, SIGKILL) < 0) {
 			log_print(LOG_WARNING, "Could not kill server: %s", strerror(errno));
-			return 0;
+			return FALSE;
 		}
 	}
 
-	while (pidfound != pid) {
-		pidfound = waitpid(pid, NULL, WNOHANG);
+	while (pidfound != server_pid) {
+		pidfound = waitpid(server_pid, NULL, WNOHANG);
 
 		if (time(NULL)-start_time > SERVER_TIMEOUT)
 			break;
@@ -120,22 +125,19 @@ int server_delete(int pid)
 		usleep(100000);
 	}
 
-	if (pidfound != pid) {
+	if (pidfound != server_pid) {
 		log_print(LOG_WARNING, "Could not kill server: %s", strerror(errno));
-		return 0;
+		return FALSE;
 	}
 
-	return 1;
+	return TRUE;
 }
 
-int server_init(cfg_t *conf)
+int server_start(cfg_t *conf)
 {
 	char *cmd[CMD_LEN];
-	pid_t server_pid;
 	struct sigaction sa;
 	time_t start_time;
-	
-	server_started = FALSE;
 	
 	/* Handle signals.
 	 * SIGUSR1 is sent when the X server is ready.  */
