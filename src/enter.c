@@ -8,9 +8,11 @@
 
 #include "enter.h"
 #include "server.h"
-#include "greeter.h"
+#include "gui.h"
 #include "log.h"
 #include "conf.h"
+#include "utils.h"
+#include "auth.h"
 
 #define PIDFILE "/var/run/" PACKAGE ".pid"
 #define PIDBUF 20
@@ -119,9 +121,11 @@ static void remove_pidfile()
 int main(int argc, char **argv)
 {
 	cfg_t *conf = conf_new();
+	cfg_t *theme = conf_new();
 	
+	/* Assign default settings to conf
+	 * and parse command line arguments.  */
 	default_settings(conf);
-
 	parse_args(argc, argv, conf);
 
 	/* Check if we have enough priviledges.  */
@@ -132,15 +136,36 @@ int main(int argc, char **argv)
 	
 	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 	
-	if (conf_parse(conf,conf_get(conf,"config_file")) == FALSE) {
+	/* Parse config file.  */
+	if (conf_parse(conf, conf_get(conf,"config_file")) == FALSE) {
 		log_print(LOG_EMERG, "Could not read config file: \"%s\"",
 					conf_get(conf, "config_file"));
+		closelog();
 		exit(EXIT_FAILURE);
 	}
-	
+
+	/* Parse theme file.  */
+	char *theme_file = xstrcat(conf_get(conf, "theme_path"), "/theme");
+	if (conf_parse(theme, theme_file) == FALSE) {
+		log_print(LOG_EMERG,
+			"Could not parse theme \"%s\"",
+			theme_file);
+		closelog();
+		exit(EXIT_FAILURE);
+	}
+	free(theme_file);
+
+	/* Add some expected entries to the theme file.  */
+	conf_set(theme, "display",
+			conf_get(conf, "display"));
+	conf_set(theme, "theme_path",
+			conf_get(conf, "theme_path"));
+
+	/* Fork to background if "daemon" mode is enabled in the config. */
 	if (!strcmp(conf_get(conf,"daemon"),"true")) {
 		if (daemonize() == FALSE) {
 			log_print(LOG_EMERG, "Could not daemonize enter.");
+			closelog();
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -151,27 +176,56 @@ int main(int argc, char **argv)
 	log_print(LOG_INFO,"Starting X server.");
 	pid_t server_pid = server_start(conf);
 	if (server_pid == FALSE) {
-		log_print(LOG_WARNING,"Could not start server");
+		log_print(LOG_EMERG,"Could not start server");
+		closelog();
 		exit(EXIT_FAILURE);
 	}
 
-	greeter_t *greeter = greeter_new(conf);
+	/* Connect to the X display.  */
+	display_t *display = display_new(conf);
+	if (!display) {
+		log_print(LOG_EMERG, "Could not connect to display");
+		server_stop();
+		closelog();
+		exit(EXIT_FAILURE);
+	}
+
+	/* Create a GUI window.  */
+	gui_t *gui = gui_new(display, theme);
+	if (!gui) {
+		log_print(LOG_EMERG, "Could not open GUI");
+		server_stop();
+		closelog();
+		exit(EXIT_FAILURE);
+	}
 
 	while (1) {
-		log_print(LOG_INFO,"Starting greeter application.");
-		int status = greeter_run(greeter);
-		if (status == FALSE) {
-			log_print(LOG_WARNING,
-					"Greeter exited with error");
+		gui_show(gui);
+		int action = gui_run(gui);
+		gui_hide(gui);
+
+		switch (action) {
+		case LOGIN:
+			log_print(LOG_INFO, "Logging in user");
+			if (auth_login() == FALSE) {
+				log_print(LOG_EMERG,
+						"Could not open user session");
+				
+				server_stop();
+				closelog();
+				exit(EXIT_FAILURE);
+			}
 			break;
 		}
+		/* TODO: Kill all clients from the user session!  */
 	}
 
 
 	log_print(LOG_INFO,"Shutting down.");
 	
-	greeter_delete(greeter);
+	gui_delete(gui);
 	conf_delete(conf);
+	conf_delete(theme);
 	
 	server_stop();
 	closelog();

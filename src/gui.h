@@ -11,7 +11,6 @@ typedef struct gui_t gui_t;
 
 #include "display.h"
 #include "conf.h"
-#include "greeter.h"
 
 struct gui_t {
 	Window win;
@@ -22,10 +21,14 @@ struct gui_t {
 	
 	display_t *display;
 	cfg_t *conf;
-	greeter_t *greeter;
 
 	gui_label_t *title, *username, *password, *msg;
 	gui_input_t *user_input, *passwd_input;
+
+	enum {
+		LISTEN,
+		LOGIN
+	} mode;
 
 	enum {
 		BOTH,
@@ -34,10 +37,10 @@ struct gui_t {
 	} visible, focus;
 };
 
-gui_t* gui_new(greeter_t *greeter, display_t *display, cfg_t *config);
+gui_t* gui_new(display_t *display, cfg_t *theme);
 void gui_delete(gui_t *gui);
 void gui_show(gui_t *gui);
 void gui_hide(gui_t *gui);
-void gui_events(gui_t *gui, XEvent *event);
+int gui_run(gui_t *gui);
 
 #endif /*GUI_H_*/

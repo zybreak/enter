@@ -1,7 +1,14 @@
+Critical priority
+* Kill user clients after the user session.
+* Drop priviledges when not needed.
+
+Moderate priority
+* Add double buffering
+* Add authentication code
+
+Low priority
 * Document functions.
 * Add content to README and AUTHORS
 * Add code to enable relative positions of labels/images/areas in themes
 * Fix compiler warnings
-* Add double buffering
-* Add authentication code
 * Remove map_t from cfg_t

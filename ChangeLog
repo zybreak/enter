@@ -1,3 +1,9 @@
+2006-12-08  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/greeter.c:
+	removed greeter, moved the code to enter.c instead.
+	* src/display.c:
+	added function `display_kill_clients'.
+
 2006-12-06  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter.c:
 	changed greeter from a singleton to a regular class.
@@ -5,6 +11,8 @@
 	user session.
 	* src/server.c:
 	added code to shutdown the server.
+	* src/enter.c:
+	now kills the server when the greeter fails to load.
 
 2006-12-04  Robert Knutsson <rob_dobbs@users.sf.net>
 	* configure.ac:

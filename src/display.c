@@ -43,3 +43,22 @@ void display_delete(display_t *display)
 	free(display);
 }
 
+void display_kill_clients(display_t *display)
+{
+	unsigned int num_children = 0;
+	int i;
+	Window dummywindow;
+	Window *child;
+
+	XSync(display->dpy, 0);
+
+	XQueryTree(display->dpy, display->root, &dummywindow, &dummywindow,
+			&child, &num_children);
+
+	for (i=0;i < num_children; i++) {
+		XKillClient(display->dpy, child[i]);
+	}
+	
+	XSync(display->dpy, 0);
+}
+

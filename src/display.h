@@ -19,5 +19,6 @@ typedef struct display_t {
 
 display_t* display_new(cfg_t *conf);
 void display_delete(display_t *display);
+void display_kill_clients(display_t *display);
 
 #endif /*DISPLAY_H_*/

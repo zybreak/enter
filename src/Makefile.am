@@ -6,7 +6,6 @@ sbin_PROGRAMS = enter
 
 enter_SOURCES = \
 	enter.c enter.h \
-	greeter.c greeter.h \
 	server.c server.h \
 	utils.c utils.h \
 	conf.c conf.h \

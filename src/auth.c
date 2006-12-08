@@ -102,7 +102,7 @@ int auth_login(void)
 
 	pid_t p = waitpid(pid, NULL, 0);
 	if (p == -1) {
-		log_print(LOG_WARNING,"Could not wait for greeter.");
+		log_print(LOG_WARNING,"Could not wait for user session.");
 		return FALSE;
 	}
 

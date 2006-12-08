@@ -180,8 +180,7 @@ int server_start(cfg_t *conf)
 		
 			if (server_started == FALSE) {
 				log_print(LOG_WARNING,"Server timed out");
-				/* TODO: Maybe make sure the other process is
-				 * dead here?  */
+
 				return FALSE;
 			}
 

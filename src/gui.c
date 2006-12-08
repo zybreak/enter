@@ -1,31 +1,32 @@
-#include <X11/keysymdef.h>
+#include <X11/keysym.h>
 #include <stdlib.h>
 
 #include "enter.h"
-#include "greeter.h"
 #include "gui.h"
 #include "gui_image.h"
+
+#include "auth.h"
 #include "log.h"
 #include "utils.h"
 
 #define LABEL_NEW(LABEL) \
-	gui_label_new(display, conf_get(conf, LABEL ".font"), \
-			conf_get(conf, LABEL ".color"), \
-			atoi(conf_get(conf, LABEL ".x")), \
-			atoi(conf_get(conf, LABEL ".y")), \
+	gui_label_new(display, conf_get(theme, LABEL ".font"), \
+			conf_get(theme, LABEL ".color"), \
+			atoi(conf_get(theme, LABEL ".x")), \
+			atoi(conf_get(theme, LABEL ".y")), \
 			0, 0, \
-			conf_get(conf, LABEL ".caption"))
+			conf_get(theme, LABEL ".caption"))
 
 #define INPUT_NEW(INPUT, IMAGE) \
 	gui_input_new(display, IMAGE, \
-			atoi(conf_get(conf, INPUT ".x")), \
-			atoi(conf_get(conf, INPUT ".y")), \
-			conf_get(conf, INPUT ".text.font"), \
-			conf_get(conf, INPUT ".text.color"), \
-			atoi(conf_get(conf, INPUT ".text.x")), \
-			atoi(conf_get(conf, INPUT ".text.y")), \
-			atoi(conf_get(conf, INPUT ".text.width")), \
-			atoi(conf_get(conf, INPUT ".text.height")));
+			atoi(conf_get(theme, INPUT ".x")), \
+			atoi(conf_get(theme, INPUT ".y")), \
+			conf_get(theme, INPUT ".text.font"), \
+			conf_get(theme, INPUT ".text.color"), \
+			atoi(conf_get(theme, INPUT ".text.x")), \
+			atoi(conf_get(theme, INPUT ".text.y")), \
+			atoi(conf_get(theme, INPUT ".text.width")), \
+			atoi(conf_get(theme, INPUT ".text.height")));
 
 #define BUF_LEN 64
 
@@ -93,7 +94,7 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 
 		if (auth == TRUE) {
 			/* User authenticated successfully.  */
-			greeter_mode(gui->greeter, LOGIN);
+			gui->mode = LOGIN;
 			return;
 		} else {
 			/* User authentication failed.  */
@@ -141,7 +142,7 @@ static void gui_mappingnotify(gui_t *gui, XEvent *event)
 	XRefreshKeyboardMapping(&event->xmapping);
 }
 
-gui_t* gui_new(greeter_t *greeter, display_t *display, cfg_t *conf)
+gui_t* gui_new(display_t *display, cfg_t *theme)
 {
 	gui_t *gui = xmalloc(sizeof(*gui));
 	char buf[BUF_LEN];
@@ -153,8 +154,8 @@ gui_t* gui_new(greeter_t *greeter, display_t *display, cfg_t *conf)
 	gui->width = display->width;
 	gui->height = display->height;
 	gui->display = display;
-	gui->conf = conf;
-	gui->greeter = greeter;
+	gui->conf = theme;
+	gui->mode = LISTEN;
 
 	unsigned long color = BlackPixel(display->dpy,display->screen);
 
@@ -165,8 +166,8 @@ gui_t* gui_new(greeter_t *greeter, display_t *display, cfg_t *conf)
 	gui->draw = XftDrawCreate(display->dpy,gui->win,display->visual,
 						display->colormap);
 
-	snprintf(buf,BUF_LEN-1,"%s/%s",conf_get(conf,"theme_path"),
-			conf_get(conf,"enter.background"));
+	snprintf(buf,BUF_LEN-1, "%s/%s", conf_get(theme, "theme_path"),
+			conf_get(theme, "enter.background"));
 
 	/* This is an ugly hack, find another way to
 	 * get the Pixmap needed to set WindowBackground.  */
@@ -191,8 +192,8 @@ gui_t* gui_new(greeter_t *greeter, display_t *display, cfg_t *conf)
 		return NULL;
 	}
 
-	snprintf(buf,BUF_LEN-1,"%s/%s",conf_get(conf,"theme_path"),
-			conf_get(conf,"username_input.image"));
+	snprintf(buf,BUF_LEN-1, "%s/%s", conf_get(theme, "theme_path"),
+			conf_get(theme, "username_input.image"));
 
 	gui->user_input = INPUT_NEW("username_input", buf);
 	if (!gui->user_input) {
@@ -201,8 +202,8 @@ gui_t* gui_new(greeter_t *greeter, display_t *display, cfg_t *conf)
 		return NULL;
 	}
 
-	snprintf(buf,BUF_LEN-1,"%s/%s",conf_get(conf,"theme_path"),
-			conf_get(conf,"password_input.image"));
+	snprintf(buf,BUF_LEN-1, "%s/%s", conf_get(theme,"theme_path"),
+			conf_get(theme,"password_input.image"));
 
 	gui->passwd_input = INPUT_NEW("password_input", buf);
 	if (!gui->passwd_input) {
@@ -285,18 +286,30 @@ void gui_hide(gui_t *gui)
 	XFlush(display->dpy);
 }
 
-void gui_events(gui_t *gui, XEvent *event)
+int gui_run(gui_t *gui)
 {
-	switch(event->type) {
-	case Expose:
-		gui_draw(gui);
-		break;
-	case KeyPress:
-		gui_keypress(gui,event);
-		break;
-	case MappingNotify:
-		gui_mappingnotify(gui, event);
-		break;
+	XEvent event;
+	
+	while (gui->mode == LISTEN) {
+		XNextEvent(gui->display->dpy, &event);
+
+		switch(event.type) {
+		case Expose:
+			gui_draw(gui);
+			break;
+		case KeyPress:
+			gui_keypress(gui, &event);
+			break;
+		case MappingNotify:
+			gui_mappingnotify(gui, &event);
+			break;
+		}
 	}
+
+	/* Restore mode to LISTEN.  */
+	int mode = gui->mode;
+	gui->mode = LISTEN;
+
+	return mode;
 }
 
