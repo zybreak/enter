@@ -1,14 +1,18 @@
 Critical priority
 * Kill user clients after the user session.
 * Drop priviledges when not needed.
+* Improve configure.ac.
 
 Moderate priority
-* Add double buffering
-* Add authentication code
+* Add double buffering.
+* Add MIT cookie generator.
+* enter.conf's theme field should only contain the theme
+name, not the full path.
 
 Low priority
 * Document functions.
-* Add content to README and AUTHORS
-* Add code to enable relative positions of labels/images/areas in themes
-* Fix compiler warnings
-* Remove map_t from cfg_t
+* Add content to README and AUTHORS.
+* Add code to enable relative positions of labels/images/areas in themes.
+* Fix compiler warnings.
+* Remove map_t from cfg_t.
+* Make as many data members opaque as possible.

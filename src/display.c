@@ -12,7 +12,7 @@ display_t* display_new(cfg_t *conf)
 		free(display);
 		return NULL;
 	}
-	
+
 	display->screen = DefaultScreen(display->dpy);
 	display->root = RootWindow(display->dpy,display->screen);
 	display->depth = DefaultDepth(display->dpy,display->screen);

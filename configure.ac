@@ -13,19 +13,16 @@ AC_PROG_CC
 AC_PROG_RANLIB
 
 # Checks for libraries.
-AC_CHECK_FT2
-AC_CHECK_LIB([Xft], [XftFontOpenName],,
-			AC_MSG_ERROR([You need to have libXft.]))
-AC_CHECK_LIB([Xau], [XauWriteAuth],,
-			AC_MSG_ERROR([You need to have libXau.]))
-AC_CHECK_LIB([Imlib2], [imlib_context_new],,
-			AC_MSG_ERROR([You need to have Imlib2.]))
-
-# Checks for header files.
 AC_PATH_X
-if test x"$no_x" == x"yes"; then
+if test x"$no_x" = x"yes"; then
 	AC_MSG_ERROR([Cannot find X Windows include files or libraries!])
 fi
+
+AC_PATH_PROGS([X_PATH], [X], [none])
+if test "x$X_PATH" = "xnone"; then
+	AC_MSG_ERROR([Cannot find X Windows binary!])
+fi
+AC_SUBST([X_PATH])
 
 if test x"$x_includes" != x; then
 	X_CFLAGS="-I$x_includes";
@@ -33,11 +30,37 @@ fi
 if test x"$x_libraries" != x; then
 	X_LIBS="-L$x_libraries";
 fi
+
+AC_CHECK_FT2
+
+AC_PATH_PROGS([XFT_CONFIG], [xft-config], [none])
+if test "x$XFT_CONFIG" = "xnone"; then
+	AC_MSG_ERROR([You need to have libXft.])
+fi
+XFT_LIBS=`$XFT_CONFIG --libs`
+AC_CHECK_LIB([Xft], [XftFontOpenName],,
+			AC_MSG_ERROR([You need to have libXft.]),
+			$XFT_LIBS)
+
+AC_CHECK_LIB([Xau], [XauWriteAuth],,
+			AC_MSG_ERROR([You need to have libXau.]))
+
+AC_PATH_PROGS([IMLIB_CONFIG], [imlib2-config], [none])
+if test "x$IMLIB_CONFIG" = "xnone"; then
+	AC_MSG_ERROR([You need to have Imlib2.])
+fi
+IMLIB_LIBS=`$IMLIB_CONFIG --libs`
+
+AC_CHECK_LIB([Imlib2], [imlib_context_new],,
+			AC_MSG_ERROR([You need to have Imlib2.]),
+			$IMLIB_LIBS)
+
+# Checks for header files.
 AC_SUBST([X_CFLAGS])
 AC_SUBST([X_LIBS])
 
-AC_SUBST([IMLIB_CFLAGS],[`imlib2-config --cflags`])
-AC_SUBST([IMLIB_LIBS],[`imlib2-config --libs`])
+AC_SUBST([IMLIB_CFLAGS],[])
+AC_SUBST([IMLIB_LIBS],[-lImlib2])
 
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT

@@ -2,7 +2,7 @@
 # This is a sample config file
 #
 
-server_path=/usr/bin/X
+server_path=@X_PATH@
 theme_path=@datarootdir@/@PACKAGE@/themes/default
 
 # End of file
