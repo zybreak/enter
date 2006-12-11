@@ -4,6 +4,10 @@
 	successfuly authenticated before a login.
 	* src/auth.h, src/display.h, src/conf.h:
 	commented the function prototypes.
+	* autoconf.ac:
+	replaced version with "svn", this should only be set
+	when tagging a release.
+
 2006-12-08  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter.c:
 	removed greeter, moved the code to enter.c instead.
