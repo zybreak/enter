@@ -25,22 +25,56 @@ int auth_authenticate(cfg_t *conf, const char *username, const char *password)
 		return FALSE;
 	}
 
-	/* copy the string because conf_delete will free it.  */
+	/* copy the string because conf_delete will free it.
+	 * TODO: only pass the display string and not the whole conf. */
 	auth.display = strdup(conf_get(conf,"display"));
 
 	struct spwd *shadow = getspnam(auth.pwd->pw_name);
 	endspent();
-	
-	char *correct = (shadow)?shadow->sp_pwdp:auth.pwd->pw_passwd;
 
+	/* point to the correct password,
+	 * if NULL, skip password authentication.  */
+	char *correct = (shadow)?shadow->sp_pwdp:auth.pwd->pw_passwd;
 	if (!correct)
 		return TRUE;
 
+	/* if the passwords match, return TRUE.  */
 	char *enc = crypt(password, correct);
 	if (!strcmp(enc, correct))
 		return TRUE;
 
+	/* else free the user credinentials
+	 * and return FALSE.  */
+	free(auth.display);
+	free(auth.pwd);
+	
 	return FALSE;
+}
+
+int auth_login(void)
+{
+	/* If no previous user was authenticated,
+	 * return FALSE. */
+	if (!auth.pwd)
+		return FALSE;
+	
+	pid_t pid = fork();
+
+	if (pid == -1) {
+		log_print(LOG_WARNING, "Could not fork process");
+		return FALSE;
+	} else if (pid == 0) {
+		auth_spawn();
+		return FALSE;
+	}
+
+	pid_t p = waitpid(pid, NULL, 0);
+	if (p == -1) {
+		log_print(LOG_WARNING,"Could not wait for user session.");
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 static void auth_spawn(void)
@@ -75,37 +109,16 @@ static void auth_spawn(void)
 	};
 
 	char *env[] = {
-		xstrcat("HOME=",auth.pwd->pw_dir),
-		xstrcat("SHELL=",auth.pwd->pw_shell),
-		xstrcat("USER=",auth.pwd->pw_name),
-		xstrcat("LOGNAME=",auth.pwd->pw_name),
+		xstrcat("HOME=", auth.pwd->pw_dir),
+		xstrcat("SHELL=", auth.pwd->pw_shell),
+		xstrcat("USER=", auth.pwd->pw_name),
+		xstrcat("LOGNAME=", auth.pwd->pw_name),
 		xstrcat("XAUTHORITY=",
 				xstrcat(auth.pwd->pw_dir,"/.Xauthority")),
-		xstrcat("DISPLAY=",auth.display),
+		xstrcat("DISPLAY=", auth.display),
 		NULL
 	};
 
 	execve(args[0],args,env);
-}
-
-int auth_login(void)
-{
-	pid_t pid = fork();
-
-	if (pid == -1) {
-		log_print(LOG_WARNING, "Could not fork process");
-		return FALSE;
-	} else if (pid == 0) {
-		auth_spawn();
-		return FALSE;
-	}
-
-	pid_t p = waitpid(pid, NULL, 0);
-	if (p == -1) {
-		log_print(LOG_WARNING,"Could not wait for user session.");
-		return FALSE;
-	}
-
-	return TRUE;
 }
 

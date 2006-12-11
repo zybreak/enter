@@ -1,3 +1,9 @@
+2006-12-11  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/auth.c:
+	added a check mechanism to ensure a user was
+	successfuly authenticated before a login.
+	* src/auth.h, src/display.h, src/conf.h:
+	commented the function prototypes.
 2006-12-08  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter.c:
 	removed greeter, moved the code to enter.c instead.
