@@ -13,7 +13,7 @@ void log_daemon(int _daemon)
 	daemon = _daemon;
 }
 
-void log_print(int level, char *format, ...)
+void log_print(int level, const char *format, ...)
 {
 	va_list args;
 
