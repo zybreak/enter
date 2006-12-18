@@ -88,11 +88,6 @@ static void signal_sigusr1(int signal)
 
 int server_stop(void)
 {
-
-	struct timespec t = {
-		.tv_nsec = 1000000
-	};
-	
 	if (server_started == FALSE)
 		return TRUE;
 
@@ -111,7 +106,7 @@ int server_stop(void)
 		if (time(NULL)-start_time > SERVER_TIMEOUT)
 			break;
 
-		nanosleep(&t, NULL);
+		usleep(100000);
 	}
 
 	if (pidfound != server_pid) {
@@ -127,7 +122,7 @@ int server_stop(void)
 		if (time(NULL)-start_time > SERVER_TIMEOUT)
 			break;
 
-		nanosleep(&t, NULL);
+		usleep(100000);
 	}
 
 	if (pidfound != server_pid) {
@@ -180,10 +175,7 @@ int server_start(cfg_t *conf)
 			while (server_started == FALSE) {
 				if (time(NULL)-start_time > SERVER_TIMEOUT)
 					break;
-				struct timespec t = {
-					.tv_nsec = 1000000
-				};
-				nanosleep(&t, NULL);
+				usleep(100000);
 			}
 		
 			if (server_started == FALSE) {
