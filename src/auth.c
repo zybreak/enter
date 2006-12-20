@@ -13,7 +13,7 @@
 #include "log.h"
 
 static struct auth_t {
-	const char *display;
+	char *display;
 	struct passwd *pwd;
 } auth;
 

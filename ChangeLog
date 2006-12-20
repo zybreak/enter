@@ -3,6 +3,10 @@
 	added doublebuffering support through Xdbe.
 	* src/auth.c:
 	fixed a double-free bug.
+	* src/enter.c:
+	enter.conf now only contains the theme name.
+	* src/gui_widget.c:
+	fixed problem with incomplete type.
 
 2006-12-11  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/auth.c:

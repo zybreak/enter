@@ -9,6 +9,14 @@ typedef struct gui_input_t gui_input_t;
 #include "gui_image.h"
 #include "gui.h"
 
+struct gui_input_t {
+	int type;
+	int x, y, w, h;
+
+	gui_image_t *image;
+	gui_label_t *text;
+};
+
 gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 		const char *font, const char *color, 
 		int text_x, int text_y, int text_w, int text_h);

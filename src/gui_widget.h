@@ -5,7 +5,7 @@
 #include "gui_image.h"
 #include "gui_input.h"
 
-union gui_widget_t {
+typedef union gui_widget_t {
 	struct {
 		int type;
 		int x, y, w, h;
@@ -14,7 +14,7 @@ union gui_widget_t {
 	gui_label_t label;
 	gui_image_t image;
 	gui_input_t input;
-};
+} gui_widget_t;
 
 int gui_widget_height(gui_widget_t *widget);
 int gui_widget_width(gui_widget_t *widget);

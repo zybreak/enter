@@ -3,6 +3,6 @@
 #
 
 server_path=@X_PATH@
-theme_path=@datarootdir@/@PACKAGE@/themes/default
+theme=default
 
 # End of file

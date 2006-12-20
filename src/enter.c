@@ -16,6 +16,7 @@
 
 #define PIDFILE "/var/run/" PACKAGE ".pid"
 #define PIDBUF 20
+#define THEME_LEN 512
 
 static void parse_args(int argc, char **argv, cfg_t *conf)
 {
@@ -145,7 +146,10 @@ int main(int argc, char **argv)
 	}
 
 	/* Parse theme file.  */
-	char *theme_file = xstrcat(conf_get(conf, "theme_path"), "/theme");
+	char theme_file[THEME_LEN];
+	snprintf(theme_file, THEME_LEN-1, "%s/%s/theme", THEMEDIR,
+			conf_get(conf, "theme"));
+
 	if (conf_parse(theme, theme_file) == FALSE) {
 		log_print(LOG_EMERG,
 			"Could not parse theme \"%s\"",
@@ -153,7 +157,6 @@ int main(int argc, char **argv)
 		closelog();
 		exit(EXIT_FAILURE);
 	}
-	free(theme_file);
 
 	/* Add some expected entries to the theme file.  */
 	conf_set(theme, "display",

@@ -1,22 +1,11 @@
-#include <X11/Xlib.h>
-#include <Imlib2.h>
-
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "enter.h"
 #include "gui_image.h"
 #include "utils.h"
 
-struct gui_image_t {
-	int type;
-	int x, y, w, h;
-
-	Imlib_Image im_image;
-	display_t *display;
-};
-
-gui_image_t* gui_image_new(display_t *display, const char *filename, int x, int y)
+gui_image_t* gui_image_new(display_t *display, const char *filename,
+							int x, int y)
 {
 	gui_image_t *image = xmalloc(sizeof(*image));
 	image->display = display;

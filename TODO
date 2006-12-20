@@ -5,7 +5,6 @@ Critical priority
 
 Moderate priority
 * Add MIT cookie generator.
-* enter.conf's theme field should only contain the theme
 name, not the full path.
 
 Low priority

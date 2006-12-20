@@ -2,10 +2,17 @@
 #define __IMAGE_H__
 
 #include <X11/Xlib.h>
+#include <Imlib2.h>
 
 #include "display.h"
 
-typedef struct gui_image_t gui_image_t;
+typedef struct gui_image_t {
+	int type;
+	int x, y, w, h;
+
+	Imlib_Image im_image;
+	display_t *display;
+} gui_image_t;
 
 gui_image_t* gui_image_new(display_t *display, const char *filename, int x, int y);
 void gui_image_delete(gui_image_t *image);
