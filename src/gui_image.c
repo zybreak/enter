@@ -9,10 +9,9 @@
 #include "utils.h"
 
 struct gui_image_t {
-	int x;
-	int y;
-	int width;
-	int height;
+	int type;
+	int x, y, w, h;
+
 	Imlib_Image im_image;
 	display_t *display;
 };
@@ -24,7 +23,7 @@ gui_image_t* gui_image_new(display_t *display, const char *filename, int x, int 
 	image->x = x;
 	image->y = y;
 	image->im_image = NULL;
-	image->width = image->height = 0;
+	image->w = image->h = 0;
 
 	if (filename) {
 		if (gui_image_load(image, filename) == FALSE) {
@@ -45,12 +44,12 @@ void gui_image_delete(gui_image_t *image)
 
 int gui_image_width(gui_image_t *image)
 {
-	return image->width;
+	return image->w;
 }
 
 int gui_image_height(gui_image_t *image)
 {
-	return image->height;
+	return image->h;
 }
 
 void gui_image_draw(Drawable drawable, gui_image_t *image)
@@ -72,7 +71,7 @@ Pixmap gui_image_pixmap(gui_image_t *image)
 	display_t *display = image->display;
 
 	Pixmap pixmap = XCreatePixmap(display->dpy, display->root,
-			image->width, image->height, display->depth);
+			image->w, image->h, display->depth);
 
 	/* TODO: recode when `gui_image_move' is added.  */
 	int x = image->x;
@@ -95,8 +94,8 @@ int gui_image_load(gui_image_t *image, const char *filename)
 	}
 
 	imlib_context_set_image(image->im_image);
-	image->width = imlib_image_get_width();
-	image->height = imlib_image_get_height();
+	image->w = imlib_image_get_width();
+	image->h = imlib_image_get_height();
 
 	return TRUE;
 }

@@ -33,9 +33,10 @@
 static void gui_draw(gui_t *gui)
 {
 	display_t *display = gui->display;
-	
-	XClearWindow(display->dpy,gui->win);
-	
+
+	if (!gui->has_doublebuf)
+		XClearWindow(display->dpy, gui->win);
+
 	gui_label_draw(gui->title, gui);
 	gui_label_draw(gui->msg, gui);
 	
@@ -48,19 +49,29 @@ static void gui_draw(gui_t *gui)
 		gui_label_draw(gui->password, gui);
 		gui_input_draw(gui->passwd_input, gui, TRUE);
 	}
+	
+	gui_label_draw(gui->msg, gui);
 
-	XFlush(display->dpy);
+	if (gui->has_doublebuf) {
+		XdbeSwapInfo info = {
+			.swap_window = gui->win,
+			.swap_action = XdbeBackground
+		};
+		XdbeSwapBuffers(display->dpy, &info, 1);
+	} else
+		XFlush(display->dpy);
 }
 
 static void gui_keypress(gui_t *gui, XEvent *event)
 {
-	char ch;
+	/* ch is defined this way, so we are certain a
+	 * null sign follows the char.  */
+	char ch[2] = "\0\0";
 	KeySym keysym;
 	XComposeStatus cstatus;
 	gui_input_t *input;
-	display_t *display = gui->display;
 
-	XLookupString(&event->xkey,&ch,1,&keysym,&cstatus);
+	XLookupString(&event->xkey, ch, 1, &keysym, &cstatus);
 
 	/* Assign `input' to the currently focused
 	 * input box.  */
@@ -70,7 +81,7 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 		input = gui->passwd_input;
 	}
 	
-	char *input_text = gui_input_text(input);
+	char *input_text = gui_input_get_text(input);
 	int text_len = strlen(input_text);
 
 	if (keysym == XK_BackSpace) {
@@ -83,14 +94,14 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 		else
 			gui->focus = USERNAME;
 	} else if (keysym == XK_Return && gui->focus == PASSWORD) {
-		char *usr = gui_input_text(gui->user_input);
-		char *pwd = gui_input_text(gui->passwd_input);
+		char *usr = gui_input_get_text(gui->user_input);
+		char *pwd = gui_input_get_text(gui->passwd_input);
 
 		/* Authenticate user.  */
 		int auth = auth_authenticate(gui->conf, usr, pwd);
 			
-		memset(usr,'\0',TEXT_LEN);
-		memset(pwd,'\0',TEXT_LEN);
+		memset(usr,'\0',strlen(usr));
+		memset(pwd,'\0',strlen(pwd));
 
 		if (auth == TRUE) {
 			/* User authenticated successfully.  */
@@ -98,10 +109,8 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 			return;
 		} else {
 			/* User authentication failed.  */
-			gui_label_clear(gui->msg, gui);
 			gui_label_set_caption(gui->msg,
 					"Wrong password or username.");
-			gui_label_draw(gui->msg, gui);
 		}
 		
 		if (gui->visible == PASSWORD)
@@ -113,28 +122,14 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 			gui->visible = PASSWORD;
 		gui->focus = PASSWORD;
 	} else {
-		if (text_len < TEXT_LEN-1) {
-			input_text[text_len] = ch;
-			input_text[text_len+1] = '\0';
-		}
+		char *str = xstrcat(input_text, ch);
+		gui_input_set_text(input, str);
+		free(str);
+		
+		gui_label_set_caption(gui->msg, "");
 	}
 
-	gui_label_clear(gui->username, gui);
-	gui_label_clear(gui->password, gui);
-	gui_input_clear(gui->user_input, gui);
-	gui_input_clear(gui->passwd_input, gui);
-	
-	if (gui->visible == BOTH || gui->visible == USERNAME) {
-		gui_input_draw(gui->user_input, gui, FALSE);
-		gui_label_draw(gui->username, gui);
-	}
-
-	if (gui->visible == BOTH || gui->visible == PASSWORD) {
-		gui_input_draw(gui->passwd_input, gui, TRUE);
-		gui_label_draw(gui->password, gui);
-	}
-
-	XFlush(display->dpy);
+	gui_draw(gui);
 }
 
 static void gui_mappingnotify(gui_t *gui, XEvent *event)
@@ -163,7 +158,16 @@ gui_t* gui_new(display_t *display, cfg_t *theme)
 		gui->x, gui->y, gui->width, gui->height,
 		0, color, color);
 	
-	gui->draw = XftDrawCreate(display->dpy,gui->win,display->visual,
+	int major, minor;
+	gui->has_doublebuf = XdbeQueryExtension(display->dpy, &major, &minor);
+
+	if (gui->has_doublebuf) {
+		gui->buffer = XdbeAllocateBackBufferName(display->dpy, gui->win,
+					XdbeBackground);
+		gui->draw = XftDrawCreate(display->dpy, gui->buffer, display->visual,
+						display->colormap);
+	} else
+		gui->draw = XftDrawCreate(display->dpy, gui->win, display->visual,
 						display->colormap);
 
 	snprintf(buf,BUF_LEN-1, "%s/%s", conf_get(theme, "theme_path"),
@@ -218,6 +222,9 @@ gui_t* gui_new(display_t *display, cfg_t *theme)
 void gui_delete(gui_t *gui)
 {
 	display_t *display = gui->display;
+
+	if (gui->has_doublebuf)
+		XdbeDeallocateBackBufferName(display->dpy, gui->buffer);
 	
 	if (gui->background)
 		XFreePixmap(display->dpy,gui->background);
@@ -256,11 +263,8 @@ void gui_show(gui_t *gui)
 		gui->visible = BOTH;
 	}
 
-	char *usr = gui_input_text(gui->user_input);
-	char *pwd = gui_input_text(gui->passwd_input);
-
-	memset(usr, '\0', TEXT_LEN);
-	memset(pwd, '\0', TEXT_LEN);
+	gui_input_set_text(gui->user_input, "");
+	gui_input_set_text(gui->passwd_input, "");
 
 	gui_label_set_caption(gui->msg, "");
 	
@@ -273,7 +277,7 @@ void gui_show(gui_t *gui)
 
 	XGrabKeyboard(display->dpy, gui->win, False, GrabModeAsync, GrabModeAsync, CurrentTime);
 
-	XFlush(display->dpy);
+	gui_draw(gui);
 }
 
 void gui_hide(gui_t *gui)

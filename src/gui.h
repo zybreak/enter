@@ -3,6 +3,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
+#include <X11/extensions/Xdbe.h>
 
 typedef struct gui_t gui_t;
 
@@ -14,8 +15,10 @@ typedef struct gui_t gui_t;
 
 struct gui_t {
 	Window win;
+	XdbeBackBuffer buffer;
 	Pixmap background;
 	XftDraw *draw;
+	int has_doublebuf;
 	int x, y;
 	int width, height;
 	

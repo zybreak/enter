@@ -3,6 +3,16 @@
 #include "gui_input.h"
 #include "utils.h"
 
+#define TEXT_LEN 64
+
+struct gui_input_t {
+	int type;
+	int x, y, w, h;
+
+	gui_image_t *image;
+	gui_label_t *text;
+};
+
 gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 		const char *font, const char *color, 
 		int text_x, int text_y, int text_w, int text_h)
@@ -47,27 +57,49 @@ void gui_input_delete(gui_input_t *input, display_t *display)
 
 void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden)
 {
-	gui_image_draw(gui->win, input->image);
+	Drawable d = (gui->has_doublebuf)?gui->buffer:gui->win;
+	gui_image_draw(d, input->image);
 
 	char old[TEXT_LEN];
-	strncpy(old, gui_input_text(input), TEXT_LEN);
+	strncpy(old, gui_input_get_text(input), TEXT_LEN);
 
 	if (hidden) {
-		memset(gui_input_text(input), '*',
-				strlen(gui_input_text(input)));
+		memset(gui_input_get_text(input), '*',
+				strlen(gui_input_get_text(input)));
 	}
 
 	gui_label_draw(input->text, gui);
 
-	strncpy(gui_input_text(input), old, TEXT_LEN);
+	gui_input_set_text(input, old);
 }
 
-void gui_input_clear(gui_input_t *input, gui_t *gui)
+char* gui_input_get_text(gui_input_t *input)
 {
-	display_t *display = gui->display;
-	XClearArea(display->dpy, gui->win, input->x,
-			input->y,
-			input->w,
-			input->h, False);
+	return gui_label_get_caption(input->text);
+}
+
+void gui_input_set_text(gui_input_t *input, const char *text)
+{
+	gui_label_set_caption(input->text, text);
+}
+
+int gui_input_x(gui_input_t *input)
+{
+	return input->x;
+}
+
+int gui_input_y(gui_input_t *input)
+{
+	return input->y;
+}
+
+int gui_input_width(gui_input_t *input)
+{
+	return input->w;
+}
+
+int gui_input_height(gui_input_t *input)
+{
+	return input->h;
 }
 

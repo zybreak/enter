@@ -3,6 +3,17 @@
 #include "gui_label.h"
 #include "utils.h"
 
+#define TEXT_LEN 64
+
+struct gui_label_t {
+	int type;
+	int x, y, w, h;
+
+	XftFont *font;
+	XftColor *color;
+	char caption[TEXT_LEN];
+};
+
 gui_label_t* gui_label_new(display_t *display, const char *font,
 		const char *color, int x, int y, int w, int h, const char *caption)
 {
@@ -69,20 +80,14 @@ void gui_label_draw(gui_label_t *label, gui_t *gui)
 		(XftChar8*)p,strlen(p));
 }
 
-void gui_label_clear(gui_label_t *label, gui_t *gui)
+char* gui_label_get_caption(gui_label_t *label)
 {
-	int w, h;
-	XGlyphInfo extent;
-	display_t *display = gui->display;
-	
-	XftTextExtents8(display->dpy,label->font,(XftChar8*)label->caption,
-			strlen(label->caption),&extent);
+	return label->caption;
+}
 
-	w = (label->w > 0)?label->w:extent.xOff;
-	h = (label->h > 0)?label->h:extent.height;
-
-	XClearArea(display->dpy, gui->win, label->x,
-			label->y - extent.height,
-			w, h, False);
+void gui_label_set_caption(gui_label_t *label, const char *caption)
+{
+	memset(label->caption, '\0', TEXT_LEN);
+	strncpy(label->caption, caption, TEXT_LEN-1);
 }
 

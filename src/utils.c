@@ -35,7 +35,7 @@ char* xstrcat(const char *str1, const char *str2)
 {
 	int size = strlen(str1)+strlen(str2);
 	char *p = xmalloc(size+1);
-	
+
 	strncpy(p, str1, size);
 	strncat(p, str2, size);
 
