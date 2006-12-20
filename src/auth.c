@@ -81,7 +81,7 @@ int auth_authenticate(cfg_t *conf, const char *username, const char *password)
 	 * if NULL, skip password authentication.  */
 	char *correct = (shadow)?shadow->sp_pwdp:auth.pwd->pw_passwd;
 	if (!correct)
-		return TRUE;
+		return FALSE;
 
 	/* if the passwords match, return TRUE.  */
 	char *enc = crypt(password, correct);
@@ -91,7 +91,7 @@ int auth_authenticate(cfg_t *conf, const char *username, const char *password)
 	/* else free the user credinentials
 	 * and return FALSE.  */
 	free(auth.display);
-	free(auth.pwd);
+	auth.pwd = NULL;
 	
 	return FALSE;
 }

@@ -150,7 +150,6 @@ gui_t* gui_new(display_t *display, cfg_t *theme)
 	gui->height = display->height;
 	gui->display = display;
 	gui->conf = theme;
-	gui->mode = LISTEN;
 
 	unsigned long color = BlackPixel(display->dpy,display->screen);
 
@@ -293,6 +292,7 @@ void gui_hide(gui_t *gui)
 int gui_run(gui_t *gui)
 {
 	XEvent event;
+	gui->mode = LISTEN;
 	
 	while (gui->mode == LISTEN) {
 		XNextEvent(gui->display->dpy, &event);
@@ -310,10 +310,6 @@ int gui_run(gui_t *gui)
 		}
 	}
 
-	/* Restore mode to LISTEN.  */
-	int mode = gui->mode;
-	gui->mode = LISTEN;
-
-	return mode;
+	return gui->mode;
 }
 
