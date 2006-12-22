@@ -1,4 +1,4 @@
-.TH enter 1
+.TH ENTER "1" "DATE" "enter @VERSION@" "User Commands"
 .SH NAME
 Enter @VERSION@ \- Lightweight graphical login manager
 .SH SYNOPSIS

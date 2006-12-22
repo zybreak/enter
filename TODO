@@ -16,3 +16,5 @@ Low priority
 * Remove map_t from cfg_t.
 * Make as many data members opaque as possible.
 * Finish man pages.
+* Add PAM authentication support.
+
