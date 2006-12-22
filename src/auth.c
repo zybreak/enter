@@ -13,7 +13,7 @@
 #include "log.h"
 
 static struct auth_t {
-	char *display;
+	const char *display;
 	struct passwd *pwd;
 } auth;
 
@@ -62,17 +62,13 @@ static void auth_spawn(void)
 	execve(args[0],args,env);
 }
 
-int auth_authenticate(cfg_t *conf, const char *username, const char *password)
+int auth_authenticate(const char *username, const char *password)
 {
 	auth.pwd = getpwnam(username);
 	endpwent();
 	if (!auth.pwd) {
 		return FALSE;
 	}
-
-	/* copy the string because conf_delete will free it.
-	 * TODO: only pass the display string and not the whole conf. */
-	auth.display = strdup(conf_get(conf,"display"));
 
 	struct spwd *shadow = getspnam(auth.pwd->pw_name);
 	endspent();
@@ -90,18 +86,19 @@ int auth_authenticate(cfg_t *conf, const char *username, const char *password)
 
 	/* else free the user credinentials
 	 * and return FALSE.  */
-	free(auth.display);
 	auth.pwd = NULL;
 	
 	return FALSE;
 }
 
-int auth_login(void)
+int auth_login(const char *display)
 {
 	/* If no previous user was authenticated,
 	 * return FALSE. */
 	if (!auth.pwd)
 		return FALSE;
+
+	auth.display = display;
 	
 	pid_t pid = fork();
 

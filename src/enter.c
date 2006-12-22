@@ -158,11 +158,10 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	/* Add some expected entries to the theme file.  */
-	conf_set(theme, "display",
-			conf_get(conf, "display"));
-	conf_set(theme, "theme_path",
-			conf_get(conf, "theme_path"));
+	/* Add theme name to theme, so the full path of datafiles
+	 * can be read by only supplying theme .  */
+	conf_set(theme, "theme",
+			conf_get(conf, "theme"));
 
 	/* Fork to background if "daemon" mode is enabled in the config. */
 	if (!strcmp(conf_get(conf,"daemon"),"true")) {
@@ -210,7 +209,7 @@ int main(int argc, char **argv)
 		switch (action) {
 		case LOGIN:
 			log_print(LOG_INFO, "Logging in user");
-			if (auth_login() == FALSE) {
+			if (auth_login(conf_get(conf, "display")) == FALSE) {
 				log_print(LOG_EMERG,
 						"Could not open user session");
 				

@@ -98,7 +98,7 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 		char *pwd = gui_input_get_text(gui->passwd_input);
 
 		/* Authenticate user.  */
-		int auth = auth_authenticate(gui->conf, usr, pwd);
+		int auth = auth_authenticate(usr, pwd);
 			
 		memset(usr,'\0',strlen(usr));
 		memset(pwd,'\0',strlen(pwd));
@@ -169,7 +169,7 @@ gui_t* gui_new(display_t *display, cfg_t *theme)
 		gui->draw = XftDrawCreate(display->dpy, gui->win, display->visual,
 						display->colormap);
 
-	snprintf(buf,BUF_LEN-1, "%s/%s", conf_get(theme, "theme_path"),
+	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme, "theme"),
 			conf_get(theme, "enter.background"));
 
 	/* This is an ugly hack, find another way to
@@ -195,7 +195,7 @@ gui_t* gui_new(display_t *display, cfg_t *theme)
 		return NULL;
 	}
 
-	snprintf(buf,BUF_LEN-1, "%s/%s", conf_get(theme, "theme_path"),
+	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme, "theme"),
 			conf_get(theme, "username_input.image"));
 
 	gui->user_input = INPUT_NEW("username_input", buf);
@@ -205,7 +205,7 @@ gui_t* gui_new(display_t *display, cfg_t *theme)
 		return NULL;
 	}
 
-	snprintf(buf,BUF_LEN-1, "%s/%s", conf_get(theme,"theme_path"),
+	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme,"theme"),
 			conf_get(theme,"password_input.image"));
 
 	gui->passwd_input = INPUT_NEW("password_input", buf);
