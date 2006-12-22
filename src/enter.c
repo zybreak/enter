@@ -219,7 +219,7 @@ int main(int argc, char **argv)
 			}
 			break;
 		}
-		/* TODO: Kill all clients from the user session!  */
+		display_kill_clients(display, gui->win);
 	}
 
 

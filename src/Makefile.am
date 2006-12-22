@@ -18,6 +18,6 @@ enter_SOURCES = \
 	gui.c gui.h \
 	auth.c auth.h
 
-enter_CFLAGS = @DEBUG_CFLAGS@ @FT2_CFLAGS@ @IMLIB_CFLAGS@ @X_CFLAGS@ -DCONFDIR=\"$(sysconfdir)\" -DTHEMEDIR=\"$(datarootdir)/@PACKAGE@/themes\"
+enter_CFLAGS = @DEBUG_CFLAGS@ @FT2_CFLAGS@ @IMLIB_CFLAGS@ @X_CFLAGS@ -DCONFDIR=\"$(sysconfdir)\" -DTHEMEDIR=\"$(datadir)/@PACKAGE@/themes\"
 enter_LDFLAGS = @X_LIBS@ @IMLIB_LIBS@ @FT2_LIBS@ -lcrypt
 

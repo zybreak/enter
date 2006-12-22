@@ -1,5 +1,5 @@
-#ifndef __IMAGE_H__
-#define __IMAGE_H__
+#ifndef __GUI_IMAGE_H__
+#define __GUI_IMAGE_H__
 
 #include <X11/Xlib.h>
 #include <Imlib2.h>
@@ -22,4 +22,4 @@ void gui_image_draw(Drawable drawable, gui_image_t *image);
 Pixmap gui_image_pixmap(gui_image_t *image);
 int gui_image_load(gui_image_t *image, const char *filename);
 
-#endif /* __IMAGE_H__  */
+#endif /* __GUI_IMAGE_H__  */

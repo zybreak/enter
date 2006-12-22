@@ -1,0 +1,21 @@
+.TH enter.conf 5
+.SH NAME
+enter.conf \- configuration file for enter
+
+.SH DESCRIPTION
+.LP
+This file, by default
+.IR @sysconfdir@/enter.conf ,
+is read by enter.
+.LP
+This is a config with the default values:
+.IP
+.nf
+#
+# enter.conf
+#
+.fi
+.LP
+
+.SH SEE ALSO
+\fIhttp://enter.sourceforge.net\fR

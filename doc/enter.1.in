@@ -1,0 +1,22 @@
+.TH enter 1
+.SH NAME
+Enter @VERSION@ \- Lightweight graphical login manager
+.SH SYNOPSIS
+.TP 5
+\fBenter \fI[options]\fR
+
+.SH DESCRIPTION
+
+.SH FILES
+@sysconfdir@/enter.conf
+.br
+@datadir@/@PACKAGE@/themes
+
+.SH BUGS
+You'll notice...
+
+.SH AUTHOR
+Written by Robert Knutsson.
+
+.SH SEE ALSO
+\fIhttp://enter.sourceforge.net\fR

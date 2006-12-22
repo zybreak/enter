@@ -1,4 +1,4 @@
 AUTOMAKE_OPTIONS = dist-bzip2
 
-SUBDIRS = src data
+SUBDIRS = src data doc
 

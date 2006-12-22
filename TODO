@@ -1,16 +1,18 @@
 Critical priority
-* Kill user clients after the user session.
 * Drop priviledges when not needed.
 * Improve configure.ac.
+* Add MIT cookie generator.
 
 Moderate priority
-* Add MIT cookie generator.
-name, not the full path.
+* Document functions.
+* Add code to enable relative positions of labels/images/areas in themes.
 
 Low priority
-* Document functions.
 * Add content to README and AUTHORS.
-* Add code to enable relative positions of labels/images/areas in themes.
+* Add support for multiple themes.
+* Add support for multiple sessions.
+* Add support for actions other than login (shutdown, hibernate).
 * Fix compiler warnings.
 * Remove map_t from cfg_t.
 * Make as many data members opaque as possible.
+* Finish man pages.

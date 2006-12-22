@@ -43,7 +43,7 @@ void display_delete(display_t *display)
 	free(display);
 }
 
-void display_kill_clients(display_t *display)
+void display_kill_clients(display_t *display, Window window)
 {
 	unsigned int num_children = 0;
 	int i;
@@ -56,7 +56,8 @@ void display_kill_clients(display_t *display)
 			&child, &num_children);
 
 	for (i=0;i < num_children; i++) {
-		XKillClient(display->dpy, child[i]);
+		if (child[i] != window)
+			XKillClient(display->dpy, child[i]);
 	}
 	
 	XSync(display->dpy, 0);
