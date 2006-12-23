@@ -1,4 +1,4 @@
-.TH enter.conf 5
+.TH ENTER.CONF "5" "December 2006" "enter @VERSION@" "User Commands"
 .SH NAME
 enter.conf \- configuration file for enter
 
@@ -12,10 +12,24 @@ This is a config with the default values:
 .IP
 .nf
 #
-# enter.conf
+# This is a sample config file
 #
+
+server_path=/usr/X11R6/bin/X
+theme=default
+
+# End of file
 .fi
 .LP
+This configuration specifies to run `/usr/X11R6/bin/X' as the X
+server, and to use the default theme.
+.TP
+.BI "server_path=" <filename>
+Specifies where the X server is located.
+.TP
+.BI "theme=" <theme>
+Specifies which theme to use.
 
-.SH SEE ALSO
-\fIhttp://enter.sourceforge.net\fR
+.SH "SEE ALSO"
+\fIhttp://enter.sourceforge.net\fR,
+\fIenter(1)\fR

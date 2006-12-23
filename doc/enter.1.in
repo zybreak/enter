@@ -1,4 +1,4 @@
-.TH ENTER "1" "DATE" "enter @VERSION@" "User Commands"
+.TH ENTER "1" "December 2006" "enter @VERSION@" "User Commands"
 .SH NAME
 Enter @VERSION@ \- Lightweight graphical login manager
 .SH SYNOPSIS
@@ -6,17 +6,35 @@ Enter @VERSION@ \- Lightweight graphical login manager
 \fBenter \fI[options]\fR
 
 .SH DESCRIPTION
+.PP
+Enter is a lightweight login manager for X.
+.TP
+\fB\-c\fR
+specify an alternative config file
+.TP
+\fB\-d\fR
+specify which display to connect to
+.TP
+\fB\-n\fR
+run in foreground
+.TP
+\fB\-v\fR
+print version information
+.TP
+\fB\-h\fR
+print help information
 
 .SH FILES
 @sysconfdir@/enter.conf
 .br
 @datadir@/@PACKAGE@/themes
 
-.SH BUGS
-You'll notice...
+.SH "REPORTING BUGS"
+Report bugs to <rob_dobbs@users.sourceforge.net>.
 
 .SH AUTHOR
 Written by Robert Knutsson.
 
-.SH SEE ALSO
-\fIhttp://enter.sourceforge.net\fR
+.SH "SEE ALSO"
+\fIhttp://enter.sourceforge.net\fR,
+\fIenter.conf(5)\fR
