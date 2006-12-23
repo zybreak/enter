@@ -47,8 +47,7 @@ void gui_input_delete(gui_input_t *input, display_t *display)
 
 void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden)
 {
-	Drawable d = (gui->has_doublebuf)?gui->buffer:gui->win;
-	gui_image_draw(d, input->image);
+	gui_image_draw(gui->drawable, input->image);
 
 	char old[TEXT_LEN];
 	strncpy(old, gui_input_get_text(input), TEXT_LEN);

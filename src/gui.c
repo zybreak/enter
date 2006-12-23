@@ -34,6 +34,8 @@ static void gui_draw(gui_t *gui)
 {
 	display_t *display = gui->display;
 
+	/* Only clear if double buffering is not present,
+	 * since DBE clears the window for us.  */
 	if (!gui->has_doublebuf)
 		XClearWindow(display->dpy, gui->win);
 
@@ -53,11 +55,7 @@ static void gui_draw(gui_t *gui)
 	gui_label_draw(gui->msg, gui);
 
 	if (gui->has_doublebuf) {
-		XdbeSwapInfo info = {
-			.swap_window = gui->win,
-			.swap_action = XdbeBackground
-		};
-		XdbeSwapBuffers(display->dpy, &info, 1);
+		XdbeSwapBuffers(display->dpy, &gui->swap_info, 1);
 	} else
 		XFlush(display->dpy);
 }
@@ -161,19 +159,26 @@ gui_t* gui_new(display_t *display, cfg_t *theme)
 	gui->has_doublebuf = XdbeQueryExtension(display->dpy, &major, &minor);
 
 	if (gui->has_doublebuf) {
-		gui->buffer = XdbeAllocateBackBufferName(display->dpy, gui->win,
-					XdbeBackground);
-		gui->draw = XftDrawCreate(display->dpy, gui->buffer, display->visual,
-						display->colormap);
-	} else
-		gui->draw = XftDrawCreate(display->dpy, gui->win, display->visual,
-						display->colormap);
+		XdbeSwapInfo swap = {
+			.swap_window = gui->win,
+			.swap_action = XdbeBackground
+		};
+		gui->swap_info = swap;
+
+		gui->back_buffer = XdbeAllocateBackBufferName(display->dpy,
+			gui->swap_info.swap_window, gui->swap_info.swap_action);
+		gui->drawable = gui->back_buffer;
+	} else {
+		gui->drawable = gui->win;
+	}
+
+	gui->draw = XftDrawCreate(display->dpy, gui->drawable, display->visual,
+					display->colormap);
 
 	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme, "theme"),
 			conf_get(theme, "enter.background"));
 
-	/* This is an ugly hack, find another way to
-	 * get the Pixmap needed to set WindowBackground.  */
+	/* Read the background pixmap.  */
 	gui_image_t *image = gui_image_new(display, buf, 0, 0);
 	if (!image) {
 		log_print(LOG_ERR, "could not load image \"buf\"");
@@ -182,6 +187,7 @@ gui_t* gui_new(display_t *display, cfg_t *theme)
 	}
 	gui->background = gui_image_pixmap(image);
 	gui_image_delete(image);
+	
 	XSetWindowBackgroundPixmap(display->dpy, gui->win, gui->background);
 
 	gui->title = LABEL_NEW("title");
@@ -223,7 +229,7 @@ void gui_delete(gui_t *gui)
 	display_t *display = gui->display;
 
 	if (gui->has_doublebuf)
-		XdbeDeallocateBackBufferName(display->dpy, gui->buffer);
+		XdbeDeallocateBackBufferName(display->dpy, gui->back_buffer);
 	
 	if (gui->background)
 		XFreePixmap(display->dpy,gui->background);
@@ -277,6 +283,8 @@ void gui_show(gui_t *gui)
 	XGrabKeyboard(display->dpy, gui->win, False, GrabModeAsync, GrabModeAsync, CurrentTime);
 
 	gui_draw(gui);
+
+	XFlush(display->dpy);
 }
 
 void gui_hide(gui_t *gui)

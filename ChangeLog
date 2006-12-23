@@ -3,6 +3,11 @@
 	finished writing the manuals.
 	* src/auth.c:
 	included crypt.h, and got rid of stupid warning.
+	* README, AUTHORS:
+	added content.
+	* src/gui.c:
+	added new member `drawable' which points to the drawable
+	surface, doublebuffering or not.
 
 2006-12-21  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/auth:

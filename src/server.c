@@ -45,7 +45,7 @@ static int server_authenticate(cfg_t *conf, const char *address)
 	/* Copy the address. */
 	auth->address_length = strlen(address);
 	auth->address = xmalloc(auth->address_length+1);
-	memcpy(auth->address,address,auth->address_length);
+	memcpy(auth->address, address, auth->address_length);
 
 	/* Copy the display number.  */	
 	auth->number = conf_get(conf, "display");
@@ -147,7 +147,8 @@ int server_start(cfg_t *conf)
 	sigaction(SIGUSR1,&sa,NULL);
 	
 	if (!strcmp(conf_get(conf,"authenticate"),"true")) {
-		/* TODO: generate cookie  */
+		server_authenticate(conf, "");
+		
 		cmd[0] = conf_get(conf,"server_path");
 		cmd[1] = "-auth";
 		cmd[2] = conf_get(conf,"auth_file");

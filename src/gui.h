@@ -15,16 +15,20 @@ typedef struct gui_t gui_t;
 
 struct gui_t {
 	Window win;
-	XdbeBackBuffer buffer;
-	Pixmap background;
+	Drawable drawable;
 	XftDraw *draw;
+	
 	int has_doublebuf;
+	XdbeBackBuffer back_buffer;
+	XdbeSwapInfo swap_info;
+
 	int x, y;
 	int width, height;
 	
 	display_t *display;
 	cfg_t *conf;
 
+	Pixmap background;
 	gui_label_t *title, *username, *password, *msg;
 	gui_input_t *user_input, *passwd_input;
 
