@@ -1,3 +1,7 @@
+2007-01-10  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/Makefile.am:
+	changed install path for binaries to bin instead of sbin.
+
 2006-12-23  Robert Knutsson <rob_dobbs@users.sf.net>
 	* doc:
 	finished writing the manuals.

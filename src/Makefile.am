@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS=nostdinc
 
 AM_CPPFLAGS = -I..
 
-sbin_PROGRAMS = enter
+bin_PROGRAMS = enter
 
 enter_SOURCES = \
 	enter.c enter.h \
