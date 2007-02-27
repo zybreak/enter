@@ -1,6 +1,10 @@
 2007-02-27  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/gui_input.c:
 	added basic code for cursor functions.
+	* data/themes/default:
+	changed default theme.
+	* src/gui.c:
+	changed theme syntax.
 
 2007-01-10  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/Makefile.am:

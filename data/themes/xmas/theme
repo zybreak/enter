@@ -8,53 +8,53 @@ enter.background = background.png
 enter.visible = single
 
 # Main title label
-title.caption = Enter
-title.font = verdana-42:bold:dpi=75
-title.color = #FFFFFF
-title.x = 430
-title.y = 130
+label.title.caption = Enter
+label.title.font = verdana-42:bold:dpi=75
+label.title.color = #FFFFFF
+label.title.x = 430
+label.title.y = 130
 
 # Username label
-username.caption = Username
-username.font = verdana-14:bold:dpi=75
-username.color = #FFFFFF
-username.x = 450
-username.y = 205
+label.username.caption = Username
+label.username.font = verdana-14:bold:dpi=75
+label.username.color = #FFFFFF
+label.username.x = 450
+label.username.y = 205
 
 # Msg label
-msg.caption = 
-msg.font = verdana-14:bold:dpi=75
-msg.color = #00FF00
-msg.x = 450
-msg.y = 400
+label.msg.caption = 
+label.msg.font = verdana-14:bold:dpi=75
+label.msg.color = #00FF00
+label.msg.x = 450
+label.msg.y = 400
 
 # Password label
-password.caption = Password
-password.font = verdana-14:bold:dpi=75
-password.color = #FFFFFF
-password.x = 450
-password.y = 205
+label.password.caption = Password
+label.password.font = verdana-14:bold:dpi=75
+label.password.color = #FFFFFF
+label.password.x = 450
+label.password.y = 205
 
 # Username input field
-username_input.x = 415
-username_input.y = 210
-username_input.image = input.png
-username_input.text.font = verdana-14:bold:dpi=75
-username_input.text.color = #FFFFFF
-username_input.text.x =	15
-username_input.text.y = 18
-username_input.text.width = 194
-username_input.text.height = 194
+input.username.x = 415
+input.username.y = 210
+input.username.image = input.png
+input.username.text.font = verdana-14:bold:dpi=75
+input.username.text.color = #FFFFFF
+input.username.text.x =	15
+input.username.text.y = 18
+input.username.text.width = 194
+input.username.text.height = 194
 
 # Password input field
-password_input.x = 415
-password_input.y = 210
-password_input.image = input.png
-password_input.text.font = verdana-14:bold:dpi=75
-password_input.text.color = #FFFFFF
-password_input.text.x = 15
-password_input.text.y = 18
-password_input.text.width = 194
-password_input.text.height = 194
+input.password.x = 415
+input.password.y = 210
+input.password.image = input.png
+input.password.text.font = verdana-14:bold:dpi=75
+input.password.text.color = #FFFFFF
+input.password.text.x = 15
+input.password.text.y = 18
+input.password.text.width = 194
+input.password.text.height = 194
 
 # End of file

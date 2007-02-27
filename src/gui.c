@@ -18,7 +18,7 @@
 			conf_get(theme, LABEL ".caption"))
 
 #define INPUT_NEW(INPUT, IMAGE) \
-	gui_input_new(display, IMAGE, \
+	gui_input_new(display, buf, \
 			atoi(conf_get(theme, INPUT ".x")), \
 			atoi(conf_get(theme, INPUT ".y")), \
 			conf_get(theme, INPUT ".text.font"), \
@@ -26,7 +26,7 @@
 			atoi(conf_get(theme, INPUT ".text.x")), \
 			atoi(conf_get(theme, INPUT ".text.y")), \
 			atoi(conf_get(theme, INPUT ".text.width")), \
-			atoi(conf_get(theme, INPUT ".text.height")));
+			atoi(conf_get(theme, INPUT ".text.height")))
 
 #define BUF_LEN 64
 
@@ -142,6 +142,7 @@ gui_t* gui_new(display_t *display, conf_t *theme)
 
 	memset(gui,'\0',sizeof(*gui));
 
+	/* Set default options.  */
 	gui->x = 0;
 	gui->y = 0;
 	gui->width = display->width;
@@ -151,10 +152,12 @@ gui_t* gui_new(display_t *display, conf_t *theme)
 
 	unsigned long color = BlackPixel(display->dpy,display->screen);
 
+	/* Create the GUI window.  */
 	gui->win = XCreateSimpleWindow(display->dpy, display->root,
 		gui->x, gui->y, gui->width, gui->height,
 		0, color, color);
 	
+	/* Check for the DBE extention.  */
 	int major, minor;
 	gui->has_doublebuf = XdbeQueryExtension(display->dpy, &major, &minor);
 
@@ -172,13 +175,15 @@ gui_t* gui_new(display_t *display, conf_t *theme)
 		gui->drawable = gui->win;
 	}
 
+	/* Create a draw surface.  */
 	gui->draw = XftDrawCreate(display->dpy, gui->drawable, display->visual,
 					display->colormap);
 
+	
+	/* Read the background pixmap.  */
 	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme, "theme"),
 			conf_get(theme, "enter.background"));
 
-	/* Read the background pixmap.  */
 	gui_image_t *image = gui_image_new(display, buf, 0, 0);
 	if (!image) {
 		log_print(LOG_ERR, "could not load image \"buf\"");
@@ -188,35 +193,28 @@ gui_t* gui_new(display_t *display, conf_t *theme)
 	gui->background = gui_image_pixmap(image);
 	gui_image_delete(image);
 	
+	/* Set the background pixmap.  */
 	XSetWindowBackgroundPixmap(display->dpy, gui->win, gui->background);
 
-	gui->title = LABEL_NEW("title");
-	gui->msg = LABEL_NEW("msg");
-	gui->username = LABEL_NEW("username");
-	gui->password = LABEL_NEW("password");
+	/* Load labels.  */
+	gui->title = LABEL_NEW("label.title");
+	gui->msg = LABEL_NEW("label.msg");
+	gui->username = LABEL_NEW("label.username");
+	gui->password = LABEL_NEW("label.password");
+	
+	/* Load input boxes.  */
+	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme,"theme"), 
+			conf_get(theme,"input.username.image"));
+	gui->user_input = INPUT_NEW("input.username", buf);
+	
+	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme,"theme"), 
+			conf_get(theme,"input.password.image"));
+	gui->passwd_input = INPUT_NEW("input.password", buf);
 
-	if (!(gui->title && gui->msg && gui->username && gui->password)) {
-		log_print(LOG_ERR, "could not load labels.");
-		gui_delete(gui);
-		return NULL;
-	}
-
-	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme, "theme"),
-			conf_get(theme, "username_input.image"));
-
-	gui->user_input = INPUT_NEW("username_input", buf);
-	if (!gui->user_input) {
-		log_print(LOG_ERR, "could not load user_input");
-		gui_delete(gui);
-		return NULL;
-	}
-
-	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme,"theme"),
-			conf_get(theme,"password_input.image"));
-
-	gui->passwd_input = INPUT_NEW("password_input", buf);
-	if (!gui->passwd_input) {
-		log_print(LOG_ERR, "could not load passwd_input");
+	/* Make sure all object's were loaded.  */
+	if (!(gui->title && gui->msg && gui->username && gui->password &&
+				gui->passwd_input && gui->user_input)) {
+		log_print(LOG_ERR, "could not load objects.");
 		gui_delete(gui);
 		return NULL;
 	}
