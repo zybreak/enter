@@ -15,6 +15,6 @@ int auth_authenticate(const char *username, const char *password);
  * Then return TRUE when the session ends. If no previous user was
  * authenticated or a failure occurs, return FALSE.
  */
-int auth_login(const char *display);
+int auth_login(const char *display, const char *auth_file, const char *login_file);
 
 #endif

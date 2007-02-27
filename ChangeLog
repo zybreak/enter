@@ -5,6 +5,12 @@
 	changed default theme.
 	* src/gui.c:
 	changed theme syntax.
+	* src/auth.c:
+	auth_login now takes the login_file and auth_file as arguments
+	* src/enter.c:
+	login_file and auth_file now gets default values.
+	* doc/:
+	updated the documentation.
 
 2007-01-10  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/Makefile.am:

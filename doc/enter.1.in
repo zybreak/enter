@@ -12,6 +12,12 @@ Enter is a lightweight login manager for X.
 \fB\-c\fR
 specify an alternative config file
 .TP
+\fB\-a\fR
+specify an alternative auth file
+.TP
+\fB\-l\fR
+specify an alternative login file
+.TP
 \fB\-d\fR
 specify which display to connect to
 .TP

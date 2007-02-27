@@ -27,9 +27,12 @@ static void parse_args(int argc, char **argv, conf_t *conf)
 		if ((strcmp(argv[i],"-c") == 0) && (i+1 < argc)) {
 			conf_set(conf,"config_file",argv[++i]);
 
-		} else if ((strcmp(argv[i],"-c") == 0) && (i+1 < argc)) {
+		} else if ((strcmp(argv[i],"-a") == 0) && (i+1 < argc)) {
 			conf_set(conf,"auth_file",argv[++i]);
 
+		} else if ((strcmp(argv[i],"-l") == 0) && (i+1 < argc)) {
+			conf_set(conf,"login_file",argv[++i]);
+			
 		} else if ((strcmp(argv[i],"-d") == 0) && (i+1 < argc)) {
 			conf_set(conf,"display",argv[++i]);
 
@@ -45,6 +48,7 @@ static void parse_args(int argc, char **argv, conf_t *conf)
 			"Usage: %s: [OPTIONS]\n\n"
 			"  -c CONFIG   use config file CONFIG\n"
 			"  -a AUTH     write MIT cookie to AUTH\n"
+			"  -l LOGIN    run LOGIN as the user session\n"
 			"  -d DISPLAY  connect to display DISPLAY\n"
 			"  -n          dont run as a daemon\n"
 			"  -v          print version information\n"
@@ -62,10 +66,11 @@ static void parse_args(int argc, char **argv, conf_t *conf)
 
 static void default_settings(conf_t *conf)
 {
-	conf_set(conf,"config_file",CONFDIR "/enter.conf");
-	conf_set(conf,"auth_file",XauFileName());
-	conf_set(conf,"daemon","true");
-	conf_set(conf,"display",":0");
+	conf_set(conf,"config_file", CONFDIR "/enter.conf");
+	conf_set(conf,"auth_file", XauFileName());
+	conf_set(conf,"login_file", ".xinitrc");
+	conf_set(conf,"daemon", "true");
+	conf_set(conf,"display", ":0");
 }
 
 static int daemonize()
@@ -219,7 +224,9 @@ int main(int argc, char **argv)
 		switch (action) {
 		case LOGIN:
 			log_print(LOG_INFO, "Logging in user");
-			if (auth_login(conf_get(conf, "display")) == FALSE) {
+			if (auth_login(conf_get(conf, "display"),
+						conf_get(conf, "auth_file"),
+						conf_get(conf, "login_file")) == FALSE) {
 				log_print(LOG_EMERG,
 						"Could not open user session");
 				

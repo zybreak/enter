@@ -16,6 +16,8 @@ This is a config with the default values:
 #
 
 server_path=/usr/X11R6/bin/X
+login_file=.xinitrc
+auth_file=.Xauthenticate
 theme=default
 
 # End of file
@@ -26,6 +28,12 @@ server, and to use the default theme.
 .TP
 .BI "server_path=" <filename>
 Specifies where the X server is located.
+.TP
+.BI "login_file=" <filename>
+Specifies which file to run as the user session.
+.TP
+.BI "auth_file=" <filename>
+Write the MIT cookie to the specified file instead of the system default.
 .TP
 .BI "theme=" <theme>
 Specifies which theme to use.

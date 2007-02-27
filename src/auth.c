@@ -15,6 +15,8 @@
 
 static struct auth_t {
 	const char *display;
+	const char *auth_file;
+	const char *login_file;
 	struct passwd *pwd;
 } auth;
 
@@ -48,7 +50,7 @@ static void auth_spawn(void)
 	char *args[] = {
 		auth.pwd->pw_shell,
 		"-login",
-		xstrcat(auth.pwd->pw_dir,"/.xinitrc"),
+		auth.login_file,
 		NULL
 	};
 
@@ -57,8 +59,7 @@ static void auth_spawn(void)
 		xstrcat("SHELL=", auth.pwd->pw_shell),
 		xstrcat("USER=", auth.pwd->pw_name),
 		xstrcat("LOGNAME=", auth.pwd->pw_name),
-		xstrcat("XAUTHORITY=",
-				xstrcat(auth.pwd->pw_dir,"/.Xauthority")),
+		xstrcat("XAUTHORITY=", auth.auth_file),
 		xstrcat("DISPLAY=", auth.display),
 		NULL
 	};
@@ -96,7 +97,7 @@ int auth_authenticate(const char *username, const char *password)
 	return FALSE;
 }
 
-int auth_login(const char *display)
+int auth_login(const char *display, const char *auth_file, const char *login_file)
 {
 	/* If no previous user was authenticated,
 	 * return FALSE. */
@@ -104,17 +105,31 @@ int auth_login(const char *display)
 		return FALSE;
 
 	auth.display = display;
+	auth.auth_file = auth_file;
+	auth.login_file = login_file;
 	
+	/* Fork a new process.  */
 	pid_t pid = fork();
 
 	if (pid == -1) {
 		log_print(LOG_WARNING, "Could not fork process");
 		return FALSE;
 	} else if (pid == 0) {
+		/* Spawn a user session in the child thread.  */
 		auth_spawn();
+		/* If the user session could not spawn,
+		 * reset the auth struct and return false.  */
+		
+		auth.pwd = NULL;
+		
 		return FALSE;
 	}
 
+	/* Reset the auth struct for subsequent calls.  */
+
+	auth.pwd = NULL;
+
+	/* Wait for the user session in the parent thread.  */
 	pid_t p = waitpid(pid, NULL, 0);
 	if (p == -1) {
 		log_print(LOG_WARNING,"Could not wait for user session.");
