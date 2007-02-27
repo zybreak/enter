@@ -17,4 +17,4 @@ Low priority
 * Remove map_t from cfg_t.
 * Add PAM authentication support.
 * Add NLS support.
-
+* Add testcases.
