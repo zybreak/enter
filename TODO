@@ -16,4 +16,5 @@ Low priority
 * Add support for actions other than login (shutdown, hibernate).
 * Remove map_t from cfg_t.
 * Add PAM authentication support.
+* Add NLS support.
 
