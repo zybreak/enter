@@ -3,7 +3,7 @@
 #include "display.h"
 #include "utils.h"
 
-display_t* display_new(cfg_t *conf)
+display_t* display_new(conf_t *conf)
 {
 	display_t *display = (display_t*)xmalloc(sizeof(display_t));
 

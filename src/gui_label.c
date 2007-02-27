@@ -16,6 +16,7 @@ gui_label_t* gui_label_new(display_t *display, const char *font,
 		return NULL;
 	}
 
+	memset(label->caption, '\0', TEXT_LEN);
 	strncpy(label->caption,caption,TEXT_LEN-1);
 	
 	XftTextExtents8(display->dpy,label->font,(XftChar8*)"l",1,&extent);
@@ -76,7 +77,6 @@ char* gui_label_get_caption(gui_label_t *label)
 
 void gui_label_set_caption(gui_label_t *label, const char *caption)
 {
-	memset(label->caption, '\0', TEXT_LEN);
 	strncpy(label->caption, caption, TEXT_LEN-1);
 }
 

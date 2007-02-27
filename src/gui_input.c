@@ -24,6 +24,7 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 	t_w = (text_w>0)?text_w:gui_image_width(input->image);
 	t_h = (text_h>0)?text_h:gui_image_height(input->image);
 
+	input->pos = 0;
 	input->text = gui_label_new(display, font, color, t_x, t_y,
 					t_w, t_h, "");
 	if (!input->text) {
@@ -69,7 +70,24 @@ char* gui_input_get_text(gui_input_t *input)
 
 void gui_input_set_text(gui_input_t *input, const char *text)
 {
+	input->pos = strlen(text);
 	gui_label_set_caption(input->text, text);
+}
+
+void gui_input_set_pos(gui_input_t *input, int pos, pos_mode_t mode)
+{
+	input->pos += pos;
+
+	if (input->pos < 0)
+		input->pos = 0;
+	else if (input->pos > strlen(gui_input_get_text(input)))
+		input->pos = strlen(gui_input_get_text(input));
+}
+
+void gui_input_delete_char(gui_input_t *input)
+{
+	if (input->pos > 0)
+		xstrdel(gui_label_get_caption(input->text),input->pos);
 }
 
 int gui_input_x(gui_input_t *input)

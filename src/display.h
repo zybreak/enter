@@ -21,7 +21,7 @@ typedef struct display_t {
  * Returns a new display_t object,
  * uses conf to get the DISPLAY string.
  */
-display_t* display_new(cfg_t *conf);
+display_t* display_new(conf_t *conf);
 
 /**
  * Frees the memory occupied by display.

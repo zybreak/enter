@@ -32,14 +32,17 @@ static void auth_spawn(void)
 	if (initgroups(auth.pwd->pw_name, auth.pwd->pw_gid) == -1)
 		return;
 
+	/* Set the group ID.  */
 	if (setgid(auth.pwd->pw_gid) == -1) {
 		return;
 	}
 
+	/* Set the user ID.  */
 	if (setuid(auth.pwd->pw_uid) == -1) {
 		return;
 	}
 
+	/* Change working directory, to the users home directory.  */
 	chdir(auth.pwd->pw_dir);
 
 	char *args[] = {
@@ -67,6 +70,7 @@ int auth_authenticate(const char *username, const char *password)
 {
 	auth.pwd = getpwnam(username);
 	endpwent();
+
 	if (!auth.pwd) {
 		return FALSE;
 	}
@@ -78,7 +82,7 @@ int auth_authenticate(const char *username, const char *password)
 	 * if NULL, skip password authentication.  */
 	char *correct = (shadow)?shadow->sp_pwdp:auth.pwd->pw_passwd;
 	if (!correct)
-		return FALSE;
+		return TRUE;
 
 	/* if the passwords match, return TRUE.  */
 	char *enc = crypt(password, correct);

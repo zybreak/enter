@@ -135,7 +135,7 @@ static void gui_mappingnotify(gui_t *gui, XEvent *event)
 	XRefreshKeyboardMapping(&event->xmapping);
 }
 
-gui_t* gui_new(display_t *display, cfg_t *theme)
+gui_t* gui_new(display_t *display, conf_t *theme)
 {
 	gui_t *gui = xmalloc(sizeof(*gui));
 	char buf[BUF_LEN];

@@ -15,7 +15,7 @@ void* xmalloc(size_t size)
 	return p;
 }
 
-char* strtrim(char *str)
+char* xstrtrim(char *str)
 {
 	char *begin=str;
 	char *end = str+strlen(str);
@@ -42,3 +42,15 @@ char* xstrcat(const char *str1, const char *str2)
 	return p;
 }
 
+void xstrdel(char *str, size_t pos)
+{
+	size_t i;
+	for (i=1; i <= strlen(str); i++) {
+		if (i > pos)
+			str[i-1] = str[i];
+	}
+}
+
+void xstrins(char *str, size_t pos, char c, size_t size)
+{
+}

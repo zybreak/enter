@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <X11/Xauth.h>
 
 #include "enter.h"
 #include "server.h"
@@ -18,13 +19,16 @@
 #define PIDBUF 20
 #define THEME_LEN 512
 
-static void parse_args(int argc, char **argv, cfg_t *conf)
+static void parse_args(int argc, char **argv, conf_t *conf)
 {
 	int i;
 
 	for (i=1;i<argc;i++) {
 		if ((strcmp(argv[i],"-c") == 0) && (i+1 < argc)) {
 			conf_set(conf,"config_file",argv[++i]);
+
+		} else if ((strcmp(argv[i],"-c") == 0) && (i+1 < argc)) {
+			conf_set(conf,"auth_file",argv[++i]);
 
 		} else if ((strcmp(argv[i],"-d") == 0) && (i+1 < argc)) {
 			conf_set(conf,"display",argv[++i]);
@@ -40,6 +44,7 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 			printf(
 			"Usage: %s: [OPTIONS]\n\n"
 			"  -c CONFIG   use config file CONFIG\n"
+			"  -a AUTH     write MIT cookie to AUTH\n"
 			"  -d DISPLAY  connect to display DISPLAY\n"
 			"  -n          dont run as a daemon\n"
 			"  -v          print version information\n"
@@ -55,9 +60,10 @@ static void parse_args(int argc, char **argv, cfg_t *conf)
 	}
 }
 
-static void default_settings(cfg_t *conf)
+static void default_settings(conf_t *conf)
 {
 	conf_set(conf,"config_file",CONFDIR "/enter.conf");
+	conf_set(conf,"auth_file",XauFileName());
 	conf_set(conf,"daemon","true");
 	conf_set(conf,"display",":0");
 }
@@ -125,8 +131,8 @@ static void remove_pidfile()
 
 int main(int argc, char **argv)
 {
-	cfg_t *conf = conf_new();
-	cfg_t *theme = conf_new();
+	conf_t *conf = conf_new();
+	conf_t *theme = conf_new();
 	
 	/* Assign default settings to conf
 	 * and parse command line arguments.  */

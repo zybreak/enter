@@ -26,7 +26,7 @@ struct gui_t {
 	int width, height;
 	
 	display_t *display;
-	cfg_t *conf;
+	conf_t *conf;
 
 	Pixmap background;
 	gui_label_t *title, *username, *password, *msg;
@@ -44,7 +44,7 @@ struct gui_t {
 	} visible, focus;
 };
 
-gui_t* gui_new(display_t *display, cfg_t *theme);
+gui_t* gui_new(display_t *display, conf_t *theme);
 void gui_delete(gui_t *gui);
 void gui_show(gui_t *gui);
 void gui_hide(gui_t *gui);

@@ -17,8 +17,8 @@ static void get_opt_arg(char *str, char **opt, char **arg)
 	else
 		*p='\0';
 
-	*opt = strtrim(str);
-	*arg = strtrim(++p);
+	*opt = xstrtrim(str);
+	*arg = xstrtrim(++p);
 }
 
 static map_t* map_new(const char *key, const char *value)
@@ -31,15 +31,15 @@ static map_t* map_new(const char *key, const char *value)
 	return map;
 }
 
-cfg_t* conf_new(void)
+conf_t* conf_new(void)
 {
-	cfg_t *conf = xmalloc(sizeof(*conf));
+	conf_t *conf = xmalloc(sizeof(*conf));
 	conf->map = NULL;
 	
 	return conf;
 }
 
-void conf_delete(cfg_t *conf)
+void conf_delete(conf_t *conf)
 {
 	map_t *map = conf->map;
 	while (map) {
@@ -54,7 +54,7 @@ void conf_delete(cfg_t *conf)
 	free(conf);
 }
 
-int conf_parse(cfg_t *conf, const char *config_file)
+int conf_parse(conf_t *conf, const char *config_file)
 {
 	char buffer[BUFFER_SIZE];
 	char *opt,*arg;
@@ -80,7 +80,7 @@ int conf_parse(cfg_t *conf, const char *config_file)
 	return TRUE;
 }
 
-char* conf_get(cfg_t *conf, const char *key)
+char* conf_get(conf_t *conf, const char *key)
 {
 	map_t *map = conf->map;
 	
@@ -98,7 +98,7 @@ char* conf_get(cfg_t *conf, const char *key)
  * Although if the responsibility to free the data is on the user,
  * this will not be needed. Then ofcource overwriting data is not
  * so easy anymore.  */
-void conf_set(cfg_t *conf, const char *key, const char *value)
+void conf_set(conf_t *conf, const char *key, const char *value)
 {
 	map_t *map = conf->map;
 

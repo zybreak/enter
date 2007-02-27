@@ -9,9 +9,15 @@ typedef struct gui_input_t gui_input_t;
 #include "gui_image.h"
 #include "gui.h"
 
+typedef enum {
+	POS_RELATIVE,
+	POS_ABSOLUTE
+} pos_mode_t;
+
 struct gui_input_t {
 	int type;
 	int x, y, w, h;
+	int pos;
 
 	gui_image_t *image;
 	gui_label_t *text;
@@ -24,6 +30,8 @@ void gui_input_delete(gui_input_t *input, display_t *display);
 void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden);
 char* gui_input_get_text(gui_input_t *input);
 void gui_input_set_text(gui_input_t *input, const char *text);
+void gui_input_set_pos(gui_input_t *input, int pos, pos_mode_t mode);
+void gui_input_delete_char(gui_input_t *input);
 int gui_input_x(gui_input_t *input);
 int gui_input_y(gui_input_t *input);
 int gui_input_width(gui_input_t *input);

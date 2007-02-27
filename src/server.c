@@ -35,7 +35,7 @@ static int generate_cookie(char *cookie)
 	return 0;
 }
 
-static int server_authenticate(cfg_t *conf, const char *address)
+static int server_authenticate(conf_t *conf, const char *address)
 {
 	FILE *auth_file;
 	Xauth *auth = xmalloc(sizeof(*auth));
@@ -133,7 +133,7 @@ int server_stop(void)
 	return TRUE;
 }
 
-int server_start(cfg_t *conf)
+int server_start(conf_t *conf)
 {
 	char *cmd[CMD_LEN];
 	struct sigaction sa;
