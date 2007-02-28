@@ -50,7 +50,7 @@ static void auth_spawn(void)
 	char *args[] = {
 		auth.pwd->pw_shell,
 		"-login",
-		auth.login_file,
+		strdup(auth.login_file),
 		NULL
 	};
 
