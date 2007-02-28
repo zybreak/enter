@@ -62,14 +62,12 @@ static void gui_draw(gui_t *gui)
 
 static void gui_keypress(gui_t *gui, XEvent *event)
 {
-	/* ch is defined this way, so we are certain a
-	 * null sign follows the char.  */
-	char ch[2] = "\0\0";
+	char ch;
 	KeySym keysym;
 	XComposeStatus cstatus;
 	gui_input_t *input;
 
-	XLookupString(&event->xkey, ch, 1, &keysym, &cstatus);
+	XLookupString(&event->xkey, &ch, 1, &keysym, &cstatus);
 
 	/* Assign `input' to the currently focused
 	 * input box.  */
@@ -79,18 +77,13 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 		input = gui->passwd_input;
 	}
 	
-	char *input_text = gui_input_get_text(input);
-	int text_len = strlen(input_text);
-
 	if (keysym == XK_BackSpace) {
-		if (text_len > 0)
-			input_text[text_len-1] = '\0';
+		gui_input_delete_char(input);
+
 	} else if (keysym == XK_Tab && gui->visible == BOTH) {
 		/* If both input boxes are visible, change focus.  */
-		if (gui->focus == USERNAME)
-			gui->focus = PASSWORD;
-		else
-			gui->focus = USERNAME;
+		gui->focus = (gui->focus == USERNAME) ? PASSWORD : USERNAME;
+
 	} else if (keysym == XK_Return && gui->focus == PASSWORD) {
 		char *usr = gui_input_get_text(gui->user_input);
 		char *pwd = gui_input_get_text(gui->passwd_input);
@@ -120,12 +113,11 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 			gui->visible = PASSWORD;
 		gui->focus = PASSWORD;
 	} else {
-		char *str = xstrcat(input_text, ch);
-		gui_input_set_text(input, str);
-		free(str);
-		
-		gui_label_set_caption(gui->msg, "");
+		gui_input_insert_char(input, ch);
 	}
+
+	char *str = gui_label_get_caption(gui->msg);
+	snprintf(str, LABEL_TEXT_LEN, "pos: %d", input->pos);
 
 	gui_draw(gui);
 }

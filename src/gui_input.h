@@ -10,8 +10,8 @@ typedef struct gui_input_t gui_input_t;
 #include "gui.h"
 
 typedef enum {
-	POS_RELATIVE,
-	POS_ABSOLUTE
+	INPUT_POS_REL,
+	INPUT_POS_ABS
 } pos_mode_t;
 
 struct gui_input_t {
@@ -32,6 +32,7 @@ char* gui_input_get_text(gui_input_t *input);
 void gui_input_set_text(gui_input_t *input, const char *text);
 void gui_input_set_pos(gui_input_t *input, int pos, pos_mode_t mode);
 void gui_input_delete_char(gui_input_t *input);
+void gui_input_insert_char(gui_input_t *input, char c);
 int gui_input_x(gui_input_t *input);
 int gui_input_y(gui_input_t *input);
 int gui_input_width(gui_input_t *input);

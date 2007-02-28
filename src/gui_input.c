@@ -50,8 +50,8 @@ void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden)
 {
 	gui_image_draw(gui->drawable, input->image);
 
-	char old[TEXT_LEN];
-	strncpy(old, gui_input_get_text(input), TEXT_LEN);
+	char old[LABEL_TEXT_LEN];
+	strncpy(old, gui_input_get_text(input), LABEL_TEXT_LEN);
 
 	if (hidden) {
 		memset(gui_input_get_text(input), '*',
@@ -71,23 +71,39 @@ char* gui_input_get_text(gui_input_t *input)
 void gui_input_set_text(gui_input_t *input, const char *text)
 {
 	input->pos = strlen(text);
+	if (input->pos > 0)
+		input->pos--;
+
 	gui_label_set_caption(input->text, text);
 }
 
 void gui_input_set_pos(gui_input_t *input, int pos, pos_mode_t mode)
 {
-	input->pos += pos;
+	if (mode == INPUT_POS_REL)
+		input->pos += pos;
+	else
+		input->pos = pos;
+
+	if (input->pos > strlen(gui_input_get_text(input)))
+		input->pos = strlen(gui_input_get_text(input));
 
 	if (input->pos < 0)
 		input->pos = 0;
-	else if (input->pos > strlen(gui_input_get_text(input)))
-		input->pos = strlen(gui_input_get_text(input));
 }
 
 void gui_input_delete_char(gui_input_t *input)
 {
-	if (input->pos > 0)
-		xstrdel(gui_label_get_caption(input->text),input->pos);
+	/* Delete character at position `input->pos'.  */
+	xstrdel(gui_label_get_caption(input->text),input->pos);
+
+	gui_input_set_pos(input, -1, INPUT_POS_REL);
+}
+
+void gui_input_insert_char(gui_input_t *input, char c)
+{
+	xstrins(gui_label_get_caption(input->text), input->pos, c, LABEL_TEXT_LEN);
+
+	gui_input_set_pos(input, 1, INPUT_POS_REL);
 }
 
 int gui_input_x(gui_input_t *input)

@@ -24,36 +24,36 @@ label.msg.y = 666
 label.username.caption = Username:
 label.username.font = verdana-26:normal:dpi=75
 label.username.color = #000000
-label.username.x = 192
-label.username.y = 171
+label.username.x = 190
+label.username.y = 170
 
 # Password label
 label.password.caption = Password:
 label.password.font = verdana-26:normal:dpi=75
 label.password.color = #000000
-label.password.x = 192
-label.password.y = 262
+label.password.x = 190
+label.password.y = 270
 
 # Username input field
-input.username.x = 187
-input.username.y = 199
+input.username.x = 186
+input.username.y = 200
 input.username.image = input.png
 input.username.text.font = verdana-26:normal:dpi=75
 input.username.text.color = #FFFFFF
 input.username.text.x =	8
 input.username.text.y = 8
-input.username.text.width = 292
+input.username.text.width = 280
 input.username.text.height = 33
 
 # Password input field
-input.password.x = 187
-input.password.y = 299
+input.password.x = 186
+input.password.y = 300
 input.password.image = input.png
 input.password.text.font = verdana-26:normal:dpi=75
 input.password.text.color = #FFFFFF
 input.password.text.x = 8
 input.password.text.y = 8
-input.password.text.width = 292
+input.password.text.width = 280
 input.password.text.height = 33
 
 # End of file.

@@ -1,3 +1,11 @@
+2007-03-01  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/gui_input.c:
+	worked on cursor code.
+	* src/gui.c:
+	now uses gui_input.c's new code.
+	* data/themes/default/theme:
+	tweaked the values.
+
 2007-02-27  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/gui_input.c:
 	added basic code for cursor functions.

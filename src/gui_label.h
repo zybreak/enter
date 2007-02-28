@@ -3,7 +3,7 @@
 
 #include <X11/Xft/Xft.h>
 
-#define TEXT_LEN 64
+#define LABEL_TEXT_LEN 64
 
 typedef  struct gui_label_t gui_label_t;
 
@@ -16,7 +16,7 @@ struct gui_label_t {
 
 	XftFont *font;
 	XftColor *color;
-	char caption[TEXT_LEN];
+	char caption[LABEL_TEXT_LEN];
 };
 
 gui_label_t* gui_label_new(display_t *display, const char *font,

@@ -53,4 +53,12 @@ void xstrdel(char *str, size_t pos)
 
 void xstrins(char *str, size_t pos, char c, size_t size)
 {
+	size_t i;
+	for (i=size-1; i > pos; i--) {
+		str[i] = str[i-1];
+	}
+
+	str[pos] = c;
+	str[size-1] = '\0';
 }
+
