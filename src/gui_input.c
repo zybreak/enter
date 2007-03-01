@@ -5,13 +5,14 @@
 
 gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 		const char *font, const char *color, 
-		int text_x, int text_y, int text_w, int text_h)
+		int text_x, int text_y, int text_w, int text_h, int hidden)
 {
 	int t_x, t_y, t_w, t_h;
 	gui_input_t *input = xmalloc(sizeof(*input));
 
 	input->x = x;
 	input->y = y;
+	input->hidden = hidden;
 
 	input->image = gui_image_new(display, image, x, y);
 	if (!input->image) {
@@ -46,21 +47,24 @@ void gui_input_delete(gui_input_t *input, display_t *display)
 	free(input);
 }
 
-void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden)
+void gui_input_draw(gui_input_t *input, gui_t *gui)
 {
+	char buf[LABEL_TEXT_LEN];
+	char *str = gui_label_get_caption(input->text);
+	int i = 0;
+
+	strncpy(buf, str, LABEL_TEXT_LEN-1);
+
+	if (input->hidden) {
+		for (i = 0; i < strlen(str); i++)
+			str[i] = '*';
+	}
+	
 	gui_image_draw(gui->drawable, input->image);
 
-	char old[LABEL_TEXT_LEN];
-	strncpy(old, gui_input_get_text(input), LABEL_TEXT_LEN);
-
-	if (hidden) {
-		memset(gui_input_get_text(input), '*',
-				strlen(gui_input_get_text(input)));
-	}
-
 	gui_label_draw(input->text, gui);
-
-	gui_input_set_text(input, old);
+	
+	strncpy(str, buf, LABEL_TEXT_LEN-1);
 }
 
 char* gui_input_get_text(gui_input_t *input)
@@ -81,11 +85,10 @@ void gui_input_set_pos(gui_input_t *input, int pos, pos_mode_t mode)
 	else
 		input->pos = pos;
 
-	if (input->pos > strlen(gui_input_get_text(input)))
-		input->pos = strlen(gui_input_get_text(input));
-
 	if (input->pos < 0)
 		input->pos = 0;
+	else if (input->pos > strlen(gui_input_get_text(input)))
+		input->pos = strlen(gui_input_get_text(input));
 }
 
 void gui_input_delete_char(gui_input_t *input)

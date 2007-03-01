@@ -1,6 +1,8 @@
 2007-03-01  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/gui_input.c:
 	cursor code now works.
+	* src/gui_input.c:
+	added code to move cursor.
 
 2007-03-01  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/gui_input.c:

@@ -17,7 +17,7 @@
 			0, 0, \
 			conf_get(theme, LABEL ".caption"))
 
-#define INPUT_NEW(INPUT, IMAGE) \
+#define INPUT_NEW(INPUT, IMAGE, PASSWORD) \
 	gui_input_new(display, buf, \
 			atoi(conf_get(theme, INPUT ".x")), \
 			atoi(conf_get(theme, INPUT ".y")), \
@@ -26,7 +26,8 @@
 			atoi(conf_get(theme, INPUT ".text.x")), \
 			atoi(conf_get(theme, INPUT ".text.y")), \
 			atoi(conf_get(theme, INPUT ".text.width")), \
-			atoi(conf_get(theme, INPUT ".text.height")))
+			atoi(conf_get(theme, INPUT ".text.height")), \
+			PASSWORD)
 
 #define BUF_LEN 64
 
@@ -44,12 +45,12 @@ static void gui_draw(gui_t *gui)
 	
 	if (gui->visible == BOTH || gui->visible == USERNAME) {
 		gui_label_draw(gui->username, gui);
-		gui_input_draw(gui->user_input, gui, FALSE);
+		gui_input_draw(gui->user_input, gui);
 	}
 	
 	if (gui->visible == BOTH || gui->visible == PASSWORD) {
 		gui_label_draw(gui->password, gui);
-		gui_input_draw(gui->passwd_input, gui, TRUE);
+		gui_input_draw(gui->passwd_input, gui);
 	}
 	
 	gui_label_draw(gui->msg, gui);
@@ -80,38 +81,53 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 	if (keysym == XK_BackSpace) {
 		gui_input_delete_char(input);
 
+	} else if (keysym == XK_Left) {
+		gui_input_set_pos(input, -1, INPUT_POS_REL);
+
+	} else if (keysym == XK_Right) {
+		gui_input_set_pos(input, 1, INPUT_POS_REL);
+
+	} else if (keysym == XK_Home) {
+		gui_input_set_pos(input, 0, INPUT_POS_ABS);
+
+	} else if (keysym == XK_End) {
+		gui_input_set_pos(input, LABEL_TEXT_LEN, INPUT_POS_ABS);
+
 	} else if (keysym == XK_Tab && gui->visible == BOTH) {
 		/* If both input boxes are visible, change focus.  */
 		gui->focus = (gui->focus == USERNAME) ? PASSWORD : USERNAME;
 
-	} else if (keysym == XK_Return && gui->focus == PASSWORD) {
+	} else if (keysym == XK_Return) {
 		char *usr = gui_input_get_text(gui->user_input);
 		char *pwd = gui_input_get_text(gui->passwd_input);
 
 		/* Authenticate user.  */
 		int auth = auth_authenticate(usr, pwd);
-			
-		memset(usr,'\0',strlen(usr));
-		memset(pwd,'\0',strlen(pwd));
 
-		if (auth == TRUE) {
-			/* User authenticated successfully.  */
-			gui->mode = LOGIN;
-			return;
-		} else {
-			/* User authentication failed.  */
-			gui_label_set_caption(gui->msg,
+		if (gui->focus == PASSWORD) {
+			memset(usr,'\0',strlen(usr));
+			memset(pwd,'\0',strlen(pwd));
+
+			if (auth == TRUE) {
+				/* User authenticated successfully.  */
+				gui->mode = LOGIN;
+				return;
+			} else {
+				/* User authentication failed.  */
+				gui_label_set_caption(gui->msg,
 					"Wrong password or username.");
+			}
 		}
-		
+
+		/* If gui->visible is either PASSWORD or
+		 * USERNAME, switch gui->visible.  */
 		if (gui->visible == PASSWORD)
 			gui->visible = USERNAME;
-		gui->focus = USERNAME;
-
-	} else if (keysym == XK_Return && gui->focus == USERNAME) {
-		if (gui->visible == USERNAME)
+		else if (gui->visible == USERNAME)
 			gui->visible = PASSWORD;
-		gui->focus = PASSWORD;
+
+		/* Change focus.  */
+		gui->focus = (gui->focus == USERNAME) ? PASSWORD : USERNAME;
 	} else {
 		gui_input_insert_char(input, ch);
 	}
@@ -197,11 +213,11 @@ gui_t* gui_new(display_t *display, conf_t *theme)
 	/* Load input boxes.  */
 	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme,"theme"), 
 			conf_get(theme,"input.username.image"));
-	gui->user_input = INPUT_NEW("input.username", buf);
+	gui->user_input = INPUT_NEW("input.username", buf, 0);
 	
 	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme,"theme"), 
 			conf_get(theme,"input.password.image"));
-	gui->passwd_input = INPUT_NEW("input.password", buf);
+	gui->passwd_input = INPUT_NEW("input.password", buf, 1);
 
 	/* Make sure all object's were loaded.  */
 	if (!(gui->title && gui->msg && gui->username && gui->password &&

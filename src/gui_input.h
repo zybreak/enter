@@ -18,6 +18,7 @@ struct gui_input_t {
 	int type;
 	int x, y, w, h;
 	int pos;
+	int hidden;
 
 	gui_image_t *image;
 	gui_label_t *text;
@@ -25,9 +26,9 @@ struct gui_input_t {
 
 gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 		const char *font, const char *color, 
-		int text_x, int text_y, int text_w, int text_h);
+		int text_x, int text_y, int text_w, int text_h, int hidden);
 void gui_input_delete(gui_input_t *input, display_t *display);
-void gui_input_draw(gui_input_t *input, gui_t *gui, int hidden);
+void gui_input_draw(gui_input_t *input, gui_t *gui);
 char* gui_input_get_text(gui_input_t *input);
 void gui_input_set_text(gui_input_t *input, const char *text);
 void gui_input_set_pos(gui_input_t *input, int pos, pos_mode_t mode);
