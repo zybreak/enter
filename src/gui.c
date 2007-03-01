@@ -76,7 +76,7 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 	} else {
 		input = gui->passwd_input;
 	}
-	
+
 	if (keysym == XK_BackSpace) {
 		gui_input_delete_char(input);
 

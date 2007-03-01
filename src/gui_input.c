@@ -70,11 +70,8 @@ char* gui_input_get_text(gui_input_t *input)
 
 void gui_input_set_text(gui_input_t *input, const char *text)
 {
-	input->pos = strlen(text);
-	if (input->pos > 0)
-		input->pos--;
-
 	gui_label_set_caption(input->text, text);
+	gui_input_set_pos(input, strlen(text), INPUT_POS_ABS);
 }
 
 void gui_input_set_pos(gui_input_t *input, int pos, pos_mode_t mode)
@@ -93,10 +90,9 @@ void gui_input_set_pos(gui_input_t *input, int pos, pos_mode_t mode)
 
 void gui_input_delete_char(gui_input_t *input)
 {
-	/* Delete character at position `input->pos'.  */
-	xstrdel(gui_label_get_caption(input->text),input->pos);
-
 	gui_input_set_pos(input, -1, INPUT_POS_REL);
+
+	xstrdel(gui_label_get_caption(input->text),input->pos);
 }
 
 void gui_input_insert_char(gui_input_t *input, char c)
