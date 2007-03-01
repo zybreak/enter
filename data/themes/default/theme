@@ -42,8 +42,8 @@ input.username.text.font = verdana-26:normal:dpi=75
 input.username.text.color = #FFFFFF
 input.username.text.x =	8
 input.username.text.y = 8
-input.username.text.width = 280
-input.username.text.height = 33
+input.username.text.width = 275
+input.username.text.height = 28
 
 # Password input field
 input.password.x = 186
@@ -53,7 +53,7 @@ input.password.text.font = verdana-26:normal:dpi=75
 input.password.text.color = #FFFFFF
 input.password.text.x = 8
 input.password.text.y = 8
-input.password.text.width = 280
-input.password.text.height = 33
+input.password.text.width = 275
+input.password.text.height = 28
 
 # End of file.

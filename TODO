@@ -6,15 +6,13 @@ Critical priority
 
 Moderate priority
 * Document functions.
-* Add code to enable relative positions of labels/images/areas in themes.
 * Allow for scaled/centered background.
 * Hide cursor.
 
 Low priority
-* Add support for multiple themes.
+* Add support for runtime theme switching.
 * Add support for multiple sessions.
 * Add support for actions other than login (shutdown, hibernate).
-* Remove map_t from cfg_t.
 * Add PAM authentication support.
 * Add NLS support.
 * Add testcases.

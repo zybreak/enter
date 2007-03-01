@@ -40,19 +40,22 @@ static void gui_draw(gui_t *gui)
 	if (!gui->has_doublebuf)
 		XClearWindow(display->dpy, gui->win);
 
+	/* Draw the labels.  */
 	gui_label_draw(gui->title, gui);
 	gui_label_draw(gui->msg, gui);
 	
+	/* Draw the input boxes.  */
 	if (gui->visible == BOTH || gui->visible == USERNAME) {
 		gui_label_draw(gui->username, gui);
-		gui_input_draw(gui->user_input, gui);
+		gui_input_draw(gui->user_input, gui, (gui->focus == USERNAME));
 	}
 	
 	if (gui->visible == BOTH || gui->visible == PASSWORD) {
 		gui_label_draw(gui->password, gui);
-		gui_input_draw(gui->passwd_input, gui);
+		gui_input_draw(gui->passwd_input, gui, (gui->focus == PASSWORD));
 	}
-	
+
+	/* Draw the message label.  */
 	gui_label_draw(gui->msg, gui);
 
 	if (gui->has_doublebuf) {
@@ -107,6 +110,8 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 		if (gui->focus == PASSWORD) {
 			memset(usr,'\0',strlen(usr));
 			memset(pwd,'\0',strlen(pwd));
+			gui_input_set_text(gui->user_input, "");
+			gui_input_set_text(gui->passwd_input, "");
 
 			if (auth == TRUE) {
 				/* User authenticated successfully.  */
@@ -131,9 +136,6 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 	} else {
 		gui_input_insert_char(input, ch);
 	}
-
-	char *str = gui_label_get_caption(gui->msg);
-	snprintf(str, LABEL_TEXT_LEN, "pos: %d", input->pos);
 
 	gui_draw(gui);
 }

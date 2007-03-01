@@ -5,7 +5,7 @@
 
 #define LABEL_TEXT_LEN 64
 
-typedef  struct gui_label_t gui_label_t;
+typedef struct gui_label_t gui_label_t;
 
 #include "display.h"
 #include "gui.h"
