@@ -2,7 +2,6 @@ Critical priority
 * Drop priviledges when not needed.
 * Improve configure.ac.
 * Add MIT cookie generator.
-* Make sure the GUI never looses focus.
 
 Moderate priority
 * Document functions.

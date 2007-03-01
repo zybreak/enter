@@ -1,6 +1,9 @@
 2007-03-01  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/gui_input.c:
 	added code to show the cursor.
+	* TODO:
+	enter dont seem to loose focus anymore when run
+	at system start.
 
 2007-03-01  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/gui_input.c:

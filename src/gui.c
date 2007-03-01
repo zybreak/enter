@@ -135,6 +135,7 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 		gui->focus = (gui->focus == USERNAME) ? PASSWORD : USERNAME;
 	} else {
 		gui_input_insert_char(input, ch);
+		gui_label_set_caption(gui->msg,"");
 	}
 
 	gui_draw(gui);
