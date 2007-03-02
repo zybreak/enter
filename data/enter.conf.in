@@ -6,5 +6,6 @@ server_path=@X_PATH@
 theme=default
 login_file=.xinitrc
 auth_file=.Xauthenticate
+authenticate=true
 
 # End of file

@@ -18,6 +18,7 @@ This is a config with the default values:
 server_path=/usr/X11R6/bin/X
 login_file=.xinitrc
 auth_file=.Xauthenticate
+authenticate=true
 theme=default
 
 # End of file
@@ -34,6 +35,9 @@ Specifies which file to run as the user session.
 .TP
 .BI "auth_file=" <filename>
 Write the MIT cookie to the specified file instead of the system default.
+.TP
+.BI "authenticate=" <boolean>
+Should Enter use the Xauth system for authenticating X clients?
 .TP
 .BI "theme=" <theme>
 Specifies which theme to use.

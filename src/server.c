@@ -12,39 +12,54 @@
 #include "log.h"
 #include "utils.h"
 
-#define AUTH_DATA_LEN 16
 #define AUTH_NAME "MIT-MAGIC-COOKIE-1"
 #define SERVER_TIMEOUT 5
+#define HOSTNAME_LEN 1024
 
 static int server_started = FALSE;
 static pid_t server_pid = 0;
 
-static int generate_cookie(char *cookie)
+static char* generate_cookie(int length)
 {
-#if 0
-	struct MD5Context ctx;
-	time_t time;
+	int i = 0;
+	int hexcount = 0;
+	const char digits[] = "0123456789abcdef";
+	char *cookie = xmalloc(sizeof(char) * length);
 
-	MD5Init(&ctx);
+	srand( time(NULL) );
+	while (i < length -1) {
+		cookie[i++] = digits[rand() % 16];
+		if (cookie[i] >= 'a')
+			hexcount++;
+	}
+	
+	/* MIT-COOKIE: demands even occurrences of digits and hex digits.
+	 * So we check if there was a odd number of digits.*/
+	if (hexcount % 2) {
+		/* generate a character.  */
+		cookie[i] = rand() % 5+10;
+	} else {
+		/* generate a number.  */
+		cookie[i] = rand()%10;
+	}
 
-	time = time(NULL);
-	MD5Update(&ctx, );
-#endif
-
-	return 0;
+	return cookie;
 }
 
-static int server_authenticate(conf_t *conf, const char *address)
+static int server_authenticate(conf_t *conf)
 {
 	FILE *auth_file;
+	char hostname[HOSTNAME_LEN];
 	Xauth *auth = xmalloc(sizeof(*auth));
-	
+
+	memset(hostname, 0, HOSTNAME_LEN);
+	gethostname(hostname, HOSTNAME_LEN-1);
+
 	auth->family = FamilyLocal;
 	
 	/* Copy the address. */
-	auth->address_length = strlen(address);
-	auth->address = xmalloc(auth->address_length+1);
-	memcpy(auth->address, address, auth->address_length);
+	auth->address_length = strlen(hostname);
+	auth->address = strdup(hostname);
 
 	/* Copy the display number.  */	
 	auth->number = conf_get(conf, "display");
@@ -56,26 +71,38 @@ static int server_authenticate(conf_t *conf, const char *address)
 	
 	/* Generate cookie.  */
 	auth->data_length = AUTH_DATA_LEN;
-	auth->data = xmalloc(auth->data_length+1);
-	auth->data_length = generate_cookie(auth->data);
+	auth->data = generate_cookie(auth->data_length);
 	if (!auth->data) {
+		log_print(LOG_ERR, "Could not generae magic cookie.");
+		
 		free(auth->name);
+		free(auth->hostname);
 		free(auth);
+		
 		return FALSE;
 	}
 	
 	/* Write authentication file.  */
 	auth_file = fopen(conf_get(conf,"auth_file"),"w");
 	if (!auth_file) {
-		log_print(LOG_ERR, "No auth file supplied.");
+		log_print(LOG_ERR, "Failed to open magic cookie file.");
+		
+		free(auth->name);
+		free(auth->hostname);
+		free(auth);
+		
 		return FALSE;
 	}
 	
-	if (!XauWriteAuth(auth_file,auth)) {
+	if (!XauWriteAuth(auth_file, auth)) {
+		log_print(LOG_ERR, "Failed to write magic cookie.");
+		
 		fclose(auth_file);
-		log_print(LOG_ERR, "Failed to write auth file for X Server.");
+		
 		return FALSE;
 	}
+
+	/* TODO: free auth when not needed.  */
 	
 	return TRUE;
 }
@@ -144,20 +171,28 @@ int server_start(conf_t *conf)
 	sa.sa_handler = signal_sigusr1;
 	sigaction(SIGUSR1,&sa,NULL);
 
-	/* TODO: finish cookies!  */
-	server_authenticate(conf, "");
+	int authenticate = !strcmp(conf_get(conf, "authenticate"), "true");
+
+	if (authenticate)
+		server_authenticate(conf);
 
 	/* This is the command to start
 	 * the X server.  */
-	char *cmd[] = {
-		conf_get(conf,"server_path"),
-		conf_get(conf,"display"),
-	/*
-		"-auth",
-		conf_get(conf,"auth_file"),
-	*/
-		NULL
-	};
+	if (authenticate) {
+		char *cmd[] = {
+			conf_get(conf,"server_path"),
+			conf_get(conf,"display"),
+			"-auth",
+			conf_get(conf,"auth_file"),
+			NULL
+		};
+	} else {
+		char *cmd[] = {
+			conf_get(conf,"server_path"),
+			conf_get(conf,"display"),
+			NULL
+		};
+	}
 	
 	server_pid = fork();
 	switch(server_pid) {
@@ -183,7 +218,6 @@ int server_start(conf_t *conf)
 
 				return FALSE;
 			}
-
 	}
 
 	return server_pid;
