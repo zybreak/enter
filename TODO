@@ -6,7 +6,9 @@ Critical priority
 Moderate priority
 * Document functions.
 * Allow for scaled/centered background.
-* Hide cursor.
+* Option to hide cursor when not wanted.
+* Add buttons and animations.
+* Replace Imlib2 with own functions.
 
 Low priority
 * Add support for runtime theme switching.
