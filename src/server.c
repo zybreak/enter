@@ -14,7 +14,6 @@
 
 #define AUTH_DATA_LEN 16
 #define AUTH_NAME "MIT-MAGIC-COOKIE-1"
-#define CMD_LEN 256
 #define SERVER_TIMEOUT 5
 
 static int server_started = FALSE;
@@ -135,7 +134,6 @@ int server_stop(void)
 
 int server_start(conf_t *conf)
 {
-	char *cmd[CMD_LEN];
 	struct sigaction sa;
 	time_t start_time;
 	
@@ -145,20 +143,21 @@ int server_start(conf_t *conf)
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = signal_sigusr1;
 	sigaction(SIGUSR1,&sa,NULL);
-	
-	if (!strcmp(conf_get(conf,"authenticate"),"true")) {
-		server_authenticate(conf, "");
-		
-		cmd[0] = conf_get(conf,"server_path");
-		cmd[1] = "-auth";
-		cmd[2] = conf_get(conf,"auth_file");
-		cmd[3] = conf_get(conf,"display");
-		cmd[4] = NULL;
-	} else {
-		cmd[0] = conf_get(conf,"server_path");
-		cmd[1] = conf_get(conf,"display");
-		cmd[2] = NULL;
-	}
+
+	/* TODO: finish cookies!  */
+	server_authenticate(conf, "");
+
+	/* This is the command to start
+	 * the X server.  */
+	char *cmd[] = {
+		conf_get(conf,"server_path"),
+		conf_get(conf,"display"),
+	/*
+		"-auth",
+		conf_get(conf,"auth_file"),
+	*/
+		NULL
+	};
 	
 	server_pid = fork();
 	switch(server_pid) {
