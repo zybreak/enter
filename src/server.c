@@ -12,6 +12,7 @@
 #include "log.h"
 #include "utils.h"
 
+#define AUTH_DATA_LEN 32
 #define AUTH_NAME "MIT-MAGIC-COOKIE-1"
 #define SERVER_TIMEOUT 5
 #define HOSTNAME_LEN 1024
@@ -76,7 +77,7 @@ static int server_authenticate(conf_t *conf)
 		log_print(LOG_ERR, "Could not generae magic cookie.");
 		
 		free(auth->name);
-		free(auth->hostname);
+		free(auth->address);
 		free(auth);
 		
 		return FALSE;
@@ -88,7 +89,7 @@ static int server_authenticate(conf_t *conf)
 		log_print(LOG_ERR, "Failed to open magic cookie file.");
 		
 		free(auth->name);
-		free(auth->hostname);
+		free(auth->address);
 		free(auth);
 		
 		return FALSE;
@@ -178,20 +179,14 @@ int server_start(conf_t *conf)
 
 	/* This is the command to start
 	 * the X server.  */
+	char *cmd[] = {
+		conf_get(conf,"server_path"),
+		conf_get(conf,"display"),
+		NULL, NULL, NULL
+	};
 	if (authenticate) {
-		char *cmd[] = {
-			conf_get(conf,"server_path"),
-			conf_get(conf,"display"),
-			"-auth",
-			conf_get(conf,"auth_file"),
-			NULL
-		};
-	} else {
-		char *cmd[] = {
-			conf_get(conf,"server_path"),
-			conf_get(conf,"display"),
-			NULL
-		};
+		cmd[2] = "-auth";
+		cmd[3] = conf_get(conf,"auth_file");
 	}
 	
 	server_pid = fork();
