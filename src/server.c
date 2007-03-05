@@ -82,6 +82,16 @@ static int server_authenticate(conf_t *conf)
 		
 		return FALSE;
 	}
+
+	if (XauLockAuth(conf_get(conf, "auth_file"), 3, 3, 0) != LOCK_SUCCESS) {
+		log_print(LOG_ERR, "Failed to lock magic cookie file.");
+
+		free(auth->name);
+		free(auth->address);
+		free(auth);
+
+		return FALSE;
+	}
 	
 	/* Write authentication file.  */
 	auth_file = fopen(conf_get(conf,"auth_file"),"w");
@@ -102,6 +112,10 @@ static int server_authenticate(conf_t *conf)
 		
 		return FALSE;
 	}
+	
+	fclose(auth_file);
+	XauUnlockAuth(conf_get(conf, "auth_file"));
+	setenv("XAUTHORITY", conf_get(conf, "auth_file"), 1);
 
 	/* TODO: free auth when not needed.  */
 	
@@ -174,9 +188,6 @@ int server_start(conf_t *conf)
 
 	int authenticate = !strcmp(conf_get(conf, "authenticate"), "true");
 
-	if (authenticate)
-		server_authenticate(conf);
-
 	/* This is the command to start
 	 * the X server.  */
 	char *cmd[] = {
@@ -185,6 +196,11 @@ int server_start(conf_t *conf)
 		NULL, NULL, NULL
 	};
 	if (authenticate) {
+		if (!server_authenticate(conf)) {
+			log_print(LOG_CRIT, "Could not create magic cookie.");
+			return FALSE;
+		}
+
 		cmd[2] = "-auth";
 		cmd[3] = conf_get(conf,"auth_file");
 	}
@@ -192,7 +208,7 @@ int server_start(conf_t *conf)
 	server_pid = fork();
 	switch(server_pid) {
 		case -1:
-			log_print(LOG_WARNING,"Could not fork process");
+			log_print(LOG_CRIT,"Could not fork process");
 			return FALSE;
 		case 0:
 			signal(SIGUSR1,SIG_IGN);

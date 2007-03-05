@@ -9,6 +9,9 @@ Moderate priority
 * Option to hide cursor when not wanted.
 * Add buttons and animations.
 * Replace Imlib2 with own functions.
+* Check all log messages, and make the
+  priority consistent.
+* Proper Xauth handling.
 
 Low priority
 * Add support for runtime theme switching.
