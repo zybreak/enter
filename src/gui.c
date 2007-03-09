@@ -5,7 +5,7 @@
 #include "gui.h"
 #include "gui_image.h"
 
-#include "auth.h"
+#include "login.h"
 #include "log.h"
 #include "utils.h"
 
@@ -105,23 +105,30 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 		char *pwd = gui_input_get_text(gui->passwd_input);
 
 		/* Authenticate user.  */
-		int auth = auth_authenticate(usr, pwd);
+		int auth = login_authenticate(usr, pwd);
 
-		if (gui->focus == PASSWORD) {
+		/* when auth is TRUE, we got a successful login,
+		 * EMPTY user, and passwd field and set gui->mode to LOGIN.
+		 * if auth is FALSE and gui->focus is USERNAME, just switch focus.
+		 * if auth is FALSE and gui->focus is PASSWORD, empty user and passwd
+		 * field and scream at the user! */
+		if (auth) {
+			/* User authenticated successfully.  */
 			memset(usr,'\0',strlen(usr));
 			memset(pwd,'\0',strlen(pwd));
 			gui_input_set_text(gui->user_input, "");
 			gui_input_set_text(gui->passwd_input, "");
 
-			if (auth == TRUE) {
-				/* User authenticated successfully.  */
-				gui->mode = LOGIN;
-				return;
-			} else {
-				/* User authentication failed.  */
-				gui_label_set_caption(gui->msg,
-					"Wrong password or username.");
-			}
+			gui->mode = LOGIN;
+
+			return;
+
+		} else if (gui->focus == PASSWORD) {
+			gui_input_set_text(gui->user_input, "");
+			gui_input_set_text(gui->passwd_input, "");
+			/* User authentication failed.  */
+			gui_label_set_caption(gui->msg,
+				"Wrong password or username.");
 		}
 
 		/* If gui->visible is either PASSWORD or

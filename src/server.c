@@ -62,8 +62,11 @@ static int server_authenticate(conf_t *conf)
 	auth->address_length = strlen(hostname);
 	auth->address = strdup(hostname);
 
-	/* Copy the display number.  */	
-	auth->number = conf_get(conf, "display");
+	/* Copy the display number.  */
+	/* TODO: move authentication code to own file.
+	 * set disp to rindex(DisplayString(),":")  */
+	char *disp = "0";
+	auth->number = disp;
 	auth->number_length = strlen(auth->number);
 	
 	/* Copy the cookie name.  */
@@ -115,6 +118,7 @@ static int server_authenticate(conf_t *conf)
 	
 	fclose(auth_file);
 	XauUnlockAuth(conf_get(conf, "auth_file"));
+	
 	setenv("XAUTHORITY", conf_get(conf, "auth_file"), 1);
 
 	/* TODO: free auth when not needed.  */
@@ -196,6 +200,7 @@ int server_start(conf_t *conf)
 		NULL, NULL, NULL
 	};
 	if (authenticate) {
+		/* TODO: make sure the auth file is removed, before creating a new one.  */
 		if (!server_authenticate(conf)) {
 			log_print(LOG_CRIT, "Could not create magic cookie.");
 			return FALSE;

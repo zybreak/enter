@@ -13,7 +13,7 @@
 #include "log.h"
 #include "conf.h"
 #include "utils.h"
-#include "auth.h"
+#include "login.h"
 
 #define PIDFILE "/var/run/" PACKAGE ".pid"
 #define PIDBUF 20
@@ -67,9 +67,10 @@ static void parse_args(int argc, char **argv, conf_t *conf)
 static void default_settings(conf_t *conf)
 {
 	conf_set(conf,"config_file", CONFDIR "/enter.conf");
-	conf_set(conf,"auth_file", XauFileName());
+	conf_set(conf,"auth_file", "/tmp/enter.xauth");
 	conf_set(conf,"login_file", ".xinitrc");
 	conf_set(conf,"daemon", "true");
+	conf_set(conf,"authenticate", "true");
 	conf_set(conf,"display", ":0");
 }
 
@@ -84,8 +85,6 @@ static int daemonize()
 		/* Kill the parent thread.  */
 		exit(EXIT_SUCCESS);
 	}
-	
-	umask(0);
 	
 	sid = setsid();
 	
@@ -149,6 +148,7 @@ int main(int argc, char **argv)
 		log_print(LOG_EMERG,"Not enough priviledges to run");
 		exit(EXIT_FAILURE);
 	}
+	umask(077);
 	
 	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 	
@@ -206,7 +206,7 @@ int main(int argc, char **argv)
 		closelog();
 		exit(EXIT_FAILURE);
 	}
-
+	
 	/* Create a GUI window.  */
 	gui_t *gui = gui_new(display, theme);
 	if (!gui) {
@@ -224,7 +224,7 @@ int main(int argc, char **argv)
 		switch (action) {
 		case LOGIN:
 			log_print(LOG_INFO, "Logging in user");
-			if (auth_login(conf_get(conf, "display"),
+			if (login_start_session(conf_get(conf, "display"),
 						conf_get(conf, "auth_file"),
 						conf_get(conf, "login_file")) == FALSE) {
 				log_print(LOG_EMERG,

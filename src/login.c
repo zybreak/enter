@@ -9,79 +9,74 @@
 #include <sys/wait.h>
 
 #include "enter.h"
-#include "auth.h"
+#include "login.h"
 #include "utils.h"
 #include "log.h"
 
-static struct auth_t {
-	const char *display;
-	const char *auth_file;
-	const char *login_file;
-	struct passwd *pwd;
-} auth;
+static struct passwd *pwd;
 
-static void auth_spawn(void)
+static void auth_spawn(const char *display, const char *auth_file, const char *login_file)
 {
 	/* If theres no shell accociated with the user in
 	 * /etc/passwd, assign the user a shell from /etc/shells.  */
-	if (!*auth.pwd->pw_shell) {
+	if (!pwd->pw_shell) {
 		setusershell();
-		auth.pwd->pw_shell = getusershell();
+		pwd->pw_shell = getusershell();
 		endusershell();
 	}
 
 	/* Read the group database /etc/group.  */
-	if (initgroups(auth.pwd->pw_name, auth.pwd->pw_gid) == -1)
+	if (initgroups(pwd->pw_name, pwd->pw_gid) == -1)
 		return;
 
 	/* Set the group ID.  */
-	if (setgid(auth.pwd->pw_gid) == -1) {
+	if (setgid(pwd->pw_gid) == -1) {
 		return;
 	}
 
 	/* Set the user ID.  */
-	if (setuid(auth.pwd->pw_uid) == -1) {
+	if (setuid(pwd->pw_uid) == -1) {
 		return;
 	}
 
 	/* Change working directory, to the users home directory.  */
-	chdir(auth.pwd->pw_dir);
+	chdir(pwd->pw_dir);
 
 	char *args[] = {
-		auth.pwd->pw_shell,
+		pwd->pw_shell,
 		"-login",
-		strdup(auth.login_file),
+		strdup(login_file),
 		NULL
 	};
 
 	char *env[] = {
-		xstrcat("HOME=", auth.pwd->pw_dir),
-		xstrcat("SHELL=", auth.pwd->pw_shell),
-		xstrcat("USER=", auth.pwd->pw_name),
-		xstrcat("LOGNAME=", auth.pwd->pw_name),
-		xstrcat("XAUTHORITY=", auth.auth_file),
-		xstrcat("DISPLAY=", auth.display),
+		xstrcat("HOME=", pwd->pw_dir),
+		xstrcat("SHELL=", pwd->pw_shell),
+		xstrcat("USER=", pwd->pw_name),
+		xstrcat("LOGNAME=", pwd->pw_name),
+		xstrcat("XAUTHORITY=", auth_file),
+		xstrcat("DISPLAY=", display),
 		NULL
 	};
 
 	execve(args[0],args,env);
 }
 
-int auth_authenticate(const char *username, const char *password)
+int login_authenticate(const char *username, const char *password)
 {
-	auth.pwd = getpwnam(username);
+	pwd = getpwnam(username);
 	endpwent();
 
-	if (!auth.pwd) {
+	if (!pwd) {
 		return FALSE;
 	}
 
-	struct spwd *shadow = getspnam(auth.pwd->pw_name);
+	struct spwd *shadow = getspnam(pwd->pw_name);
 	endspent();
 
 	/* point to the correct password,
 	 * if NULL, skip password authentication.  */
-	char *correct = (shadow)?shadow->sp_pwdp:auth.pwd->pw_passwd;
+	char *correct = (shadow)?shadow->sp_pwdp:pwd->pw_passwd;
 	if (!correct)
 		return TRUE;
 
@@ -92,21 +87,21 @@ int auth_authenticate(const char *username, const char *password)
 
 	/* else free the user credinentials
 	 * and return FALSE.  */
-	auth.pwd = NULL;
+	pwd = NULL;
 	
 	return FALSE;
 }
 
-int auth_login(const char *display, const char *auth_file, const char *login_file)
+int login_start_session(const char *display, const char *auth_file, const char *login_file)
 {
 	/* If no previous user was authenticated,
 	 * return FALSE. */
-	if (!auth.pwd)
+	if (!pwd)
 		return FALSE;
 
-	auth.display = display;
-	auth.auth_file = auth_file;
-	auth.login_file = login_file;
+	display = display;
+	auth_file = auth_file;
+	login_file = login_file;
 	
 	/* Fork a new process.  */
 	pid_t pid = fork();
@@ -116,18 +111,17 @@ int auth_login(const char *display, const char *auth_file, const char *login_fil
 		return FALSE;
 	} else if (pid == 0) {
 		/* Spawn a user session in the child thread.  */
-		auth_spawn();
+		auth_spawn(display, auth_file, login_file);
 		/* If the user session could not spawn,
 		 * reset the auth struct and return false.  */
 		
-		auth.pwd = NULL;
+		pwd = NULL;
 		
 		return FALSE;
 	}
 
 	/* Reset the auth struct for subsequent calls.  */
-
-	auth.pwd = NULL;
+	pwd = NULL;
 
 	/* Wait for the user session in the parent thread.  */
 	pid_t p = waitpid(pid, NULL, 0);
