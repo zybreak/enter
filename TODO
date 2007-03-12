@@ -1,7 +1,6 @@
 Critical priority
 * Drop priviledges when not needed.
 * Improve configure.ac.
-* Add MIT cookie generator.
 
 Moderate priority
 * Document functions.
@@ -12,6 +11,8 @@ Moderate priority
 * Check all log messages, and make the
   priority consistent.
 * Proper Xauth handling.
+* Add XDM-AUTHORIZATION-1.
+* Add XDMCP support.
 
 Low priority
 * Add support for runtime theme switching.
