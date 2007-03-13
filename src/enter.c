@@ -14,6 +14,7 @@
 #include "conf.h"
 #include "utils.h"
 #include "login.h"
+#include "auth.h"
 
 #define PIDFILE "/var/run/" PACKAGE ".pid"
 #define PIDBUF 20
@@ -137,6 +138,7 @@ int main(int argc, char **argv)
 {
 	conf_t *conf = conf_new();
 	conf_t *theme = conf_new();
+	auth_t *auth = NULL;
 	
 	/* Assign default settings to conf
 	 * and parse command line arguments.  */
@@ -148,7 +150,11 @@ int main(int argc, char **argv)
 		log_print(LOG_EMERG,"Not enough priviledges to run");
 		exit(EXIT_FAILURE);
 	}
-	umask(077);
+
+	/* Since both the server and the clients share the same
+	 * authority file, we need an umask that allows everybody to
+	 * read the content's of our files.  */
+	umask(022);
 	
 	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 	
@@ -189,6 +195,38 @@ int main(int argc, char **argv)
 	
 	write_pidfile(getpid());
 	atexit(remove_pidfile);
+
+	if (!strcmp(conf_get(conf, "authenticate"), "true")) {
+		char hostname[128];
+		char *display = rindex(conf_get(conf, "display"), ':');
+
+		/* If the colon wasn't found, set the display to a default value,
+		 * otherwise increase display to point beyond the colon.  */
+		if (!display) {
+			display = "0";
+		} else
+			display++;
+
+		memset(hostname, '\0', 128);
+		gethostname(hostname, 127);
+
+		auth = auth_new(AUTH_MIT_MAGIC_COOKIE, hostname, display);
+		if (auth) {
+			if (remove(conf_get(conf, "auth_file")) == -1) {
+				log_print(LOG_EMERG,"Could not remove old auth file.");
+			}
+
+			if (!auth_write(auth, conf_get(conf, "auth_file"))) {
+				log_print(LOG_EMERG,"Could not write to auth file, disabling authentication.");
+				conf_set(conf, "authenticate", "false");
+			} else {
+				setenv("XAUTHORITY", conf_get(conf, "auth_file"), 1);
+			}
+		} else {
+			log_print(LOG_EMERG,"Could not create auth data, disabling authentication.");
+			conf_set(conf, "authenticate", "false");
+		}
+	}
 
 	log_print(LOG_INFO,"Starting X server.");
 	pid_t server_pid = server_start(conf);

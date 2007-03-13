@@ -38,8 +38,7 @@ if test "x$XFT_CONFIG" = "xnone"; then
 fi
 XFT_LIBS=`$XFT_CONFIG --libs`
 AC_CHECK_LIB([Xft], [XftFontOpenName],,
-			AC_MSG_ERROR([You need to have libXft.]),
-			$XFT_LIBS)
+			AC_MSG_ERROR([You need to have libXft.]))
 
 AC_CHECK_LIB([Xau], [XauWriteAuth],,
 			AC_MSG_ERROR([You need to have libXau.]))
@@ -51,8 +50,7 @@ fi
 IMLIB_LIBS=`$IMLIB_CONFIG --libs`
 
 AC_CHECK_LIB([Imlib2], [imlib_context_new],,
-			AC_MSG_ERROR([You need to have Imlib2.]),
-			$IMLIB_LIBS)
+			AC_MSG_ERROR([You need to have Imlib2.]))
 
 # Checks for header files.
 AC_SUBST([X_CFLAGS])
@@ -75,7 +73,7 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([endpwent getusershell memset strdup setenv getspnam strerror atexit])
+AC_CHECK_FUNCS([endpwent getusershell memset strdup setenv getspnam strerror atexit gethostname])
 
 DEBUG_CFLAGS="-Wall -Wmissing-prototypes -Wmissing-declarations"
 AC_SUBST([DEBUG_CFLAGS])

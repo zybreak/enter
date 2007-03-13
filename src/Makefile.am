@@ -9,6 +9,7 @@ enter_SOURCES = \
 	server.c server.h \
 	utils.c utils.h \
 	conf.c conf.h \
+	auth.c auth.h \
 	log.c log.h \
 	login.c login.h \
 	display.c display.h \

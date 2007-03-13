@@ -1,3 +1,7 @@
+2007-03-13  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/auth.c:
+	added X authentication code here.
+
 2007-03-09  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/auth.[ch]:
 	moved to login.[ch].

@@ -1,5 +1,5 @@
-#ifndef __GREETER_AUTH_H__
-#define __GREETER_AUTH_H__
+#ifndef __LOGIN_H__
+#define __LOGIN_H__
 
 /**
  * Returns TRUE and saves the user credidentials for a later call

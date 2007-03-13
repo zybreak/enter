@@ -1,6 +1,5 @@
 Critical priority
 * Drop priviledges when not needed.
-* Improve configure.ac.
 
 Moderate priority
 * Document functions.
@@ -10,7 +9,6 @@ Moderate priority
 * Replace Imlib2 with own functions.
 * Check all log messages, and make the
   priority consistent.
-* Proper Xauth handling.
 * Add XDM-AUTHORIZATION-1.
 
 Low priority
