@@ -1,5 +1,6 @@
 2007-03-13  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/auth.c:
+	added auth.[ch] to SVN, sorry :S
 	added X authentication code here.
 
 2007-03-09  Robert Knutsson <rob_dobbs@users.sf.net>
