@@ -71,7 +71,7 @@ static void default_settings(conf_t *conf)
 	conf_set(conf,"auth_file", "/tmp/enter.xauth");
 	conf_set(conf,"login_file", ".xinitrc");
 	conf_set(conf,"daemon", "true");
-	conf_set(conf,"authenticate", "true");
+	conf_set(conf,"authentication", "magic-cookie");
 	conf_set(conf,"display", ":0");
 }
 
@@ -109,6 +109,54 @@ static int daemonize()
 	return TRUE;
 }
 
+static auth_t* setup_authentication(conf_t *conf)
+{
+	auth_t *auth = NULL;
+	char hostname[128];
+	char *display = rindex(conf_get(conf, "display"), ':');
+
+	/* If the colon wasn't found, set the display to a default value,
+	 * otherwise increase display to point beyond the colon.  */
+	if (display) {
+		display++;
+	} else {
+		display = "0";
+	}
+
+	memset(hostname, '\0', 128);
+	gethostname(hostname, 127);
+
+	char *authentication = conf_get(conf, "authentication");
+
+	if (!strcmp(authentication, "magic-cookie")) {
+		auth = auth_new(AUTH_MIT_MAGIC_COOKIE, hostname, display);
+	} else if (!strcmp(authentication, "xdm")) {
+		log_print(LOG_EMERG,"XDM is currently not implemented.");
+		return NULL;
+	} else {
+		log_print(LOG_EMERG,"'%s' was not recognized as an authentication option.", 
+				authentication);
+		return NULL;
+	}
+		
+	if (!auth) {
+		return NULL;
+	}
+
+	if (unlink(conf_get(conf, "auth_file")) == -1) {
+		log_print(LOG_EMERG,"Could not remove old auth file.");
+	}
+
+	if (!auth_write(auth, conf_get(conf, "auth_file"))) {
+		log_print(LOG_EMERG,"Could not write to auth file.");
+		return NULL;
+	}
+	
+	setenv("XAUTHORITY", conf_get(conf, "auth_file"), 1);
+
+	return auth;
+}
+
 static void write_pidfile(pid_t pid)
 {
 	char buf[PIDBUF];
@@ -134,6 +182,12 @@ static void remove_pidfile()
 	remove(PIDFILE);
 }
 
+static void shutdown()
+{
+	remove_pidfile();
+	/* TODO: remove auth file.  */
+}
+
 int main(int argc, char **argv)
 {
 	conf_t *conf = conf_new();
@@ -151,10 +205,11 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	/* Since both the server and the clients share the same
-	 * authority file, we need an umask that allows everybody to
-	 * read the content's of our files.  */
-	umask(022);
+	/* If the auth file is going to be shared,
+	 * umask needs to be set so everyone has reading
+	 * permissions on the files written. Otherwize umask
+	 * should be set so only the creator can read and write.  */
+	umask(077);
 	
 	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 	
@@ -194,37 +249,13 @@ int main(int argc, char **argv)
 	}
 	
 	write_pidfile(getpid());
-	atexit(remove_pidfile);
+	atexit(shutdown);
 
-	if (!strcmp(conf_get(conf, "authenticate"), "true")) {
-		char hostname[128];
-		char *display = rindex(conf_get(conf, "display"), ':');
-
-		/* If the colon wasn't found, set the display to a default value,
-		 * otherwise increase display to point beyond the colon.  */
-		if (!display) {
-			display = "0";
-		} else
-			display++;
-
-		memset(hostname, '\0', 128);
-		gethostname(hostname, 127);
-
-		auth = auth_new(AUTH_MIT_MAGIC_COOKIE, hostname, display);
-		if (auth) {
-			if (remove(conf_get(conf, "auth_file")) == -1) {
-				log_print(LOG_EMERG,"Could not remove old auth file.");
-			}
-
-			if (!auth_write(auth, conf_get(conf, "auth_file"))) {
-				log_print(LOG_EMERG,"Could not write to auth file, disabling authentication.");
-				conf_set(conf, "authenticate", "false");
-			} else {
-				setenv("XAUTHORITY", conf_get(conf, "auth_file"), 1);
-			}
-		} else {
-			log_print(LOG_EMERG,"Could not create auth data, disabling authentication.");
-			conf_set(conf, "authenticate", "false");
+	if (strcmp(conf_get(conf, "authentication"), "none") != 0) {
+		auth = setup_authentication(conf);
+		if (!auth) {
+			log_print(LOG_EMERG,"Could not setup authentication system, disabling authentication.");
+			conf_set(conf, "authentication", "none");
 		}
 	}
 
@@ -262,8 +293,9 @@ int main(int argc, char **argv)
 		switch (action) {
 		case LOGIN:
 			log_print(LOG_INFO, "Logging in user");
+
 			if (login_start_session(conf_get(conf, "display"),
-						conf_get(conf, "auth_file"),
+						auth, ".Xauthority",
 						conf_get(conf, "login_file")) == FALSE) {
 				log_print(LOG_EMERG,
 						"Could not open user session");

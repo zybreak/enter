@@ -1,6 +1,8 @@
 #ifndef __AUTH_H__
 #define __AUTH_H__
 
+#include <X11/Xauth.h>
+
 typedef struct auth_t {
 	Xauth auth;
 } auth_t;

@@ -13,9 +13,9 @@
 #include "utils.h"
 #include "log.h"
 
-static struct passwd *pwd;
+static struct passwd *pwd = NULL;
 
-static void auth_spawn(const char *display, const char *auth_file, const char *login_file)
+static void auth_spawn(const char *display, auth_t *auth, const char *auth_file, const char *login_file)
 {
 	/* If theres no shell accociated with the user in
 	 * /etc/passwd, assign the user a shell from /etc/shells.  */
@@ -41,6 +41,18 @@ static void auth_spawn(const char *display, const char *auth_file, const char *l
 
 	/* Change working directory, to the users home directory.  */
 	chdir(pwd->pw_dir);
+
+	/* Write auth file.  */
+	if (auth) {
+		if (unlink(auth_file) == -1) {
+			log_print(LOG_EMERG,"Could not remove old auth file.");
+		}
+		
+		if (!auth_write(auth, auth_file)) {
+			log_print(LOG_EMERG,"Could not write to auth file.");
+			return;
+		}
+	}
 
 	char *args[] = {
 		pwd->pw_shell,
@@ -92,17 +104,13 @@ int login_authenticate(const char *username, const char *password)
 	return FALSE;
 }
 
-int login_start_session(const char *display, const char *auth_file, const char *login_file)
+int login_start_session(const char *display, auth_t *auth, const char *auth_file, const char *login_file)
 {
 	/* If no previous user was authenticated,
 	 * return FALSE. */
 	if (!pwd)
 		return FALSE;
 
-	display = display;
-	auth_file = auth_file;
-	login_file = login_file;
-	
 	/* Fork a new process.  */
 	pid_t pid = fork();
 
@@ -111,7 +119,7 @@ int login_start_session(const char *display, const char *auth_file, const char *
 		return FALSE;
 	} else if (pid == 0) {
 		/* Spawn a user session in the child thread.  */
-		auth_spawn(display, auth_file, login_file);
+		auth_spawn(display, auth, auth_file, login_file);
 		/* If the user session could not spawn,
 		 * reset the auth struct and return false.  */
 		

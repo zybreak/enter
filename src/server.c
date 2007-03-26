@@ -100,7 +100,7 @@ int server_start(conf_t *conf)
 		NULL, NULL, NULL
 	};
 
-	if (!strcmp(conf_get(conf, "authenticate"), "true")) {
+	if (strcmp(conf_get(conf, "authentication"), "none") != 0) {
 		cmd[2] = "-auth";
 		cmd[3] = conf_get(conf,"auth_file");
 	}

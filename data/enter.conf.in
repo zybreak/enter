@@ -3,9 +3,12 @@
 #
 
 server_path=@X_PATH@
+
 theme=default
+
 login_file=.xinitrc
+
+authentication=magic-cookie
 auth_file=/tmp/Xauthority
-authenticate=true
 
 # End of file

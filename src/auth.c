@@ -1,4 +1,3 @@
-#include <X11/Xauth.h>
 #include <stdlib.h>
 
 #include "enter.h"

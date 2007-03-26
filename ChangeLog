@@ -1,3 +1,11 @@
+2007-03-26  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/login.c:
+	enter now has seperate auth files for
+	server and client.
+	* src/enter.c:
+	enter.conf can specify which authentication
+	protocol to use.
+
 2007-03-13  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/auth.c:
 	added auth.[ch] to SVN, sorry :S
