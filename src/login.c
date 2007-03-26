@@ -42,8 +42,16 @@ static void auth_spawn(const char *display, auth_t *auth, const char *auth_file,
 	/* Change working directory, to the users home directory.  */
 	chdir(pwd->pw_dir);
 
+
 	/* Write auth file.  */
 	if (auth) {
+		/* Convert relative to absolute path names.  */
+		if (*auth_file != '/') {
+			char *new_path = xmalloc(sizeof(*new_path) * 512);
+			snprintf(new_path, 511, "%s/%s", pwd->pw_dir, auth_file);
+			auth_file = new_path;
+		}
+
 		if (unlink(auth_file) == -1) {
 			log_print(LOG_EMERG,"Could not remove old auth file.");
 		}

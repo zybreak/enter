@@ -1,5 +1,9 @@
 2007-03-26  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/login.c:
+	converts relative to absolute pathnames.
+
+2007-03-26  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/login.c:
 	enter now has seperate auth files for
 	server and client.
 	* src/enter.c:
