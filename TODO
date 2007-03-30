@@ -1,5 +1,6 @@
 Critical priority
 * Drop priviledges when not needed.
+* Make commandline options overrun config file options.
 
 Moderate priority
 * Document functions.

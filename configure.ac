@@ -13,55 +13,43 @@ AC_PROG_CC
 
 # Checks for libraries.
 AC_PATH_X
-if test x"$no_x" = x"yes"; then
+if test "$no_x" = "yes"; then
 	AC_MSG_ERROR([Cannot find X Windows include files or libraries!])
 fi
 
 AC_PATH_PROGS([X_PATH], [X], [none])
-if test "x$X_PATH" = "xnone"; then
+if test "$X_PATH" = "none"; then
 	AC_MSG_ERROR([Cannot find X Windows binary!])
 fi
-AC_SUBST([X_PATH])
 
-if test x"$x_includes" != x; then
-	X_CFLAGS="-I$x_includes";
+if test "x$x_includes" != "x"; then
+	CFLAGS="$CFLAGS -I$x_includes";
 fi
-if test x"$x_libraries" != x; then
-	X_LIBS="-L$x_libraries";
+if test "x$x_libraries" != "x"; then
+	LIBS="$LIBS -L$x_libraries";
 fi
 
 AC_CHECK_FT2
 
-AC_PATH_PROGS([XFT_CONFIG], [xft-config], [none])
-if test "x$XFT_CONFIG" = "xnone"; then
-	AC_MSG_ERROR([You need to have libXft.])
-fi
-XFT_LIBS=`$XFT_CONFIG --libs`
-AC_CHECK_LIB([Xft], [XftFontOpenName],,
+AC_CHECK_LIB([Xft], [XftFontOpenName],[LIBS="$LIBS -lXft"],
 			AC_MSG_ERROR([You need to have libXft.]))
 
 AC_CHECK_LIB([Xau], [XauWriteAuth],,
 			AC_MSG_ERROR([You need to have libXau.]))
 
-AC_PATH_PROGS([IMLIB_CONFIG], [imlib2-config], [none])
-if test "x$IMLIB_CONFIG" = "xnone"; then
-	AC_MSG_ERROR([You need to have Imlib2.])
-fi
-IMLIB_LIBS=`$IMLIB_CONFIG --libs`
-
-AC_CHECK_LIB([Imlib2], [imlib_context_new],,
+AC_CHECK_LIB([Imlib2], [imlib_context_new],[LIBS="$LIBS -lImlib2"],
 			AC_MSG_ERROR([You need to have Imlib2.]))
 
 # Checks for header files.
-AC_SUBST([X_CFLAGS])
-AC_SUBST([X_LIBS])
-
-AC_SUBST([IMLIB_CFLAGS],[])
-AC_SUBST([IMLIB_LIBS],[-lImlib2])
-
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([stdlib.h string.h syslog.h unistd.h shadow.h])
+
+# Check for required headers.
+AC_CHECK_HEADERS([stdlib.h string.h syslog.h unistd.h],,
+		 AC_MSG_ERROR([Required header not found.]))
+
+# Check for optional headers.
+AC_CHECK_HEADERS_ONCE([shadow.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -73,10 +61,12 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([endpwent getusershell memset strdup setenv getspnam strerror atexit gethostname])
+AC_CHECK_FUNCS([endpwent getusershell memset strdup setenv getspnam strerror atexit gethostname],,
+	       AC_MSG_ERROR([Required function not found.]))
 
-DEBUG_CFLAGS="-Wall -Wmissing-prototypes -Wmissing-declarations"
+DEBUG_CFLAGS="-Wall -pedantic -Wmissing-prototypes -Wmissing-declarations"
 AC_SUBST([DEBUG_CFLAGS])
+AC_SUBST([X_PATH])
 
 AC_CONFIG_FILES([Makefile
                  data/Makefile

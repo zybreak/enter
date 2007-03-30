@@ -1,3 +1,8 @@
+2007-03-30  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/login.c:
+	shadow is now optional, will only be compiled
+	if the header shadow.h is found.
+
 2007-03-26  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/login.c:
 	converts relative to absolute pathnames.

@@ -1,6 +1,5 @@
 #include <pwd.h>
 #include <grp.h>
-#include <shadow.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <crypt.h>
@@ -12,6 +11,10 @@
 #include "login.h"
 #include "utils.h"
 #include "log.h"
+
+#ifdef HAVE_SHADOW_H
+#include <shadow.h>
+#endif
 
 static struct passwd *pwd = NULL;
 
@@ -84,6 +87,8 @@ static void auth_spawn(const char *display, auth_t *auth, const char *auth_file,
 
 int login_authenticate(const char *username, const char *password)
 {
+	char *real_pwd;
+
 	pwd = getpwnam(username);
 	endpwent();
 
@@ -91,18 +96,28 @@ int login_authenticate(const char *username, const char *password)
 		return FALSE;
 	}
 
+	 /* Point real_pwd to the passwd password field.  */
+	real_pwd = pwd->pw_passwd;
+
+#ifdef HAVE_SHADOW_H
+	/* If we have shadow installed, and the correct
+	 * shadow entry is found, point real_pwd to the shadow
+	 * passwd field instead.  */
 	struct spwd *shadow = getspnam(pwd->pw_name);
 	endspent();
 
-	/* point to the correct password,
-	 * if NULL, skip password authentication.  */
-	char *correct = (shadow)?shadow->sp_pwdp:pwd->pw_passwd;
-	if (!correct)
+	if (shadow) {
+		real_pwd = shadow->sp_pwdp;
+	}
+#endif
+
+	/* If we did not get a password, simply log the user in.  */
+	if (!real_pwd)
 		return TRUE;
 
 	/* if the passwords match, return TRUE.  */
-	char *enc = crypt(password, correct);
-	if (!strcmp(enc, correct))
+	char *enc = crypt(password, real_pwd);
+	if (!strcmp(enc, real_pwd))
 		return TRUE;
 
 	/* else free the user credinentials

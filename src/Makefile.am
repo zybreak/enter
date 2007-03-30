@@ -19,6 +19,6 @@ enter_SOURCES = \
 	gui_widget.c gui_widget.h \
 	gui.c gui.h
 
-enter_CFLAGS = @DEBUG_CFLAGS@ @FT2_CFLAGS@ @IMLIB_CFLAGS@ @X_CFLAGS@ -DCONFDIR=\"$(sysconfdir)\" -DTHEMEDIR=\"$(datadir)/@PACKAGE@/themes\"
-enter_LDFLAGS = @X_LIBS@ @IMLIB_LIBS@ @FT2_LIBS@ -lcrypt
+enter_CFLAGS = @FT2_CFLAGS@ -DCONFDIR=\"$(sysconfdir)\" -DTHEMEDIR=\"$(datadir)/@PACKAGE@/themes\"
+enter_LDFLAGS = @FT2_LIBS@ -lcrypt
 
