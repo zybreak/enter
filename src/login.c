@@ -56,11 +56,11 @@ static void auth_spawn(const char *display, auth_t *auth, const char *auth_file,
 		}
 
 		if (unlink(auth_file) == -1) {
-			log_print(LOG_EMERG,"Could not remove old auth file.");
+			log_print(LOG_WARNING, "Could not remove old auth file.");
 		}
 		
 		if (!auth_write(auth, auth_file)) {
-			log_print(LOG_EMERG,"Could not write to auth file.");
+			log_print(LOG_ERR, "Could not write to auth file.");
 			return;
 		}
 	}
@@ -138,7 +138,7 @@ int login_start_session(const char *display, auth_t *auth, const char *auth_file
 	pid_t pid = fork();
 
 	if (pid == -1) {
-		log_print(LOG_WARNING, "Could not fork process");
+		log_print(LOG_ERR, "Could not fork process.");
 		return FALSE;
 	} else if (pid == 0) {
 		/* Spawn a user session in the child thread.  */
@@ -157,7 +157,7 @@ int login_start_session(const char *display, auth_t *auth, const char *auth_file
 	/* Wait for the user session in the parent thread.  */
 	pid_t p = waitpid(pid, NULL, 0);
 	if (p == -1) {
-		log_print(LOG_WARNING,"Could not wait for user session.");
+		log_print(LOG_ERR, "Could not wait for user session.");
 		return FALSE;
 	}
 

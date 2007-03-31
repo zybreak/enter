@@ -1,21 +1,19 @@
 Critical priority
-* Drop priviledges when not needed.
+* Add PAM authentication support.
+* Add NLS support.
 * Make commandline options overrun config file options.
 
 Moderate priority
+* Drop priviledges when not needed.
 * Document functions.
 * Allow for scaled/centered background.
 * Option to hide cursor when not wanted.
 * Add buttons and animations.
 * Replace Imlib2 with own functions.
-* Check all log messages, and make the
-  priority consistent.
 * Add XDM-AUTHORIZATION-1.
 
 Low priority
 * Add support for runtime theme switching.
 * Add support for multiple sessions.
 * Add support for actions other than login (shutdown, hibernate).
-* Add PAM authentication support.
-* Add NLS support.
 * Add testcases.

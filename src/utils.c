@@ -9,7 +9,7 @@ void* xmalloc(size_t size)
 {
 	void* p = malloc(size);
 	if (!p) {
-		log_print(LOG_EMERG,"Could not allocate memory.");
+		log_print(LOG_EMERG, "Could not allocate memory.");
 		exit(EXIT_FAILURE);
 	}
 	return p;

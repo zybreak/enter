@@ -61,7 +61,7 @@ int server_stop(void)
 
 	/* Send SIGTERM to the server process.  */
 	if (killpg(server_pid, SIGTERM) < 0) {
-		log_print(LOG_WARNING, "Could not kill server (%d): %s",
+		log_print(LOG_ERR, "Could not kill server (%d): %s",
 						server_pid, strerror(errno));
 		return FALSE;
 	}
@@ -70,12 +70,12 @@ int server_stop(void)
 	if (!server_timeout(server_pid, SERVER_TIMEOUT)) {
 		/* If the server won't terminate, send SIGKILL.  */
 		if (killpg(server_pid, SIGKILL) < 0) {
-			log_print(LOG_WARNING, "Could not kill server: %s", strerror(errno));
+			log_print(LOG_ERR, "Could not kill server: %s", strerror(errno));
 			return FALSE;
 		}
 		/* If it STILL won't die, just let it be...  */
 		if (!server_timeout(server_pid, SERVER_TIMEOUT)) {
-			log_print(LOG_WARNING, "Could not kill server: %s", strerror(errno));
+			log_print(LOG_ERR, "Could not kill server: %s", strerror(errno));
 			return FALSE;
 		}
 	}
@@ -108,7 +108,7 @@ int server_start(conf_t *conf)
 	server_pid = fork();
 	switch(server_pid) {
 		case -1:
-			log_print(LOG_CRIT,"Could not fork process");
+			log_print(LOG_ERR, "Could not fork process.");
 			return FALSE;
 		case 0:
 			signal(SIGUSR1,SIG_IGN);
@@ -118,7 +118,7 @@ int server_start(conf_t *conf)
 			return FALSE;
 		default:
 			if (!server_startup(server_pid, SERVER_TIMEOUT)) {
-				log_print(LOG_WARNING,"Server timed out");
+				log_print(LOG_ERR, "Could not start X, server timed out.");
 				return FALSE;
 			}
 	}

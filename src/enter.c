@@ -80,7 +80,7 @@ static int daemonize()
 	pid_t pid, sid;
 	pid = fork();
 	if (pid < 0) {
-		log_print(LOG_EMERG, "could not fork process");
+		log_print(LOG_ERR, "Could not fork to background.");
 		return FALSE;
 	} else if (pid > 0) {
 		/* Kill the parent thread.  */
@@ -90,12 +90,12 @@ static int daemonize()
 	sid = setsid();
 	
 	if (sid < 0) {
-		log_print(LOG_EMERG, "could not set sid");
+		log_print(LOG_ERR, "Could not set session id.");
 		return FALSE;
 	}
 	
 	if (chdir("/") < 0) {
-		log_print(LOG_EMERG, "could not change working directory");
+		log_print(LOG_ERR, "Could not change working directory.");
 		return FALSE;
 	}
 
@@ -131,10 +131,10 @@ static auth_t* setup_authentication(conf_t *conf)
 	if (!strcmp(authentication, "magic-cookie")) {
 		auth = auth_new(AUTH_MIT_MAGIC_COOKIE, hostname, display);
 	} else if (!strcmp(authentication, "xdm")) {
-		log_print(LOG_EMERG,"XDM is currently not implemented.");
+		log_print(LOG_ERR, "XDM is currently not implemented.");
 		return NULL;
 	} else {
-		log_print(LOG_EMERG,"'%s' was not recognized as an authentication option.", 
+		log_print(LOG_ERR, "'%s' is a unknown authentication protocol.", 
 				authentication);
 		return NULL;
 	}
@@ -143,12 +143,13 @@ static auth_t* setup_authentication(conf_t *conf)
 		return NULL;
 	}
 
+	/* TODO: only remove if the file exists.  */
 	if (unlink(conf_get(conf, "auth_file")) == -1) {
-		log_print(LOG_EMERG,"Could not remove old auth file.");
+		log_print(LOG_WARNING, "Could not remove old auth file.");
 	}
 
 	if (!auth_write(auth, conf_get(conf, "auth_file"))) {
-		log_print(LOG_EMERG,"Could not write to auth file.");
+		log_print(LOG_ERR, "Could not write to auth file.");
 		return NULL;
 	}
 	
@@ -201,7 +202,7 @@ int main(int argc, char **argv)
 
 	/* Check if we have enough priviledges.  */
 	if (getuid() != 0) {
-		log_print(LOG_EMERG,"Not enough priviledges to run");
+		log_print(LOG_EMERG, "Not enough priviledges to run.");
 		exit(EXIT_FAILURE);
 	}
 
@@ -254,15 +255,15 @@ int main(int argc, char **argv)
 	if (strcmp(conf_get(conf, "authentication"), "none") != 0) {
 		auth = setup_authentication(conf);
 		if (!auth) {
-			log_print(LOG_EMERG,"Could not setup authentication system, disabling authentication.");
+			log_print(LOG_ERR, "Could not setup authentication system, disabling authentication.");
 			conf_set(conf, "authentication", "none");
 		}
 	}
 
-	log_print(LOG_INFO,"Starting X server.");
+	log_print(LOG_DEBUG, "Starting X server.");
 	pid_t server_pid = server_start(conf);
 	if (server_pid == FALSE) {
-		log_print(LOG_EMERG,"Could not start server");
+		log_print(LOG_EMERG, "Could not start X server");
 		closelog();
 		exit(EXIT_FAILURE);
 	}
@@ -270,7 +271,7 @@ int main(int argc, char **argv)
 	/* Connect to the X display.  */
 	display_t *display = display_new(conf);
 	if (!display) {
-		log_print(LOG_EMERG, "Could not connect to display");
+		log_print(LOG_EMERG, "Could not connect to X display.");
 		server_stop();
 		closelog();
 		exit(EXIT_FAILURE);
@@ -279,7 +280,7 @@ int main(int argc, char **argv)
 	/* Create a GUI window.  */
 	gui_t *gui = gui_new(display, theme);
 	if (!gui) {
-		log_print(LOG_EMERG, "Could not open GUI");
+		log_print(LOG_EMERG, "Could not open GUI.");
 		server_stop();
 		closelog();
 		exit(EXIT_FAILURE);
@@ -292,13 +293,13 @@ int main(int argc, char **argv)
 
 		switch (action) {
 		case LOGIN:
-			log_print(LOG_INFO, "Logging in user");
+			log_print(LOG_DEBUG, "Logging in user...");
 
 			if (login_start_session(conf_get(conf, "display"),
 						auth, ".Xauthority",
 						conf_get(conf, "login_file")) == FALSE) {
 				log_print(LOG_EMERG,
-						"Could not open user session");
+						"Could not open user session.");
 				
 				server_stop();
 				closelog();
@@ -310,7 +311,7 @@ int main(int argc, char **argv)
 	}
 
 
-	log_print(LOG_INFO,"Shutting down.");
+	log_print(LOG_DEBUG, "Shutting down.");
 	
 	gui_delete(gui);
 	conf_delete(conf);

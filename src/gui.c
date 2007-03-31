@@ -204,7 +204,7 @@ gui_t* gui_new(display_t *display, conf_t *theme)
 
 	gui_image_t *image = gui_image_new(display, buf, 0, 0);
 	if (!image) {
-		log_print(LOG_ERR, "could not load image \"buf\"");
+		log_print(LOG_ERR, "Could not load image \"buf\".");
 		gui_delete(gui);
 		return NULL;
 	}
@@ -232,7 +232,7 @@ gui_t* gui_new(display_t *display, conf_t *theme)
 	/* Make sure all object's were loaded.  */
 	if (!(gui->title && gui->msg && gui->username && gui->password &&
 				gui->passwd_input && gui->user_input)) {
-		log_print(LOG_ERR, "could not load objects.");
+		log_print(LOG_ERR, "Could not load objects.");
 		gui_delete(gui);
 		return NULL;
 	}
