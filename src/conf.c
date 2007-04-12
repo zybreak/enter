@@ -93,10 +93,10 @@ char* conf_get(conf_t *conf, const char *key)
 }
 
 /* TODO: how should conf_set handle new data?
- * right now it stores duplicates of its indata, and not the
- * indata itself to assure it can free it when needed.
+ * right now it stores duplicates of its in data, and not the
+ * in data itself to assure it can free it when needed.
  * Although if the responsibility to free the data is on the user,
- * this will not be needed. Then ofcource overwriting data is not
+ * this will not be needed. Then of cource overwriting data is not
  * so easy anymore.  */
 void conf_set(conf_t *conf, const char *key, const char *value)
 {

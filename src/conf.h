@@ -26,7 +26,7 @@ void conf_delete(conf_t *conf);
  */
 int conf_parse(conf_t *conf, const char *config_file);
 /**
- * Returns the key value, or an empty string if it doesnt
+ * Returns the key value, or an empty string if it doesn't
  * have a value.
  */
 char* conf_get(conf_t *conf, const char *key);

@@ -20,7 +20,7 @@ static struct passwd *pwd = NULL;
 
 static void auth_spawn(const char *display, auth_t *auth, const char *auth_file, const char *login_file)
 {
-	/* If theres no shell accociated with the user in
+	/* If there's no shell associated with the user in
 	 * /etc/passwd, assign the user a shell from /etc/shells.  */
 	if (!pwd->pw_shell) {
 		setusershell();
@@ -120,7 +120,7 @@ int login_authenticate(const char *username, const char *password)
 	if (!strcmp(enc, real_pwd))
 		return TRUE;
 
-	/* else free the user credinentials
+	/* else free the user credentials
 	 * and return FALSE.  */
 	pwd = NULL;
 	

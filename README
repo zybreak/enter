@@ -14,6 +14,6 @@ Usage
 ------------
 
 To use enter you first need to make sure the configuration `enter.conf'
-is in order. Then just run `enter' at the shell prompt.
+is in order. Then run `enter' as a superuser.
 Enter should ideally be put in a initscript.
 

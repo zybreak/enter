@@ -4,9 +4,9 @@
 #include "auth.h"
 
 /**
- * Returns TRUE and saves the user credidentials for a later call
+ * Returns TRUE and saves the user credentials for a later call
  * to auth_login if the specified user could be authenticated.
- * Otherwize returns FALSE.
+ * Otherwise returns FALSE.
  */
 int login_authenticate(const char *username, const char *password);
 

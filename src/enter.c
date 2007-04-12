@@ -200,15 +200,15 @@ int main(int argc, char **argv)
 	default_settings(conf);
 	parse_args(argc, argv, conf);
 
-	/* Check if we have enough priviledges.  */
+	/* Check if we have enough privileges.  */
 	if (getuid() != 0) {
-		log_print(LOG_EMERG, "Not enough priviledges to run.");
+		log_print(LOG_EMERG, "Not enough privileges to run.");
 		exit(EXIT_FAILURE);
 	}
 
 	/* If the auth file is going to be shared,
 	 * umask needs to be set so everyone has reading
-	 * permissions on the files written. Otherwize umask
+	 * permissions on the files written. Otherwise umask
 	 * should be set so only the creator can read and write.  */
 	umask(077);
 	
@@ -235,7 +235,7 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	/* Add theme name to theme, so the full path of datafiles
+	/* Add theme name to theme, so the full path of data files
 	 * can be read by only supplying theme .  */
 	conf_set(theme, "theme",
 			conf_get(conf, "theme"));
