@@ -3,7 +3,7 @@ man_MANS = enter.1 enter.conf.5
 CLEANFILES = $(man_MANS)
 EXTRA_DIST = enter.1.in enter.conf.5.in
 
-edit = sed \
+edit = $(SED) \
        -e 's|@VERSION[@]|$(VERSION)|g' \
        -e 's|@sysconfdir[@]|$(sysconfdir)|g' \
        -e 's|@PACKAGE[@]|$(PACKAGE)|g' \

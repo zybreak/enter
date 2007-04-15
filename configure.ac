@@ -10,6 +10,7 @@ AM_MAINTAINER_MODE
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_SED
 
 # Checks for libraries.
 AC_PATH_X
@@ -31,25 +32,35 @@ fi
 
 AC_CHECK_FT2
 
-AC_CHECK_LIB([Xft], [XftFontOpenName],[LIBS="$LIBS -lXft"],
-			AC_MSG_ERROR([You need to have libXft.]))
+AC_CHECK_LIB([Xft], [XftFontOpenName], [LIBS="$LIBS -lXft"],
+			[AC_MSG_ERROR([You need to have libXft.])])
 
-AC_CHECK_LIB([Xau], [XauWriteAuth],,
-			AC_MSG_ERROR([You need to have libXau.]))
+AC_CHECK_LIB([Xau], [XauWriteAuth], [LIBS="$LIBS -lXau"],
+			[AC_MSG_ERROR([You need to have libXau.])])
 
-AC_CHECK_LIB([Imlib2], [imlib_context_new],[LIBS="$LIBS -lImlib2"],
-			AC_MSG_ERROR([You need to have Imlib2.]))
+AC_CHECK_LIB([Imlib2], [imlib_context_new], [LIBS="$LIBS -lImlib2"],
+			[AC_MSG_ERROR([You need to have Imlib2.])])
+
+AC_ARG_ENABLE([pam],
+	      [AS_HELP_STRING([--enable-pam], [enable pam authentication])],
+	      [pam=$enableval],
+	      [pam=no])
+
+if test "x$pam" = "xyes"; then
+	AC_CHECK_HEADERS([security/pam_appl.h], [],
+	      [AC_MSG_WARN([Could not find PAM headers, disabling PAM.])])
+fi
 
 # Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 
 # Check for required headers.
-AC_CHECK_HEADERS([stdlib.h string.h syslog.h unistd.h],,
-		 AC_MSG_ERROR([Required header not found.]))
+AC_CHECK_HEADERS([stdlib.h string.h syslog.h unistd.h], [],
+		 [AC_MSG_ERROR([Required header not found.])])
 
 # Check for optional headers.
-AC_CHECK_HEADERS_ONCE([shadow.h])
+AC_CHECK_HEADERS([shadow.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -61,8 +72,9 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([endpwent getusershell memset strdup setenv getspnam strerror atexit gethostname],,
-	       AC_MSG_ERROR([Required function not found.]))
+AC_CHECK_FUNCS([endpwent getusershell memset strdup setenv getspnam \
+		strerror atexit gethostname], [],
+	       [AC_MSG_ERROR([Required function not found.])])
 
 DEBUG_CFLAGS="-Wall -pedantic -Wmissing-prototypes -Wmissing-declarations"
 AC_SUBST([DEBUG_CFLAGS])
@@ -73,3 +85,4 @@ AC_CONFIG_FILES([Makefile
                  doc/Makefile
                  src/Makefile])
 AC_OUTPUT
+

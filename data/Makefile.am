@@ -13,7 +13,7 @@ nobase_dist_theme_DATA = \
 CLEANFILES = $(dist_conf_DATA)
 EXTRA_DIST = enter.conf.in
 
-edit = sed \
+edit = $(SED) \
        -e 's|@X_PATH[@]|$(X_PATH)|g'
 
 enter.conf: Makefile
