@@ -12,6 +12,7 @@ typedef struct display_t {
 	int width;
 	int height;
 	int depth;
+	int has_doublebuffer;
 	Display *dpy;
 	Colormap colormap;
 	Visual* visual;
@@ -25,7 +26,6 @@ display_t* display_new(conf_t *conf);
 
 /**
  * Frees the memory occupied by display.
-
 */
 void display_delete(display_t *display);
 
@@ -33,5 +33,10 @@ void display_delete(display_t *display);
  * Kills all clients, except `window', running on the display.
  */
 void display_kill_clients(display_t *display, Window window);
+
+/**
+ * Check if the DBE extention is available on 'display'.
+ */
+int display_has_doublebuffer(display_t *display);
 
 #endif /*DISPLAY_H_*/

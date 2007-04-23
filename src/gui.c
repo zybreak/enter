@@ -58,7 +58,7 @@ static void gui_draw(gui_t *gui)
 	/* Draw the message label.  */
 	gui_label_draw(gui->msg, gui);
 
-	if (gui->has_doublebuf) {
+	if (display_has_doublebuffer(display)) {
 		XdbeSwapBuffers(display->dpy, &gui->swap_info, 1);
 	} else
 		XFlush(display->dpy);
@@ -174,12 +174,8 @@ gui_t* gui_new(display_t *display, conf_t *theme)
 	gui->win = XCreateSimpleWindow(display->dpy, display->root,
 		gui->x, gui->y, gui->width, gui->height,
 		0, color, color);
-	
-	/* Check for the DBE extention.  */
-	int major, minor;
-	gui->has_doublebuf = XdbeQueryExtension(display->dpy, &major, &minor);
 
-	if (gui->has_doublebuf) {
+	if (display_has_doublebuffer(display)) {
 		XdbeSwapInfo swap = {
 			.swap_window = gui->win,
 			.swap_action = XdbeBackground
@@ -197,7 +193,6 @@ gui_t* gui_new(display_t *display, conf_t *theme)
 	gui->draw = XftDrawCreate(display->dpy, gui->drawable, display->visual,
 					display->colormap);
 
-	
 	/* Read the background pixmap.  */
 	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme, "theme"),
 			conf_get(theme, "enter.background"));

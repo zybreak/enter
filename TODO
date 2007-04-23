@@ -2,6 +2,7 @@ Critical priority
 * Add PAM authentication support.
 * Add NLS support.
 * Make commandline options overrun config file options.
+* Move primitive gui code to new class.
 
 Moderate priority
 * Drop priviledges when not needed.

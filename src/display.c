@@ -32,6 +32,9 @@ display_t* display_new(conf_t *conf)
 	
 	display->visual = DefaultVisual(display->dpy, display->screen);
 	display->colormap = DefaultColormap(display->dpy, display->screen);
+
+	int major, minor;
+	display->has_doublebuffer = XdbeQueryExtentsion(display->dpy, &major, &minor);
 	
 	return display;
 }
@@ -61,5 +64,10 @@ void display_kill_clients(display_t *display, Window window)
 	}
 	
 	XSync(display->dpy, 0);
+}
+
+int display_has_doublebuffer(display_t *display)
+{
+	return display->has_doublebuffer;
 }
 

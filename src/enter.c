@@ -143,9 +143,9 @@ static auth_t* setup_authentication(conf_t *conf)
 		return NULL;
 	}
 
-	/* TODO: only remove if the file exists.  */
 	if (unlink(conf_get(conf, "auth_file")) == -1) {
-		log_print(LOG_WARNING, "Could not remove old auth file.");
+		log_print(LOG_WARNING, "Could not remove auth file: %s.",
+				strerror(errno));
 	}
 
 	if (!auth_write(auth, conf_get(conf, "auth_file"))) {
