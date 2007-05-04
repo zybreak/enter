@@ -7,6 +7,7 @@
 #include "utils.h"
 
 #define BUFFER_SIZE 200
+#define EMPTY_DATA ""
 
 static void get_opt_arg(char *str, char **opt, char **arg)
 {
@@ -21,37 +22,33 @@ static void get_opt_arg(char *str, char **opt, char **arg)
 	*arg = xstrtrim(++p);
 }
 
-static map_t* map_new(const char *key, const char *value)
+static conf_t* new_pair(const char *key, const char *value)
 {
-	map_t *map = xmalloc(sizeof(*map));
-	map->key = strdup(key);
-	map->value = strdup(value);
-	map->next = NULL;
+	conf_t *item = conf_new();
 	
-	return map;
+	item->key = key;
+	item->value = value;
+	
+	return item;
 }
 
 conf_t* conf_new(void)
 {
 	conf_t *conf = xmalloc(sizeof(*conf));
-	conf->map = NULL;
-	
+	memset(conf, 0, sizeof(*conf));
+
 	return conf;
 }
 
 void conf_delete(conf_t *conf)
 {
-	map_t *map = conf->map;
-	while (map) {
-		map_t *next = map->next;
+	while (conf) {
+		conf_t *next = conf->next;
 		
-		free(map->key);
-		free(map->value);
-		free(map);
+		free(conf);
 
-		map = next;
+		conf = next;
 	}
-	free(conf);
 }
 
 int conf_parse(conf_t *conf, const char *config_file)
@@ -71,8 +68,10 @@ int conf_parse(conf_t *conf, const char *config_file)
 		get_opt_arg(buffer,&opt,&arg);
 
 		/* Filter out comments and empty lines.  */
-		if ((*opt!='#') && (*opt))
-			conf_set(conf,opt,arg);
+		if ((*opt == '#') || !(*opt))
+			continue;
+
+		conf_set(conf,opt,arg);
 	}
 
 	fclose(fp);
@@ -82,42 +81,34 @@ int conf_parse(conf_t *conf, const char *config_file)
 
 char* conf_get(conf_t *conf, const char *key)
 {
-	map_t *map = conf->map;
-	
-	while (map) {
-		if (!strcmp(map->key,key))
-			return map->value;
-		map = map->next;
+	while (conf) {
+		if (!strcmp(conf->key,key))
+			return conf->value;
+		conf = conf->next;
 	}
-	return "";
+	
+	return EMPTY_DATA;
 }
 
-/* TODO: how should conf_set handle new data?
- * right now it stores duplicates of its in data, and not the
- * in data itself to assure it can free it when needed.
- * Although if the responsibility to free the data is on the user,
- * this will not be needed. Then of cource overwriting data is not
- * so easy anymore.  */
 void conf_set(conf_t *conf, const char *key, const char *value)
 {
-	map_t *map = conf->map;
-
-	if (!map) {
-		conf->map = map_new(key,value);
+	conf_t *c = conf->next;
+	
+	if (!conf->next) {
+		conf->next = new_pair(key,value);
 		return;
 	}
 	
 	while (1) {
-		if (!strcmp(map->key,key)) {
-			if (map->value)
-				free(map->value);
-			map->value = strdup(value);
+		if (!strcmp(c->key,key)) {
+			c->value = value;
 			return;
-		} else if (!map->next)
+		} else if (!c->next)
 			break;
 
-		map = map->next;
+		c = c->next;
 	}
 
-	map->next = map_new(key,value);
+	c->next = new_item(key,value);
 }
+

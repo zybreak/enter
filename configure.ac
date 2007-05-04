@@ -41,15 +41,15 @@ AC_CHECK_LIB([Xau], [XauWriteAuth], [LIBS="$LIBS -lXau"],
 AC_CHECK_LIB([Imlib2], [imlib_context_new], [LIBS="$LIBS -lImlib2"],
 			[AC_MSG_ERROR([You need to have Imlib2.])])
 
-AC_ARG_ENABLE([pam],
-	      [AS_HELP_STRING([--enable-pam], [enable pam authentication])],
-	      [pam=$enableval],
-	      [pam=no])
+dnl AC_ARG_ENABLE([pam],
+dnl	      [AS_HELP_STRING([--enable-pam], [enable pam authentication])],
+dnl	      [pam=$enableval],
+dnl	      [pam=no])
 
-if test "x$pam" = "xyes"; then
-	AC_CHECK_HEADERS([security/pam_appl.h], [],
-	      [AC_MSG_WARN([Could not find PAM headers, disabling PAM.])])
-fi
+dnl if test "x$pam" = "xyes"; then
+dnl	AC_CHECK_HEADERS([security/pam_appl.h], [],
+dnl	      [AC_MSG_WARN([Could not find PAM headers, disabling PAM.])])
+dnl fi
 
 # Checks for header files.
 AC_HEADER_STDC

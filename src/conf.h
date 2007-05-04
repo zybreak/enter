@@ -1,14 +1,14 @@
 #ifndef CONF_H_
 #define CONF_H_
 
-typedef struct map_t {
+/**
+ * The first node in the list is just a pointer to the
+ * head and should not contain any other data.
+ */
+typedef struct conf_t {
 	char *key;
 	char *value;
-	struct map_t *next;
-} map_t;
-
-typedef struct conf_t {
-	map_t *map;
+	struct conf_t *next;
 } conf_t;
 
 /**
@@ -16,7 +16,7 @@ typedef struct conf_t {
  */
 conf_t* conf_new(void);
 /**
- * Frees conf, and any data contained in conf.
+ * Free's conf, but not any data.
  */
 void conf_delete(conf_t *conf);
 /**

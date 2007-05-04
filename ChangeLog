@@ -1,3 +1,7 @@
+2007-05-04  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/conf.[ch]:
+	Removed map_t typedef.
+
 2007-04-11  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/:
 	All files where spell-checked.
