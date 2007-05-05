@@ -1,3 +1,10 @@
+2007-05-05  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/conf.c:
+	removed const strings.
+
+	* src/enter.c:
+	added errno.h.
+
 2007-05-04  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/conf.[ch]:
 	Removed map_t typedef.

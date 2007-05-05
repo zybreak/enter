@@ -22,7 +22,7 @@ static void get_opt_arg(char *str, char **opt, char **arg)
 	*arg = xstrtrim(++p);
 }
 
-static conf_t* new_pair(const char *key, const char *value)
+static conf_t* new_pair(char *key, char *value)
 {
 	conf_t *item = conf_new();
 	
@@ -79,7 +79,7 @@ int conf_parse(conf_t *conf, const char *config_file)
 	return TRUE;
 }
 
-char* conf_get(conf_t *conf, const char *key)
+char* conf_get(conf_t *conf, char *key)
 {
 	while (conf) {
 		if (!strcmp(conf->key,key))
@@ -90,17 +90,17 @@ char* conf_get(conf_t *conf, const char *key)
 	return EMPTY_DATA;
 }
 
-void conf_set(conf_t *conf, const char *key, const char *value)
+void conf_set(conf_t *conf, char *key, char *value)
 {
 	conf_t *c = conf->next;
 	
 	if (!conf->next) {
-		conf->next = new_pair(key,value);
+		conf->next = new_pair(key, value);
 		return;
 	}
 	
 	while (1) {
-		if (!strcmp(c->key,key)) {
+		if (!strcmp(c->key, key)) {
 			c->value = value;
 			return;
 		} else if (!c->next)
@@ -109,6 +109,6 @@ void conf_set(conf_t *conf, const char *key, const char *value)
 		c = c->next;
 	}
 
-	c->next = new_item(key,value);
+	c->next = new_pair(key, value);
 }
 

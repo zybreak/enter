@@ -34,7 +34,7 @@ display_t* display_new(conf_t *conf)
 	display->colormap = DefaultColormap(display->dpy, display->screen);
 
 	int major, minor;
-	display->has_doublebuffer = XdbeQueryExtentsion(display->dpy, &major, &minor);
+	display->has_doublebuffer = XdbeQueryExtension(display->dpy, &major, &minor);
 	
 	return display;
 }

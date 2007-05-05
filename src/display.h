@@ -2,6 +2,7 @@
 #define DISPLAY_H_
 
 #include <X11/Xlib.h>
+#include <X11/extensions/Xdbe.h>
 
 #include "conf.h"
 

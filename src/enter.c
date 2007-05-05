@@ -5,6 +5,8 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <errno.h>
+
 #include <X11/Xauth.h>
 
 #include "enter.h"
