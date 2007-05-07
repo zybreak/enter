@@ -1,3 +1,8 @@
+2007-05-07  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/conf.c:
+	added const strings and strdup to adress a bug
+	caused by memory corruption.
+
 2007-05-05  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/conf.c:
 	removed const strings.

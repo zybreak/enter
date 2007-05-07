@@ -22,12 +22,12 @@ static void get_opt_arg(char *str, char **opt, char **arg)
 	*arg = xstrtrim(++p);
 }
 
-static conf_t* new_pair(char *key, char *value)
+static conf_t* new_pair(const char *key, const char *value)
 {
 	conf_t *item = conf_new();
 	
-	item->key = key;
-	item->value = value;
+	item->key = strdup(key);
+	item->value = strdup(value);
 	
 	return item;
 }
@@ -45,6 +45,8 @@ void conf_delete(conf_t *conf)
 	while (conf) {
 		conf_t *next = conf->next;
 		
+		free(conf->key);
+		free(conf->value);
 		free(conf);
 
 		conf = next;
@@ -79,7 +81,7 @@ int conf_parse(conf_t *conf, const char *config_file)
 	return TRUE;
 }
 
-char* conf_get(conf_t *conf, char *key)
+char* conf_get(conf_t *conf, const char *key)
 {
 	while (conf) {
 		if (!strcmp(conf->key,key))
@@ -90,7 +92,7 @@ char* conf_get(conf_t *conf, char *key)
 	return EMPTY_DATA;
 }
 
-void conf_set(conf_t *conf, char *key, char *value)
+void conf_set(conf_t *conf, const char *key, const char *value)
 {
 	conf_t *c = conf->next;
 	
@@ -101,7 +103,7 @@ void conf_set(conf_t *conf, char *key, char *value)
 	
 	while (1) {
 		if (!strcmp(c->key, key)) {
-			c->value = value;
+			c->value = strdup(value);
 			return;
 		} else if (!c->next)
 			break;
