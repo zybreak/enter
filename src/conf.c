@@ -106,6 +106,9 @@ void conf_set(conf_t *conf, const char *key, const char *value)
 	
 	while (1) {
 		if (!strcmp(c->key, key)) {
+			if (c->value)
+				free(c->value);
+
 			c->value = strdup(value);
 			return;
 		} else if (!c->next)
