@@ -1,7 +1,6 @@
 Critical priority
 * Add PAM authentication support.
 * Add NLS support.
-* Make commandline options overrun config file options.
 * Move primitive gui code to new class.
 * Fork the GUI process and drop privileges.
 * Let the GUI and the authentication code communicate through IPC

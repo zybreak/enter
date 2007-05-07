@@ -28,7 +28,6 @@ struct gui_t {
 	display_t *display;
 	conf_t *conf;
 
-	Pixmap background;
 	gui_label_t *title, *username, *password, *msg;
 	gui_input_t *user_input, *passwd_input;
 

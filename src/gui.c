@@ -109,9 +109,9 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 
 		/* when auth is TRUE, we got a successful login,
 		 * EMPTY user, and passwd field and set gui->mode to LOGIN.
-		 * if auth is FALSE and gui->focus is USERNAME, just switch focus.
-		 * if auth is FALSE and gui->focus is PASSWORD, empty user and passwd
-		 * field and scream at the user! */
+		 * if auth is FALSE and gui->focus is USERNAME, just switch
+		 * focus. If auth is FALSE and gui->focus is PASSWORD,
+		 * empty user and passwd field and scream at the user! */
 		if (auth) {
 			/* User authenticated successfully.  */
 			memset(usr,'\0',strlen(usr));
@@ -203,11 +203,12 @@ gui_t* gui_new(display_t *display, conf_t *theme)
 		gui_delete(gui);
 		return NULL;
 	}
-	gui->background = gui_image_pixmap(image);
+
+	Pixmap background = gui_image_pixmap(image);
 	gui_image_delete(image);
 	
 	/* Set the background pixmap.  */
-	XSetWindowBackgroundPixmap(display->dpy, gui->win, gui->background);
+	XSetWindowBackgroundPixmap(display->dpy, gui->win, background);
 
 	/* Load labels.  */
 	gui->title = LABEL_NEW("label.title");
@@ -242,9 +243,6 @@ void gui_delete(gui_t *gui)
 	if (gui->has_doublebuf)
 		XdbeDeallocateBackBufferName(display->dpy, gui->back_buffer);
 	
-	if (gui->background)
-		XFreePixmap(display->dpy,gui->background);
-
 	if (gui->title)
 		gui_label_delete(gui->title,display);
 
@@ -291,7 +289,8 @@ void gui_show(gui_t *gui)
 	XMapWindow(display->dpy, gui->win);
 	XMoveWindow(display->dpy, gui->win, gui->x, gui->y);
 
-	XGrabKeyboard(display->dpy, gui->win, False, GrabModeAsync, GrabModeAsync, CurrentTime);
+	XGrabKeyboard(display->dpy, gui->win, False, GrabModeAsync,
+			GrabModeAsync, CurrentTime);
 
 	gui_draw(gui);
 

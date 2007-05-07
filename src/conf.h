@@ -35,5 +35,9 @@ char* conf_get(conf_t *conf, const char *key);
  * a previous one.
  */
 void conf_set(conf_t *conf, const char *key, const char *value);
+/**
+ * Assign conf `to' all keys from conf `from'.
+ */
+void conf_merge(conf_t *to, conf_t *from);
 
 #endif /*CONF_H_*/

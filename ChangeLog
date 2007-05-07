@@ -1,6 +1,15 @@
+2007-05-08  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/gui.c:
+	removed Background pixmap from struct, since we can free
+	it as soon as it has been passed to SetBackground.
+
+	* src/enter.c:
+	arguments passed to the program now overrides options in
+	config file.
+
 2007-05-07  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/conf.c:
-	added const strings and strdup to adress a bug
+	added const strings and strdup to address a bug
 	caused by memory corruption.
 
 2007-05-05  Robert Knutsson <rob_dobbs@users.sf.net>

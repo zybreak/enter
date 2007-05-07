@@ -83,6 +83,9 @@ int conf_parse(conf_t *conf, const char *config_file)
 
 char* conf_get(conf_t *conf, const char *key)
 {
+	/* Skip head.  */
+	conf = conf->next;
+
 	while (conf) {
 		if (!strcmp(conf->key,key))
 			return conf->value;
@@ -112,5 +115,16 @@ void conf_set(conf_t *conf, const char *key, const char *value)
 	}
 
 	c->next = new_pair(key, value);
+}
+
+void conf_merge(conf_t *to, conf_t *from)
+{
+	/* Skip head.  */
+	from = from->next;
+
+	while (from) {
+		conf_set(to, from->key, from->value);
+		from = from->next;
+	}
 }
 

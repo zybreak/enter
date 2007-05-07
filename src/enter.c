@@ -38,21 +38,25 @@ static void parse_args(int argc, char **argv, conf_t *conf)
 			
 		} else if ((strcmp(argv[i],"-d") == 0) && (i+1 < argc)) {
 			conf_set(conf,"display",argv[++i]);
+		
+		} else if ((strcmp(argv[i],"-t") == 0) && (i+1 < argc)) {
+			conf_set(conf,"theme",argv[++i]);
 
 		} else if (strcmp(argv[i],"-n") == 0) {
 			conf_set(conf,"daemon","false");
 
 		} else if (strcmp(argv[i],"-v") == 0) {
-			printf("%s version %s\n",PACKAGE,VERSION);
+			printf("%s version %s\n", PACKAGE, VERSION);
 			exit(EXIT_SUCCESS);
 
 		} else if (strcmp(argv[i],"-h") == 0) {
 			printf(
 			"Usage: %s: [OPTIONS]\n\n"
 			"  -c CONFIG   use config file CONFIG\n"
-			"  -a AUTH     write MIT cookie to AUTH\n"
+			"  -a AUTH     write server authentication to AUTH\n"
 			"  -l LOGIN    run LOGIN as the user session\n"
 			"  -d DISPLAY  connect to display DISPLAY\n"
+			"  -t THEME    use the theme THEME, instead of the one in the config\n"
 			"  -n          dont run as a daemon\n"
 			"  -v          print version information\n"
 			"  -h          print this help info\n"
@@ -69,12 +73,12 @@ static void parse_args(int argc, char **argv, conf_t *conf)
 
 static void default_settings(conf_t *conf)
 {
-	conf_set(conf,"config_file", CONFDIR "/enter.conf");
-	conf_set(conf,"auth_file", "/tmp/enter.xauth");
-	conf_set(conf,"login_file", ".xinitrc");
-	conf_set(conf,"daemon", "true");
-	conf_set(conf,"authentication", "magic-cookie");
-	conf_set(conf,"display", ":0");
+	conf_set(conf, "auth_file", "/tmp/enter.xauth");
+	conf_set(conf, "login_file", ".xinitrc");
+	conf_set(conf, "daemon", "true");
+	conf_set(conf, "authentication", "magic-cookie");
+	conf_set(conf, "display", ":0");
+	conf_set(conf, "theme", "default");
 }
 
 static int daemonize()
@@ -195,12 +199,15 @@ int main(int argc, char **argv)
 {
 	conf_t *conf = conf_new();
 	conf_t *theme = conf_new();
+	conf_t *cmd = conf_new();
 	auth_t *auth = NULL;
 	
 	/* Assign default settings to conf
 	 * and parse command line arguments.  */
 	default_settings(conf);
-	parse_args(argc, argv, conf);
+
+	conf_set(cmd,"config_file", CONFDIR "/enter.conf");
+	parse_args(argc, argv, cmd);
 
 	/* Check if we have enough privileges.  */
 	if (getuid() != 0) {
@@ -217,12 +224,15 @@ int main(int argc, char **argv)
 	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 	
 	/* Parse config file.  */
-	if (conf_parse(conf, conf_get(conf,"config_file")) == FALSE) {
+	if (conf_parse(conf, conf_get(cmd,"config_file")) == FALSE) {
 		log_print(LOG_EMERG, "Could not read config file: \"%s\"",
-					conf_get(conf, "config_file"));
+					conf_get(cmd, "config_file"));
 		closelog();
 		exit(EXIT_FAILURE);
 	}
+
+	conf_merge(conf, cmd);
+	conf_delete(cmd);
 
 	/* Parse theme file.  */
 	char theme_file[THEME_LEN];
@@ -238,7 +248,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Add theme name to theme, so the full path of data files
-	 * can be read by only supplying theme .  */
+	 * can be read by only supplying theme.  */
 	conf_set(theme, "theme",
 			conf_get(conf, "theme"));
 
