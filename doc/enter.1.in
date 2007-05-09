@@ -21,6 +21,9 @@ specify an alternative login file
 \fB\-d\fR
 specify which display to connect to
 .TP
+\fB\-t\fR
+use specified theme
+.TP
 \fB\-n\fR
 run in foreground
 .TP

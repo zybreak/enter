@@ -1,8 +1,9 @@
 #include <stdlib.h>
 
 #include "enter.h"
-#include "gui_image.h"
 #include "utils.h"
+
+#include "gui_image.h"
 
 gui_image_t* gui_image_new(display_t *display, const char *filename,
 							int x, int y)
@@ -29,16 +30,6 @@ void gui_image_delete(gui_image_t *image)
 	imlib_context_set_image(image->im_image);
 	imlib_free_image();
 	free(image);
-}
-
-int gui_image_width(gui_image_t *image)
-{
-	return image->w;
-}
-
-int gui_image_height(gui_image_t *image)
-{
-	return image->h;
 }
 
 void gui_image_draw(Drawable drawable, gui_image_t *image)

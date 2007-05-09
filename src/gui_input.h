@@ -35,9 +35,5 @@ void gui_input_set_text(gui_input_t *input, const char *text);
 void gui_input_set_pos(gui_input_t *input, int pos, pos_mode_t mode);
 void gui_input_delete_char(gui_input_t *input);
 void gui_input_insert_char(gui_input_t *input, char c);
-int gui_input_x(gui_input_t *input);
-int gui_input_y(gui_input_t *input);
-int gui_input_width(gui_input_t *input);
-int gui_input_height(gui_input_t *input);
 
 #endif /*GUI_INPUT_H_*/

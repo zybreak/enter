@@ -1,7 +1,8 @@
 #include <X11/Xlib.h>
 
-#include "gui_label.h"
 #include "utils.h"
+
+#include "gui_label.h"
 
 gui_label_t* gui_label_new(display_t *display, const char *font,
 		const char *color, int x, int y, int w, int h, const char *caption)

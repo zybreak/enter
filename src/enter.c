@@ -56,7 +56,7 @@ static void parse_args(int argc, char **argv, conf_t *conf)
 			"  -a AUTH     write server authentication to AUTH\n"
 			"  -l LOGIN    run LOGIN as the user session\n"
 			"  -d DISPLAY  connect to display DISPLAY\n"
-			"  -t THEME    use the theme THEME, instead of the one in the config\n"
+			"  -t THEME    override config theme's setting with THEME\n"
 			"  -n          dont run as a daemon\n"
 			"  -v          print version information\n"
 			"  -h          print this help info\n"

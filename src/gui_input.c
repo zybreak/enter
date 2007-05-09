@@ -1,7 +1,8 @@
 #include <X11/Xlib.h>
 
-#include "gui_input.h"
 #include "utils.h"
+
+#include "gui_widget.h"
 
 gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 		const char *font, const char *color, 
@@ -23,8 +24,8 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 	 * a value below zero was specified.  */
 	input->t_x = (text_x>0)?x+text_x:x;
 	input->t_y = (text_y>0)?y+text_y:y;
-	input->t_w = (text_w>0)?text_w:gui_image_width(input->image);
-	input->t_h = (text_h>0)?text_h:gui_image_height(input->image);
+	input->t_w = (text_w>0)?text_w:gui_widget_width((gui_widget_t*)input->image);
+	input->t_h = (text_h>0)?text_h:gui_widget_height((gui_widget_t*)input->image);
 
 	input->pos = 0;
 	input->text = gui_label_new(display, font, color,
@@ -36,8 +37,8 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 		return NULL;
 	}
 
-	input->w = gui_image_width(input->image);
-	input->h = gui_image_height(input->image);
+	input->w = gui_widget_width((gui_widget_t*)input->image);
+	input->h = gui_widget_height((gui_widget_t*)input->image);
 
 	return input;
 }
@@ -125,25 +126,5 @@ void gui_input_insert_char(gui_input_t *input, char c)
 	xstrins(gui_label_get_caption(input->text), input->pos, c, LABEL_TEXT_LEN);
 
 	gui_input_set_pos(input, 1, INPUT_POS_REL);
-}
-
-int gui_input_x(gui_input_t *input)
-{
-	return input->x;
-}
-
-int gui_input_y(gui_input_t *input)
-{
-	return input->y;
-}
-
-int gui_input_width(gui_input_t *input)
-{
-	return input->w;
-}
-
-int gui_input_height(gui_input_t *input)
-{
-	return input->h;
 }
 
