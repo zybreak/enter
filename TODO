@@ -3,7 +3,7 @@ Critical priority
 * Add NLS support.
 * Move primitive gui code to new class.
 * Fork the GUI process and drop privileges.
-* Let the GUI and the authentication code communicate through IPC
+* Let the GUI and the authentication code communicate through IPC.
 
 Moderate priority
 * Document functions.

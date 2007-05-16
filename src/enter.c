@@ -290,7 +290,7 @@ int main(int argc, char **argv)
 	}
 	
 	/* Create a GUI window.  */
-	gui_t *gui = gui_new(display, theme);
+	gui_t *gui = gui_new(display);
 	if (!gui) {
 		log_print(LOG_EMERG, "Could not open GUI.");
 		server_stop();
@@ -299,6 +299,7 @@ int main(int argc, char **argv)
 	}
 
 	while (1) {
+#if 0
 		gui_show(gui);
 		int action = gui_run(gui);
 		gui_hide(gui);
@@ -320,6 +321,7 @@ int main(int argc, char **argv)
 			break;
 		}
 		display_kill_clients(display, gui->win);
+#endif
 	}
 
 

@@ -1,3 +1,13 @@
+2007-05-16  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/greeter.c:
+	code from old gui.c.
+	* src/gui.c:
+	stripped all high-level code.
+	* src/list.c:
+	implemented a linked list.
+	* src/conf.c:
+	conf_t is now a linked list of type list_t.
+
 2007-05-08  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/gui.c:
 	removed Background pixmap from struct, since we can free

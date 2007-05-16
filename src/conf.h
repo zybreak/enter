@@ -1,15 +1,12 @@
 #ifndef CONF_H_
 #define CONF_H_
 
+#include "list.h"
+
 /**
- * The first node in the list is just a pointer to the
- * head and should not contain any other data.
+ * The conf_t struct is just a linked list
  */
-typedef struct conf_t {
-	char *key;
-	char *value;
-	struct conf_t *next;
-} conf_t;
+typedef list_t conf_t;
 
 /**
  * Returns a new conf_t object.

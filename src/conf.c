@@ -9,6 +9,11 @@
 #define BUFFER_SIZE 200
 #define EMPTY_DATA ""
 
+typedef struct pair_t {
+	const char *key;
+	const char *value;
+} pair_t;
+
 static void get_opt_arg(char *str, char **opt, char **arg)
 {
 	char *p = index(str,'=');
@@ -22,14 +27,14 @@ static void get_opt_arg(char *str, char **opt, char **arg)
 	*arg = xstrtrim(++p);
 }
 
-static conf_t* new_pair(const char *key, const char *value)
+static pair_t* new_pair(const char *key, const char *value)
 {
-	conf_t *item = conf_new();
+	pair_t *pair = xmalloc(sizeof(*pair));
 	
-	item->key = strdup(key);
-	item->value = strdup(value);
+	pair->key = key;
+	pair->value = value;
 	
-	return item;
+	return pair;
 }
 
 conf_t* conf_new(void)
@@ -42,15 +47,7 @@ conf_t* conf_new(void)
 
 void conf_delete(conf_t *conf)
 {
-	while (conf) {
-		conf_t *next = conf->next;
-		
-		free(conf->key);
-		free(conf->value);
-		free(conf);
-
-		conf = next;
-	}
+	list_delete(conf);
 }
 
 int conf_parse(conf_t *conf, const char *config_file)
@@ -84,12 +81,12 @@ int conf_parse(conf_t *conf, const char *config_file)
 char* conf_get(conf_t *conf, const char *key)
 {
 	/* Skip head.  */
-	conf = conf->next;
+	conf = list_next(conf);
 
 	while (conf) {
-		if (!strcmp(conf->key,key))
-			return conf->value;
-		conf = conf->next;
+		if (!strcmp(((pair_t*)list_data(conf))->key, key))
+			return ((pair_t*)list_data(conf))->value;
+		conf = list_next(conf);
 	}
 	
 	return EMPTY_DATA;
@@ -97,37 +94,24 @@ char* conf_get(conf_t *conf, const char *key)
 
 void conf_set(conf_t *conf, const char *key, const char *value)
 {
-	conf_t *c = conf->next;
-	
-	if (!conf->next) {
-		conf->next = new_pair(key, value);
-		return;
-	}
-	
-	while (1) {
-		if (!strcmp(c->key, key)) {
-			if (c->value)
-				free(c->value);
+	/* Skip the first node, since its never used.  */
+	while (list_next(conf)) {
+		conf = list_next(conf);
 
-			c->value = strdup(value);
+		if (!strcmp(((pair_t*)list_data(conf))->key, key)) {
+			((pair_t*)list_data(conf))->value = value;
 			return;
-		} else if (!c->next)
-			break;
-
-		c = c->next;
+		}
 	}
 
-	c->next = new_pair(key, value);
+	list_add(conf, new_pair(key, value));
 }
 
 void conf_merge(conf_t *to, conf_t *from)
 {
 	/* Skip head.  */
-	from = from->next;
-
-	while (from) {
-		conf_set(to, from->key, from->value);
-		from = from->next;
+	while (from = list_next(from)) {
+		conf_set(to, ((pair_t*)list_data(from))->key, ((pair_t*)list_data(from))->value);
 	}
 }
 

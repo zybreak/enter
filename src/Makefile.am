@@ -11,6 +11,7 @@ enter_SOURCES = \
 	conf.c conf.h \
 	auth.c auth.h \
 	log.c log.h \
+	list.c list.h \
 	login.c login.h \
 	display.c display.h \
 	gui_image.c gui_image.h \
