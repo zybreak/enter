@@ -10,8 +10,8 @@
 #define EMPTY_DATA ""
 
 typedef struct pair_t {
-	const char *key;
-	const char *value;
+	char *key;
+	char *value;
 } pair_t;
 
 static void get_opt_arg(char *str, char **opt, char **arg)
@@ -27,7 +27,7 @@ static void get_opt_arg(char *str, char **opt, char **arg)
 	*arg = xstrtrim(++p);
 }
 
-static pair_t* new_pair(const char *key, const char *value)
+static pair_t* new_pair(char *key, char *value)
 {
 	pair_t *pair = xmalloc(sizeof(*pair));
 	
@@ -78,7 +78,7 @@ int conf_parse(conf_t *conf, const char *config_file)
 	return TRUE;
 }
 
-char* conf_get(conf_t *conf, const char *key)
+char* conf_get(conf_t *conf, char *key)
 {
 	/* Skip head.  */
 	conf = list_next(conf);
@@ -92,7 +92,7 @@ char* conf_get(conf_t *conf, const char *key)
 	return EMPTY_DATA;
 }
 
-void conf_set(conf_t *conf, const char *key, const char *value)
+void conf_set(conf_t *conf, char *key, char *value)
 {
 	/* Skip the first node, since its never used.  */
 	while (list_next(conf)) {

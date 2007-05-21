@@ -26,12 +26,12 @@ int conf_parse(conf_t *conf, const char *config_file);
  * Returns the key value, or an empty string if it doesn't
  * have a value.
  */
-char* conf_get(conf_t *conf, const char *key);
+char* conf_get(conf_t *conf, char *key);
 /**
  * Assigns key with the value in ´value´, or overwrites
  * a previous one.
  */
-void conf_set(conf_t *conf, const char *key, const char *value);
+void conf_set(conf_t *conf, char *key, char *value);
 /**
  * Assign conf `to' all keys from conf `from'.
  */

@@ -13,13 +13,13 @@ static void gui_draw(gui_t *gui)
 
 	/* Only clear if double buffering is not present,
 	 * since DBE clears the window for us.  */
-	if (!gui->has_doublebuf) {
+	if (!display_has_doublebuffer(display)) {
 		XClearWindow(display->dpy, gui->win);
 	}
 
 	/* Draw the widgets.  */
 	while (it) {
-		gui_widgets_draw(it);
+		gui_widget_draw(list_data(it));
 		it = list_next(it);
 	}
 
@@ -35,9 +35,13 @@ static void gui_mappingnotify(gui_t *gui, XEvent *event)
 	XRefreshKeyboardMapping(&event->xmapping);
 }
 
+static void gui_keypress(gui_t *gui, XEvent *event)
+{
+}
+
 gui_t* gui_new(display_t *display)
 {
-	gui_t *gui = xmalloc(sizeof(*gui));
+	gui_t *gui = (gui_t*)xmalloc(sizeof(*gui));
 	memset(gui,'\0',sizeof(*gui));
 
 	/* Set default options.  */
@@ -46,11 +50,17 @@ gui_t* gui_new(display_t *display)
 	gui->width = display->width;
 	gui->height = display->height;
 	gui->display = display;
-	gui->conf = theme;
 	gui->widgets = list_new();
 	gui->focus = NULL;
 
-	unsigned long color = BlackPixel(display->dpy,display->screen);
+	/*
+	gui->swap_info = {
+		.swap_window = gui->win,
+		.swap_action = XdbeBackground
+	};
+	*/
+
+	unsigned long color = BlackPixel(display->dpy, display->screen);
 
 	/* Create the GUI window.  */
 	gui->win = XCreateSimpleWindow(display->dpy, display->root,
@@ -58,11 +68,6 @@ gui_t* gui_new(display_t *display)
 		0, color, color);
 
 	if (display_has_doublebuffer(display)) {
-		gui->swap_info = {
-			.swap_window = gui->win,
-			.swap_action = XdbeBackground
-		};
-
 		gui->back_buffer = XdbeAllocateBackBufferName(display->dpy,
 			gui->swap_info.swap_window, gui->swap_info.swap_action);
 		gui->drawable = gui->back_buffer;
@@ -81,7 +86,7 @@ void gui_delete(gui_t *gui)
 {
 	display_t *display = gui->display;
 
-	if (gui->has_doublebuf)
+	if (display_has_doublebuffer(display))
 		XdbeDeallocateBackBufferName(display->dpy, gui->back_buffer);
 	
 	XftDrawDestroy(gui->draw);
@@ -121,7 +126,6 @@ void gui_hide(gui_t *gui)
 void gui_next_event(gui_t *gui)
 {
 	XEvent event;
-	gui->mode = LISTEN;
 	
 	XNextEvent(gui->display->dpy, &event);
 
