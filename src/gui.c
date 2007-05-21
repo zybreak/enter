@@ -5,10 +5,6 @@
 #include "gui.h"
 
 #include "login.h"
-#include "log.h"
-#include "utils.h"
-
-#define BUF_LEN 64
 
 static void gui_draw(gui_t *gui)
 {
@@ -41,8 +37,6 @@ static void gui_mappingnotify(gui_t *gui, XEvent *event)
 
 gui_t* gui_new(display_t *display)
 {
-	char buf[BUF_LEN];
-	
 	gui_t *gui = xmalloc(sizeof(*gui));
 	memset(gui,'\0',sizeof(*gui));
 
