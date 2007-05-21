@@ -20,3 +20,8 @@ int gui_widget_y(gui_widget_t *widget)
 	return widget->widget.y;
 }
 
+void gui_widget_draw(gui_widget_t *widget)
+{
+
+}
+
