@@ -18,9 +18,8 @@ static void gui_draw(gui_t *gui)
 	}
 
 	/* Draw the widgets.  */
-	while (it) {
-		gui_widget_draw(list_data(it));
-		it = list_next(it);
+	while (it = list_next(it)) {
+		gui_widget_draw(list_data(it), gui);
 	}
 
 	if (display_has_doublebuffer(display)) {

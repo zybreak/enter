@@ -1,3 +1,4 @@
+#include "enter.h"
 #include "gui_widget.h"
 
 int gui_widget_height(gui_widget_t *widget)
@@ -20,8 +21,17 @@ int gui_widget_y(gui_widget_t *widget)
 	return widget->widget.y;
 }
 
-void gui_widget_draw(gui_widget_t *widget)
+void gui_widget_draw(gui_widget_t *widget, gui_t *gui)
 {
-
+	switch (widget->widget.type) {
+	case LABEL:
+		gui_label_draw(&widget->label, gui);
+		break;
+	case INPUT:
+		gui_input_draw(&widget->input, gui, TRUE);
+		break;
+	case IMAGE:
+	break;
+	}
 }
 

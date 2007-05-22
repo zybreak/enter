@@ -5,6 +5,7 @@
 #include <Imlib2.h>
 
 #include "display.h"
+#include "gui.h"
 
 typedef struct gui_image_t {
 	int type;
@@ -16,7 +17,7 @@ typedef struct gui_image_t {
 
 gui_image_t* gui_image_new(display_t *display, const char *filename, int x, int y);
 void gui_image_delete(gui_image_t *image);
-void gui_image_draw(Drawable drawable, gui_image_t *image);
+void gui_image_draw(gui_image_t *image, gui_t *gui);
 Pixmap gui_image_pixmap(gui_image_t *image);
 int gui_image_load(gui_image_t *image, const char *filename);
 

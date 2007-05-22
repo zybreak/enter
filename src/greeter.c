@@ -148,21 +148,21 @@ greeter_t* greeter_new(display_t *display, conf_t *theme)
 	XSetWindowBackgroundPixmap(display->dpy, greeter->gui->win, background);
 
 	/* Load labels.  */
-#if 0
-	gui->title = LABEL_NEW("label.title");
-	gui->msg = LABEL_NEW("label.msg");
-	gui->username = LABEL_NEW("label.username");
-	gui->password = LABEL_NEW("label.password");
-	
+	list_add(greeter->gui->widgets, LABEL_NEW("label.title"));
+	list_add(greeter->gui->widgets, LABEL_NEW("label.msg"));
+	list_add(greeter->gui->widgets, LABEL_NEW("label.username"));
+	list_add(greeter->gui->widgets, LABEL_NEW("label.password"));
+
 	/* Load input boxes.  */
 	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme,"theme"), 
 			conf_get(theme,"input.username.image"));
-	gui->user_input = INPUT_NEW("input.username", buf, 0);
+	list_add(greeter->gui->widgets, INPUT_NEW("input.username", buf, 0));
 	
 	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme,"theme"), 
 			conf_get(theme,"input.password.image"));
-	gui->passwd_input = INPUT_NEW("input.password", buf, 1);
+	list_add(greeter->gui->widgets, INPUT_NEW("input.password", buf, 1));
 
+#if 0
 	/* Make sure all object's were loaded.  */
 	if (!(gui->title && gui->msg && gui->username && gui->password &&
 				gui->passwd_input && gui->user_input)) {

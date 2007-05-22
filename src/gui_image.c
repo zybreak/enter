@@ -3,7 +3,7 @@
 #include "enter.h"
 #include "utils.h"
 
-#include "gui_image.h"
+#include "gui_widget.h"
 
 gui_image_t* gui_image_new(display_t *display, const char *filename,
 							int x, int y)
@@ -14,6 +14,7 @@ gui_image_t* gui_image_new(display_t *display, const char *filename,
 	image->y = y;
 	image->im_image = NULL;
 	image->w = image->h = 0;
+	image->type = IMAGE;
 
 	if (filename) {
 		if (gui_image_load(image, filename) == FALSE) {
@@ -32,9 +33,10 @@ void gui_image_delete(gui_image_t *image)
 	free(image);
 }
 
-void gui_image_draw(Drawable drawable, gui_image_t *image)
+void gui_image_draw(gui_image_t *image, gui_t *gui)
 {
 	display_t *display = image->display;
+	Drawable drawable = gui->drawable;
 
 	imlib_context_set_display(display->dpy);
 	imlib_context_set_visual(display->visual);

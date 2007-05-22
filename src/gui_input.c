@@ -12,6 +12,7 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 
 	input->x = x;
 	input->y = y;
+	input->type = INPUT;
 	input->hidden = hidden;
 
 	input->image = gui_image_new(display, image, x, y);

@@ -26,6 +26,7 @@ gui_label_t* gui_label_new(display_t *display, const char *font,
 	label->y = y+extent.height;
 	label->w = w;
 	label->h = h;
+	label->type = LABEL;
 
 	label->color = xmalloc(sizeof(*label->color));
 	XftColorAllocName(display->dpy,display->visual,display->colormap,
