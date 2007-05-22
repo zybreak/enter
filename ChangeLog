@@ -3,6 +3,9 @@
 	changed gui_t references to greeter_t.
 	* src/greeter.c:
 	now calls base class gui_t.
+	* debian
+	added a debian folder with control files for the debian package
+	system. now we can make debian packages!
 
 2007-05-16  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter.c:

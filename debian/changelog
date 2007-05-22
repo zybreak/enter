@@ -1,0 +1,6 @@
+enter (0.0.9-1) unstable; urgency=low
+
+  * Setup of debian package system
+
+ -- Robert Knutsson <rob_dobbs@users.sourceforge.net>  Tue, 22 May 2007 11:19:48 +0200
+
