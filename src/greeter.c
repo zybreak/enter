@@ -28,7 +28,7 @@
 			atoi(conf_get(theme, INPUT ".text.height")), \
 			PASSWORD)
 
-#define BUF_LEN 64
+#define BUF_LEN 256
 
 static void greeter_keypress(greeter_t *greeter, XEvent *event)
 {
@@ -126,6 +126,8 @@ greeter_t* greeter_new(display_t *display, conf_t *theme)
 	greeter->theme = theme;
 	greeter->gui = gui_new(display);
 	if (!greeter->gui) {
+		free(greeter);
+		return NULL;
 	}
 
 	/* Read the background pixmap.  */
@@ -134,7 +136,7 @@ greeter_t* greeter_new(display_t *display, conf_t *theme)
 
 	gui_image_t *image = gui_image_new(display, buf, 0, 0);
 	if (!image) {
-		log_print(LOG_ERR, "Could not load image \"buf\".");
+		log_print(LOG_ERR, "Could not load image \"%s\".", buf);
 		greeter_delete(greeter);
 		return NULL;
 	}

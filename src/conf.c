@@ -70,7 +70,7 @@ int conf_parse(conf_t *conf, const char *config_file)
 		if ((*opt == '#') || !(*opt))
 			continue;
 
-		conf_set(conf,opt,arg);
+		conf_set(conf,strdup(opt),strdup(arg));
 	}
 
 	fclose(fp);
