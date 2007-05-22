@@ -18,7 +18,8 @@ enter_SOURCES = \
 	gui_label.c gui_label.h \
 	gui_input.c gui_input.h \
 	gui_widget.c gui_widget.h \
-	gui.c gui.h
+	gui.c gui.h \
+	greeter.c greeter.h
 
 enter_CFLAGS = @FT2_CFLAGS@ -DCONFDIR=\"$(sysconfdir)\" -DTHEMEDIR=\"$(datadir)/@PACKAGE@/themes\"
 enter_LDFLAGS = @FT2_LIBS@ -lcrypt

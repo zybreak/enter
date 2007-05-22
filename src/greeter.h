@@ -1,52 +1,27 @@
-#ifndef GUI_H_
-#define GUI_H_
+#ifndef GREETER_H_
+#define GREETER_H_
 
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 #include <X11/extensions/Xdbe.h>
 
-typedef struct gui_t gui_t;
-
-#include "gui_label.h"
-#include "gui_input.h"
-
 #include "display.h"
+#include "gui_widget.h"
 #include "conf.h"
 
-struct gui_t {
-	Window win;
-	Drawable drawable;
-	XftDraw *draw;
-	
-	int has_doublebuf;
-	XdbeBackBuffer back_buffer;
-	XdbeSwapInfo swap_info;
+typedef enum action_t {
+	LOGIN
+} action_t;
 
-	int x, y;
-	int width, height;
-	
-	display_t *display;
-	conf_t *conf;
+typedef struct greeter_t {
+	gui_t *gui;
+	conf_t *theme;
+} greeter_t;
 
-	gui_label_t *title, *username, *password, *msg;
-	gui_input_t *user_input, *passwd_input;
+greeter_t* greeter_new(display_t *display, conf_t *theme);
+void greeter_delete(greeter_t *greeter);
+void greeter_show(greeter_t *greeter);
+void greeter_hide(greeter_t *greeter);
+action_t greeter_run(greeter_t *greeter);
 
-	enum {
-		LISTEN,
-		LOGIN
-	} mode;
-
-	enum {
-		BOTH,
-		USERNAME,
-		PASSWORD
-	} visible, focus;
-};
-
-gui_t* gui_new(display_t *display, conf_t *theme);
-void gui_delete(gui_t *gui);
-void gui_show(gui_t *gui);
-void gui_hide(gui_t *gui);
-int gui_run(gui_t *gui);
-
-#endif /*GUI_H_*/
+#endif /*GREETER_H_*/

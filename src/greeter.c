@@ -2,8 +2,7 @@
 #include <stdlib.h>
 
 #include "enter.h"
-#include "gui.h"
-#include "gui_image.h"
+#include "greeter.h"
 
 #include "login.h"
 #include "log.h"
@@ -31,41 +30,9 @@
 
 #define BUF_LEN 64
 
-static void gui_draw(gui_t *gui)
+static void greeter_keypress(greeter_t *greeter, XEvent *event)
 {
-	display_t *display = gui->display;
-
-	/* Only clear if double buffering is not present,
-	 * since DBE clears the window for us.  */
-	if (!gui->has_doublebuf)
-		XClearWindow(display->dpy, gui->win);
-
-	/* Draw the labels.  */
-	gui_label_draw(gui->title, gui);
-	gui_label_draw(gui->msg, gui);
-	
-	/* Draw the input boxes.  */
-	if (gui->visible == BOTH || gui->visible == USERNAME) {
-		gui_label_draw(gui->username, gui);
-		gui_input_draw(gui->user_input, gui, (gui->focus == USERNAME));
-	}
-	
-	if (gui->visible == BOTH || gui->visible == PASSWORD) {
-		gui_label_draw(gui->password, gui);
-		gui_input_draw(gui->passwd_input, gui, (gui->focus == PASSWORD));
-	}
-
-	/* Draw the message label.  */
-	gui_label_draw(gui->msg, gui);
-
-	if (display_has_doublebuffer(display)) {
-		XdbeSwapBuffers(display->dpy, &gui->swap_info, 1);
-	} else
-		XFlush(display->dpy);
-}
-
-static void gui_keypress(gui_t *gui, XEvent *event)
-{
+#if 0
 	char ch;
 	KeySym keysym;
 	XComposeStatus cstatus;
@@ -146,52 +113,20 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 	}
 
 	gui_draw(gui);
+#endif
 }
 
-static void gui_mappingnotify(gui_t *gui, XEvent *event)
+greeter_t* greeter_new(display_t *display, conf_t *theme)
 {
-	XRefreshKeyboardMapping(&event->xmapping);
-}
-
-gui_t* gui_new(display_t *display, conf_t *theme)
-{
-	gui_t *gui = xmalloc(sizeof(*gui));
 	char buf[BUF_LEN];
+	greeter_t *greeter = xmalloc(sizeof(*greeter));
 
-	memset(gui,'\0',sizeof(*gui));
+	memset(greeter,'\0',sizeof(*greeter));
 
-	/* Set default options.  */
-	gui->x = 0;
-	gui->y = 0;
-	gui->width = display->width;
-	gui->height = display->height;
-	gui->display = display;
-	gui->conf = theme;
-
-	unsigned long color = BlackPixel(display->dpy,display->screen);
-
-	/* Create the GUI window.  */
-	gui->win = XCreateSimpleWindow(display->dpy, display->root,
-		gui->x, gui->y, gui->width, gui->height,
-		0, color, color);
-
-	if (display_has_doublebuffer(display)) {
-		XdbeSwapInfo swap = {
-			.swap_window = gui->win,
-			.swap_action = XdbeBackground
-		};
-		gui->swap_info = swap;
-
-		gui->back_buffer = XdbeAllocateBackBufferName(display->dpy,
-			gui->swap_info.swap_window, gui->swap_info.swap_action);
-		gui->drawable = gui->back_buffer;
-	} else {
-		gui->drawable = gui->win;
+	greeter->theme = theme;
+	greeter->gui = gui_new(display);
+	if (!greeter->gui) {
 	}
-
-	/* Create a draw surface.  */
-	gui->draw = XftDrawCreate(display->dpy, gui->drawable, display->visual,
-					display->colormap);
 
 	/* Read the background pixmap.  */
 	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme, "theme"),
@@ -200,7 +135,7 @@ gui_t* gui_new(display_t *display, conf_t *theme)
 	gui_image_t *image = gui_image_new(display, buf, 0, 0);
 	if (!image) {
 		log_print(LOG_ERR, "Could not load image \"buf\".");
-		gui_delete(gui);
+		greeter_delete(greeter);
 		return NULL;
 	}
 
@@ -208,9 +143,10 @@ gui_t* gui_new(display_t *display, conf_t *theme)
 	gui_image_delete(image);
 	
 	/* Set the background pixmap.  */
-	XSetWindowBackgroundPixmap(display->dpy, gui->win, background);
+	XSetWindowBackgroundPixmap(display->dpy, greeter->gui->win, background);
 
 	/* Load labels.  */
+#if 0
 	gui->title = LABEL_NEW("label.title");
 	gui->msg = LABEL_NEW("label.msg");
 	gui->username = LABEL_NEW("label.username");
@@ -232,102 +168,43 @@ gui_t* gui_new(display_t *display, conf_t *theme)
 		gui_delete(gui);
 		return NULL;
 	}
+#endif
 
-	return gui;
+	return greeter;
 }
 
-void gui_delete(gui_t *gui)
+void greeter_delete(greeter_t *greeter)
 {
-	display_t *display = gui->display;
-
-	if (gui->has_doublebuf)
-		XdbeDeallocateBackBufferName(display->dpy, gui->back_buffer);
-	
-	if (gui->title)
-		gui_label_delete(gui->title,display);
-
-	if (gui->msg)
-		gui_label_delete(gui->msg,display);
-
-	if (gui->username)
-		gui_label_delete(gui->username,display);
-	
-	if (gui->password)
-		gui_label_delete(gui->password,display);
-
-	if (gui->user_input)
-		gui_input_delete(gui->user_input,display);
-
-	if (gui->passwd_input)
-		gui_input_delete(gui->passwd_input,display);
-
-	XftDrawDestroy(gui->draw);
-	XDestroyWindow(display->dpy, gui->win);
-	
-	free(gui);
+	gui_delete(greeter->gui);
+	free(greeter);
 }
 
-void gui_show(gui_t *gui)
+void greeter_show(greeter_t *greeter)
 {
-	gui->visible = USERNAME;
-	gui->focus = USERNAME;
-
-	char *s = conf_get(gui->conf, "enter.visible");
-	if (!strcmp(s, "both")) {
-		gui->visible = BOTH;
-	}
-
-	gui_input_set_text(gui->user_input, "");
-	gui_input_set_text(gui->passwd_input, "");
-
-	gui_label_set_caption(gui->msg, "");
-	
-	display_t *display = gui->display;
-
-	XSelectInput(display->dpy, gui->win, ExposureMask | KeyPressMask);
-
-	XMapWindow(display->dpy, gui->win);
-	XMoveWindow(display->dpy, gui->win, gui->x, gui->y);
-
-	XGrabKeyboard(display->dpy, gui->win, False, GrabModeAsync,
-			GrabModeAsync, CurrentTime);
-
-	gui_draw(gui);
-
-	XFlush(display->dpy);
+	gui_show(greeter->gui);
 }
 
-void gui_hide(gui_t *gui)
+void greeter_hide(greeter_t *greeter)
 {
-	display_t *display = gui->display;
-
-	XUnmapWindow(display->dpy, gui->win);
-	XUngrabKeyboard(display->dpy, CurrentTime);
-
-	XFlush(display->dpy);
+	greeter_hide(greeter);
 }
 
-int gui_run(gui_t *gui)
+action_t greeter_run(greeter_t *greeter)
 {
 	XEvent event;
-	gui->mode = LISTEN;
 	
-	while (gui->mode == LISTEN) {
-		XNextEvent(gui->display->dpy, &event);
+	while (1) {
+		XNextEvent(greeter->gui->display->dpy, &event);
 
 		switch(event.type) {
-		case Expose:
-			gui_draw(gui);
-			break;
 		case KeyPress:
-			gui_keypress(gui, &event);
+			greeter_keypress(greeter, &event);
 			break;
-		case MappingNotify:
-			gui_mappingnotify(gui, &event);
-			break;
+		default:
+			gui_next_event(greeter->gui);
 		}
 	}
 
-	return gui->mode;
+	return LOGIN;
 }
 

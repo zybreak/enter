@@ -11,7 +11,7 @@
 
 #include "enter.h"
 #include "server.h"
-#include "gui.h"
+#include "greeter.h"
 #include "log.h"
 #include "conf.h"
 #include "utils.h"
@@ -290,8 +290,8 @@ int main(int argc, char **argv)
 	}
 	
 	/* Create a GUI window.  */
-	gui_t *gui = gui_new(display);
-	if (!gui) {
+	greeter_t *greeter = greeter_new(display, theme);
+	if (!greeter) {
 		log_print(LOG_EMERG, "Could not open GUI.");
 		server_stop();
 		closelog();
@@ -299,11 +299,9 @@ int main(int argc, char **argv)
 	}
 
 	while (1) {
-#if 0
-		gui_show(gui);
-		int action = gui_run(gui);
-		gui_hide(gui);
-
+		greeter_show(greeter);
+		action_t action = greeter_run(greeter);
+		greeter_hide(greeter);
 		switch (action) {
 		case LOGIN:
 			log_print(LOG_DEBUG, "Logging in user...");
@@ -320,14 +318,13 @@ int main(int argc, char **argv)
 			}
 			break;
 		}
-		display_kill_clients(display, gui->win);
-#endif
+		display_kill_clients(display, greeter->gui->win);
 	}
 
 
 	log_print(LOG_DEBUG, "Shutting down.");
 	
-	gui_delete(gui);
+	greeter_delete(greeter);
 	conf_delete(conf);
 	conf_delete(theme);
 	

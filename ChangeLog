@@ -1,3 +1,9 @@
+2007-05-22  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/enter.c:
+	changed gui_t references to greeter_t.
+	* src/greeter.c:
+	now calls base class gui_t.
+
 2007-05-16  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/greeter.c:
 	code from old gui.c.
