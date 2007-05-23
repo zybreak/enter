@@ -31,6 +31,6 @@ gui_t* gui_new(display_t *display);
 void gui_delete(gui_t *gui);
 void gui_show(gui_t *gui);
 void gui_hide(gui_t *gui);
-void gui_next_event(gui_t *gui);
+void gui_handle_event(gui_t *gui, XEvent *event);
 
 #endif /*GUI_H_*/

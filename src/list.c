@@ -1,10 +1,12 @@
 #include <stdlib.h>
 
+#include "utils.h"
 #include "list.h"
 
 list_t* list_new(void)
 {
-	list_t *this = (list_t*)xmalloc(sizeof(*this));
+	list_t *this = xmalloc(sizeof(*this));
+
 	this->data = NULL;
 	this->next = NULL;
 

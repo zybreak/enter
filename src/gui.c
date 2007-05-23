@@ -42,12 +42,14 @@ static void gui_mappingnotify(gui_t *gui, XEvent *event)
 
 static void gui_keypress(gui_t *gui, XEvent *event)
 {
+	if (gui->focus->on_key_down) {
+		gui->focus->on_key_down(gui->focus, event);
+	}
 }
 
 gui_t* gui_new(display_t *display)
 {
 	gui_t *gui = (gui_t*)xmalloc(sizeof(*gui));
-	memset(gui,'\0',sizeof(*gui));
 
 	/* Set default options.  */
 	gui->x = 0;
@@ -134,22 +136,19 @@ void gui_hide(gui_t *gui)
 	XFlush(display->dpy);
 }
 
-void gui_next_event(gui_t *gui)
+void gui_handle_event(gui_t *gui, XEvent *event)
 {
-	XEvent event;
-	
-	XNextEvent(gui->display->dpy, &event);
-
-	switch(event.type) {
+	switch(event->type) {
 		case Expose:
 			gui_draw(gui);
 			break;
 		case KeyPress:
-			gui_keypress(gui, &event);
+			gui_keypress(gui, event);
 			break;
 		case MappingNotify:
-			gui_mappingnotify(gui, &event);
+			gui_mappingnotify(gui, event);
 			break;
 	}
+	gui_draw(gui);
 }
 

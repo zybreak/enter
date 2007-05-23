@@ -1,11 +1,9 @@
 #ifndef GUI_WIDGET_H_
 #define GUI_WIDGET_H_
 
-typedef union gui_widget_t gui_widget_t;
+#include <X11/Xlib.h>
 
-#include "gui_label.h"
-#include "gui_image.h"
-#include "gui_input.h"
+typedef union gui_widget_t gui_widget_t;
 
 typedef enum gui_widget_type_t {
 	LABEL,
@@ -13,11 +11,19 @@ typedef enum gui_widget_type_t {
 	IMAGE
 } gui_widget_type_t;
 
+#define GUI_WIDGET_BASE \
+	struct { \
+		int type; \
+		int x, y, w, h; \
+		int (*on_key_down)(gui_widget_t*, XEvent*); \
+	}
+
+#include "gui_label.h"
+#include "gui_image.h"
+#include "gui_input.h"
+
 union gui_widget_t {
-	struct {
-		int type;
-		int x, y, w, h;
-	} widget;
+	GUI_WIDGET_BASE;
 
 	gui_label_t label;
 	gui_image_t image;

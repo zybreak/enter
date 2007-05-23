@@ -9,6 +9,7 @@ gui_image_t* gui_image_new(display_t *display, const char *filename,
 							int x, int y)
 {
 	gui_image_t *image = xmalloc(sizeof(*image));
+
 	image->display = display;
 	image->x = x;
 	image->y = y;
@@ -59,9 +60,9 @@ Pixmap gui_image_pixmap(gui_image_t *image)
 	Pixmap pixmap = XCreatePixmap(display->dpy, display->root,
 			image->w, image->h, display->depth);
 
-	/* TODO: recode when `gui_image_move' is added.  */
 	int x = image->x;
 	int y = image->y;
+
 	image->x = image->y = 0;
 
 	gui_image_draw_drawable(image, pixmap);

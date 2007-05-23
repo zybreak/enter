@@ -40,7 +40,6 @@ static pair_t* new_pair(char *key, char *value)
 conf_t* conf_new(void)
 {
 	conf_t *conf = xmalloc(sizeof(*conf));
-	memset(conf, 0, sizeof(*conf));
 
 	return conf;
 }

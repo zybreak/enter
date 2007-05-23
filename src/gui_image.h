@@ -6,10 +6,10 @@
 
 #include "display.h"
 #include "gui.h"
+#include "gui_widget.h"
 
 typedef struct gui_image_t {
-	int type;
-	int x, y, w, h;
+	GUI_WIDGET_BASE;
 
 	Imlib_Image im_image;
 	display_t *display;

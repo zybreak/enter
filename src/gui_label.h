@@ -11,8 +11,7 @@ typedef struct gui_label_t gui_label_t;
 #include "gui.h"
 
 struct gui_label_t {
-	int type;
-	int x, y, w, h;
+	GUI_WIDGET_BASE;
 
 	XftFont *font;
 	XftColor *color;

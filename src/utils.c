@@ -12,6 +12,8 @@ void* xmalloc(size_t size)
 		log_print(LOG_EMERG, "Could not allocate memory.");
 		exit(EXIT_FAILURE);
 	}
+	memset(p, 0, sizeof(*p));
+
 	return p;
 }
 

@@ -30,6 +30,38 @@
 
 #define BUF_LEN 256
 
+static int greeter_input_keypress(gui_widget_t *widget, XEvent *event)
+{
+	char ch;
+	KeySym keysym;
+	XComposeStatus cstatus;
+	gui_input_t *input = &widget->input;
+
+	XLookupString(&event->xkey, &ch, 1, &keysym, &cstatus);
+
+	if (keysym == XK_BackSpace) {
+		gui_input_delete_char(input);
+
+	} else if (keysym == XK_Left) {
+		gui_input_set_pos(input, -1, INPUT_POS_REL);
+
+	} else if (keysym == XK_Right) {
+		gui_input_set_pos(input, 1, INPUT_POS_REL);
+
+	} else if (keysym == XK_Home) {
+		gui_input_set_pos(input, 0, INPUT_POS_ABS);
+
+	} else if (keysym == XK_End) {
+		gui_input_set_pos(input, LABEL_TEXT_LEN, INPUT_POS_ABS);
+
+	} else if (keysym == XK_Return) {
+	} else {
+		gui_input_insert_char(input, ch);
+	}
+
+	return TRUE;
+}
+
 static void greeter_keypress(greeter_t *greeter, XEvent *event)
 {
 #if 0
@@ -121,8 +153,6 @@ greeter_t* greeter_new(display_t *display, conf_t *theme)
 	char buf[BUF_LEN];
 	greeter_t *greeter = xmalloc(sizeof(*greeter));
 
-	memset(greeter,'\0',sizeof(*greeter));
-
 	greeter->theme = theme;
 	greeter->gui = gui_new(display);
 	if (!greeter->gui) {
@@ -156,21 +186,14 @@ greeter_t* greeter_new(display_t *display, conf_t *theme)
 	/* Load input boxes.  */
 	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme,"theme"), 
 			conf_get(theme,"input.username.image"));
-	list_add(greeter->gui->widgets, INPUT_NEW("input.username", buf, 0));
+	gui_input_t *input = INPUT_NEW("input.username", buf, 0);
+	greeter->gui->focus = (gui_widget_t*)input;
+	input->on_key_down = greeter_input_keypress;
+	list_add(greeter->gui->widgets, input);
 	
 	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme,"theme"), 
 			conf_get(theme,"input.password.image"));
 	list_add(greeter->gui->widgets, INPUT_NEW("input.password", buf, 1));
-
-#if 0
-	/* Make sure all object's were loaded.  */
-	if (!(gui->title && gui->msg && gui->username && gui->password &&
-				gui->passwd_input && gui->user_input)) {
-		log_print(LOG_ERR, "Could not load objects.");
-		gui_delete(gui);
-		return NULL;
-	}
-#endif
 
 	return greeter;
 }
@@ -197,14 +220,7 @@ action_t greeter_run(greeter_t *greeter)
 	
 	while (1) {
 		XNextEvent(greeter->gui->display->dpy, &event);
-
-		switch(event.type) {
-		case KeyPress:
-			greeter_keypress(greeter, &event);
-			break;
-		default:
-			gui_next_event(greeter->gui);
-		}
+		gui_handle_event(greeter->gui, &event);
 	}
 
 	return LOGIN;

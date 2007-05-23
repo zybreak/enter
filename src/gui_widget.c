@@ -3,27 +3,27 @@
 
 int gui_widget_height(gui_widget_t *widget)
 {
-	return widget->widget.h;
+	return widget->h;
 }
 
 int gui_widget_width(gui_widget_t *widget)
 {
-	return widget->widget.w;
+	return widget->w;
 }
 
 int gui_widget_x(gui_widget_t *widget)
 {
-	return widget->widget.x;
+	return widget->x;
 }
 
 int gui_widget_y(gui_widget_t *widget)
 {
-	return widget->widget.y;
+	return widget->y;
 }
 
 void gui_widget_draw(gui_widget_t *widget, gui_t *gui)
 {
-	switch (widget->widget.type) {
+	switch (widget->type) {
 	case LABEL:
 		gui_label_draw(&widget->label, gui);
 		break;
@@ -37,7 +37,7 @@ void gui_widget_draw(gui_widget_t *widget, gui_t *gui)
 
 void gui_widget_draw_focus(gui_widget_t *widget, gui_t *gui)
 {
-	switch (widget->widget.type) {
+	switch (widget->type) {
 	case LABEL:
 		gui_label_draw(&widget->label, gui);
 		break;

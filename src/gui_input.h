@@ -15,8 +15,8 @@ typedef enum {
 } pos_mode_t;
 
 struct gui_input_t {
-	int type;
-	int x, y, w, h;
+	GUI_WIDGET_BASE;
+
 	int t_x, t_y, t_w, t_h;
 	int pos;
 	int hidden;
