@@ -64,7 +64,7 @@ void gui_input_draw(gui_input_t *input, gui_t *gui, int draw_cursor)
 			str[i] = '*';
 	}
 	
-	gui_image_draw(gui->drawable, input->image);
+	gui_image_draw(input->image, gui);
 
 	gui_label_draw(input->text, gui);
 	

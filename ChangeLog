@@ -1,3 +1,7 @@
+2007-05-23  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/gui_widget.c:
+	added draw_focus routine
+
 2007-05-22  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/enter.c:
 	changed gui_t references to greeter_t.

@@ -33,10 +33,9 @@ void gui_image_delete(gui_image_t *image)
 	free(image);
 }
 
-void gui_image_draw(gui_image_t *image, gui_t *gui)
+static void gui_image_draw_drawable(gui_image_t *image, Drawable drawable)
 {
 	display_t *display = image->display;
-	Drawable drawable = gui->drawable;
 
 	imlib_context_set_display(display->dpy);
 	imlib_context_set_visual(display->visual);
@@ -46,6 +45,11 @@ void gui_image_draw(gui_image_t *image, gui_t *gui)
 	imlib_context_set_image(image->im_image);
 
 	imlib_render_image_on_drawable(image->x,image->y);
+}
+
+void gui_image_draw(gui_image_t *image, gui_t *gui)
+{
+	gui_image_draw_drawable(image, gui->drawable);
 }
 
 Pixmap gui_image_pixmap(gui_image_t *image)
@@ -60,7 +64,7 @@ Pixmap gui_image_pixmap(gui_image_t *image)
 	int y = image->y;
 	image->x = image->y = 0;
 
-	gui_image_draw(pixmap, image);
+	gui_image_draw_drawable(image, pixmap);
 
 	image->x = x;
 	image->y = y;

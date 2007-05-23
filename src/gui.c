@@ -18,8 +18,14 @@ static void gui_draw(gui_t *gui)
 	}
 
 	/* Draw the widgets.  */
+	if (gui->focus) {
+		gui_widget_draw_focus(gui->focus, gui);
+	}
+
 	while (it = list_next(it)) {
-		gui_widget_draw(list_data(it), gui);
+		if (list_data(it) != gui->focus) {
+			gui_widget_draw(list_data(it), gui);
+		}
 	}
 
 	if (display_has_doublebuffer(display)) {

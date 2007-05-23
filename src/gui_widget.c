@@ -28,6 +28,20 @@ void gui_widget_draw(gui_widget_t *widget, gui_t *gui)
 		gui_label_draw(&widget->label, gui);
 		break;
 	case INPUT:
+		gui_input_draw(&widget->input, gui, FALSE);
+		break;
+	case IMAGE:
+	break;
+	}
+}
+
+void gui_widget_draw_focus(gui_widget_t *widget, gui_t *gui)
+{
+	switch (widget->widget.type) {
+	case LABEL:
+		gui_label_draw(&widget->label, gui);
+		break;
+	case INPUT:
 		gui_input_draw(&widget->input, gui, TRUE);
 		break;
 	case IMAGE:
