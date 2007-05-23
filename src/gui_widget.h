@@ -30,5 +30,6 @@ int gui_widget_x(gui_widget_t *widget);
 int gui_widget_y(gui_widget_t *widget);
 void gui_widget_draw(gui_widget_t *widget, gui_t *gui);
 void gui_widget_draw_focus(gui_widget_t *widget, gui_t *gui);
+void gui_widget_delete(gui_widget_t *widget);
 
 #endif /*GUI_WIDGET_H_*/

@@ -49,3 +49,8 @@ void gui_widget_draw_focus(gui_widget_t *widget, gui_t *gui)
 	}
 }
 
+void gui_widget_delete(gui_widget_t *widget)
+{
+	/* TODO: implement me.  */
+}
+

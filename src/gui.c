@@ -97,7 +97,13 @@ void gui_delete(gui_t *gui)
 	XftDrawDestroy(gui->draw);
 	XDestroyWindow(display->dpy, gui->win);
 
-	list_delete(gui->widgets);	
+	list_t *it = gui->widgets;
+
+	while (it = list_next(it)) {
+		gui_widget_delete(list_data(it));
+	}
+
+	list_delete(gui->widgets);
 	free(gui);
 }
 
