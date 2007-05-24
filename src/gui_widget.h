@@ -15,7 +15,7 @@ typedef enum gui_widget_type_t {
 	struct { \
 		int type; \
 		int x, y, w, h; \
-		int (*on_key_down)(gui_widget_t*, XEvent*); \
+		int (*on_key_down)(gui_widget_t*, KeySym); \
 	}
 
 #include "gui_label.h"

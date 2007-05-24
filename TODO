@@ -4,9 +4,11 @@ Critical priority
 * Move primitive gui code to new class.
 * Fork the GUI process and drop privileges.
 * Let the GUI and the authentication code communicate through IPC.
+* Don't rely on the existance of ~/.xinitrc.
+  Maybe we should fallback on /etc/X11/xinit/xinitrc?
 
 Moderate priority
-* Document functions.
+* Add Doxygen comments.
 * Allow for scaled/centered background.
 * Option to hide cursor when not wanted.
 * Add buttons and animations.

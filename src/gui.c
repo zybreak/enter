@@ -42,8 +42,10 @@ static void gui_mappingnotify(gui_t *gui, XEvent *event)
 
 static void gui_keypress(gui_t *gui, XEvent *event)
 {
+	KeySym keysym = XLookupKeysym(&event->xkey,1);
+
 	if (gui->focus->on_key_down) {
-		gui->focus->on_key_down(gui->focus, event);
+		gui->focus->on_key_down(gui->focus, keysym);
 	}
 }
 

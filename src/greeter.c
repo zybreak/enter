@@ -30,14 +30,11 @@
 
 #define BUF_LEN 256
 
-static int greeter_input_keypress(gui_widget_t *widget, XEvent *event)
+static int greeter_input_keypress(gui_widget_t *widget, KeySym keysym)
 {
-	char ch;
-	KeySym keysym;
-	XComposeStatus cstatus;
 	gui_input_t *input = &widget->input;
-
-	XLookupString(&event->xkey, &ch, 1, &keysym, &cstatus);
+	
+	char *ch = XKeysymToString(keysym);
 
 	if (keysym == XK_BackSpace) {
 		gui_input_delete_char(input);
@@ -56,7 +53,7 @@ static int greeter_input_keypress(gui_widget_t *widget, XEvent *event)
 
 	} else if (keysym == XK_Return) {
 	} else {
-		gui_input_insert_char(input, ch);
+		gui_input_insert_char(input, *ch);
 	}
 
 	return TRUE;
