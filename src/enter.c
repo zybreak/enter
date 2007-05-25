@@ -281,7 +281,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Connect to the X display.  */
-	display_t *display = display_new(conf);
+	display_t *display = display_new(conf_get(conf, "display"));
 	if (!display) {
 		log_print(LOG_EMERG, "Could not connect to X display.");
 		server_stop();

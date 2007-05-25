@@ -3,11 +3,11 @@
 #include "display.h"
 #include "utils.h"
 
-display_t* display_new(conf_t *conf)
+display_t* display_new(const char *display_name)
 {
 	display_t *display = xmalloc(sizeof(*display));
 
-	display->dpy = XOpenDisplay(conf_get(conf, "display"));
+	display->dpy = XOpenDisplay(display_name);
 	if (!display->dpy) {
 		free(display);
 		return NULL;
