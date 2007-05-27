@@ -3,6 +3,8 @@
 
 #include "auth.h"
 
+/* TODO: This should probably be an object instead of a instance.  */
+
 /**
  * Authenticates a username with a password.
  * @param username Which username to use.
