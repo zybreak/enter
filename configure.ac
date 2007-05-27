@@ -3,9 +3,9 @@
 AC_PREREQ(2.60)
 AC_INIT([enter],[svn],[rob_dobbs@users.sourceforge.net])
 AC_CONFIG_SRCDIR([src/enter.c])
+AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE
-AC_CONFIG_HEADERS([config.h])
 AM_MAINTAINER_MODE
 
 # Checks for programs.
@@ -41,6 +41,9 @@ AC_CHECK_LIB([Xau], [XauWriteAuth], [LIBS="$LIBS -lXau"],
 
 AC_CHECK_LIB([Imlib2], [imlib_context_new], [LIBS="$LIBS -lImlib2"],
 			[AC_MSG_ERROR([You need to have Imlib2.])])
+
+AC_CHECK_LIB([crypt], [crypt], [LIBS="$LIBS -lcrypt"],
+			[AC_MSG_ERROR([You need to have libcrypt.])])
 
 dnl AC_ARG_ENABLE([pam],
 dnl	      [AS_HELP_STRING([--enable-pam], [enable pam authentication])],
