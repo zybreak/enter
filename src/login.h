@@ -4,9 +4,10 @@
 #include "auth.h"
 
 /**
- * Returns TRUE and saves the user credentials for a later call
- * to auth_login if the specified user could be authenticated.
- * Otherwise returns FALSE.
+ * Authenticates a username with a password.
+ * @param username Which username to use.
+ * @param password Which password to use.
+ * @return TRUE if the login where successful otherwise FALSE.
  */
 int login_authenticate(const char *username, const char *password);
 

@@ -4,36 +4,50 @@
 #include "list.h"
 
 /**
- * The conf_t struct is just a linked list
+ * The conf_t struct is just a linked list.
  */
 typedef list_t conf_t;
 
 /**
- * Returns a new conf_t object.
+ * Creates a new conf_t object. 
+ * @return A new conf_t object.
  */
 conf_t* conf_new(void);
+
 /**
- * Free's conf, but not any data.
+ * Deletes a conf_t object, but not the stored data.
+ * @param conf the object to free.
  */
 void conf_delete(conf_t *conf);
+
 /**
- * Parses the config file pointed to by config_file
- * and stores the data in conf.
- * Returns FALSE if any error was encountered.
+ * Parses a configuration into a conf_t object.
+ * @param conf The object to store the data in.
+ * @param config_file Which configuration file to use.
+ * @return TRUE if successful, otherwise FALSE.
  */
 int conf_parse(conf_t *conf, const char *config_file);
+
 /**
- * Returns the key value, or an empty string if it doesn't
- * have a value.
+ * Return the value associated with a specified key.
+ * @param conf Which conf_t object to use.
+ * @param key Which key to use.
+ * @return The value associated with key, or EMPTY_DATA.
  */
 char* conf_get(conf_t *conf, char *key);
+
 /**
- * Assigns key with the value in ´value´, or overwrites
- * a previous one.
+ * Assign key a specified value.
+ * @param conf Which conf_t object to use.
+ * @param key Which key to assign a value to.
+ * @param value The value to assign.
  */
 void conf_set(conf_t *conf, char *key, char *value);
+
 /**
- * Assign conf `to' all keys from conf `from'.
+ * Merge two conf_t objects.
+ * @param to Which object to store the data in.
+ * @param from The object to read the data from.
  */
 void conf_merge(conf_t *to, conf_t *from);
 

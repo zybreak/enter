@@ -5,7 +5,9 @@
 #include <X11/extensions/Xdbe.h>
 
 /**
- * Holds information about an X connection.
+ * Stores information about an X connection.
+ * Also stores information about the current display,
+ * such as dimensions and extensions.
  */
 typedef struct display_t {
 	Window root;
