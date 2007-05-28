@@ -16,9 +16,8 @@
 #include <shadow.h>
 #endif
 
-static struct passwd *pwd = NULL;
-
-static void auth_spawn(const char *display, auth_t *auth, const char *auth_file, const char *login_file)
+static void auth_spawn(login_t *pwd, const char *display, auth_t *auth,
+	const char *auth_file, const char *login_file)
 {
 	/* If there's no shell associated with the user in
 	 * /etc/passwd, assign the user a shell from /etc/shells.  */
@@ -85,15 +84,16 @@ static void auth_spawn(const char *display, auth_t *auth, const char *auth_file,
 	execve(args[0],args,env);
 }
 
-int login_authenticate(const char *username, const char *password)
+login_t* login_authenticate(const char *username, const char *password)
 {
 	char *real_pwd;
+	login_t *pwd = xmalloc(sizeof(*pwd));
 
 	pwd = getpwnam(username);
 	endpwent();
 
 	if (!pwd) {
-		return FALSE;
+		return NULL;
 	}
 
 	 /* Point real_pwd to the passwd password field.  */
@@ -112,26 +112,28 @@ int login_authenticate(const char *username, const char *password)
 #endif
 
 	/* If we did not get a password, simply log the user in.  */
-	if (!real_pwd)
-		return TRUE;
+	if (!real_pwd) {
+		return pwd;
+	}
 
 	/* if the passwords match, return TRUE.  */
 	char *enc = crypt(password, real_pwd);
 	if (!strcmp(enc, real_pwd))
-		return TRUE;
+		return pwd;
 
 	/* else free the user credentials
 	 * and return FALSE.  */
-	pwd = NULL;
+	free(pwd);
 	
-	return FALSE;
+	return NULL;
 }
 
-int login_start_session(const char *display, auth_t *auth, const char *auth_file, const char *login_file)
+int login_start_session(login_t *login, const char *display, auth_t *auth,
+			const char *auth_file, const char *login_file)
 {
 	/* If no previous user was authenticated,
 	 * return FALSE. */
-	if (!pwd)
+	if (!login)
 		return FALSE;
 
 	/* Fork a new process.  */
@@ -142,17 +144,18 @@ int login_start_session(const char *display, auth_t *auth, const char *auth_file
 		return FALSE;
 	} else if (pid == 0) {
 		/* Spawn a user session in the child thread.  */
-		auth_spawn(display, auth, auth_file, login_file);
-		/* If the user session could not spawn,
-		 * reset the auth struct and return false.  */
+
+		auth_spawn(login, display, auth, auth_file, login_file);
+
+		/* If the user session could not spawn return FALSE.  */
 		
-		pwd = NULL;
+		free(login);
 		
 		return FALSE;
 	}
 
 	/* Reset the auth struct for subsequent calls.  */
-	pwd = NULL;
+	free(login);
 
 	/* Wait for the user session in the parent thread.  */
 	pid_t p = waitpid(pid, NULL, 0);

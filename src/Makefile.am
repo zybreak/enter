@@ -22,5 +22,5 @@ enter_SOURCES = \
 	greeter.c greeter.h
 
 enter_CFLAGS = @FT2_CFLAGS@ -DCONFDIR=\"$(sysconfdir)\" -DTHEMEDIR=\"$(datadir)/@PACKAGE@/themes\"
-enter_LDFLAGS = @FT2_LIBS@ -lcrypt
+enter_LDFLAGS = @FT2_LIBS@
 

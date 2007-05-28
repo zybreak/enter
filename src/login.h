@@ -3,21 +3,30 @@
 
 #include "auth.h"
 
-/* TODO: This should probably be an object instead of a instance.  */
+/**
+ * This object holds a user identification
+ * after a successful login.
+ */
+typedef struct passwd login_t;
 
 /**
  * Authenticates a username with a password.
  * @param username Which username to use.
  * @param password Which password to use.
- * @return TRUE if the login where successful otherwise FALSE.
+ * @return A login_t object if the login where successful otherwise NULL.
  */
-int login_authenticate(const char *username, const char *password);
+login_t* login_authenticate(const char *username, const char *password);
 
 /**
- * Switches to the previous authenticated user and starts the user session.
- * Then return TRUE when the session ends. If no previous user was
- * authenticated or a failure occurs, return FALSE.
+ * Starts a user session based upon the provided user identification.
+ * @param login The user who wants to login.
+ * @param display The display to start the session on.
+ * @param auth The X authentication needed.
+ * @param auth_file The file to write the X authentication to.
+ * @param login_file The file to run as the user session.
+ * @return TRUE for a successful session, otherwise FALSE.
  */
-int login_start_session(const char *display, auth_t *auth, const char *auth_file, const char *login_file);
+int login_start_session(login_t *login, const char *display, auth_t *auth,
+			const char *auth_file, const char *login_file);
 
 #endif

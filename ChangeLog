@@ -1,7 +1,11 @@
 2007-05-28  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/*.h:
 	Added doxygen comments to all objects,
-	and spellchecked the comments with aspell.
+	and spell checked the comments with Aspell.
+
+	* src/login.c:
+	login_authenticate now returns a object after a successful
+	authentication.
 
 2007-05-23  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/gui_widget.c:

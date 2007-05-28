@@ -302,6 +302,7 @@ int main(int argc, char **argv)
 		greeter_show(greeter);
 		action_t action = greeter_run(greeter);
 		greeter_hide(greeter);
+#if 0
 		switch (action) {
 		case LOGIN:
 			log_print(LOG_DEBUG, "Logging in user...");
@@ -319,6 +320,7 @@ int main(int argc, char **argv)
 			break;
 		}
 		display_kill_clients(display, greeter->gui->win);
+#endif
 	}
 
 
