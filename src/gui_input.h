@@ -15,7 +15,8 @@ typedef struct gui_input_t gui_input_t;
  */
 typedef enum pos_mode_t {
 	INPUT_POS_REL,
-	INPUT_POS_ABS
+	INPUT_POS_ABS,
+	INPUT_POS_END
 } pos_mode_t;
 
 /**
@@ -62,9 +63,9 @@ void gui_input_delete(gui_input_t *input, display_t *display);
  * Draws the object on a window.
  * @param input The object to draw.
  * @param gui The window to draw on.
- * @param draw_cursor Whether the control has focus or not.
+ * @param focus Whether the control has focus or not.
  */
-void gui_input_draw(gui_input_t *input, gui_t *gui, int draw_cursor);
+void gui_input_draw(gui_input_t *input, gui_t *gui, int focus);
 
 /**
  * Return the text in the object.

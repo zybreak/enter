@@ -3,6 +3,8 @@
 
 #include <X11/Xlib.h>
 
+#include "enter.h"
+
 typedef union gui_widget_t gui_widget_t;
 
 /**
@@ -21,7 +23,7 @@ typedef enum gui_widget_type_t {
 	struct { \
 		int type; \
 		int x, y, w, h; \
-		int (*on_key_down)(gui_widget_t*, KeySym); \
+		action_t (*on_key_down)(gui_widget_t*, KeySym); \
 	}
 
 #include "gui_label.h"

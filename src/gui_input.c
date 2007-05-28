@@ -51,24 +51,21 @@ void gui_input_delete(gui_input_t *input, display_t *display)
 	free(input);
 }
 
-void gui_input_draw(gui_input_t *input, gui_t *gui, int draw_cursor)
+void gui_input_draw(gui_input_t *input, gui_t *gui, int focus)
 {
-	char buf[LABEL_TEXT_LEN];
+	int i;
 	char *str = gui_label_get_caption(input->text);
-	int i = 0;
-
-	strncpy(buf, str, LABEL_TEXT_LEN-1);
+	char *old_str = strdup(str);
 
 	if (input->hidden) {
-		for (i = 0; i < strlen(str); i++)
-			str[i] = '*';
+		memset(str, '*', strlen(str));
 	}
 	
 	gui_image_draw(input->image, gui);
 
 	gui_label_draw(input->text, gui);
 	
-	if (draw_cursor) {
+	if (focus) {
 		XGlyphInfo extents;
 		display_t *display = gui->display;
 
@@ -85,7 +82,8 @@ void gui_input_draw(gui_input_t *input, gui_t *gui, int draw_cursor)
 			x, input->t_y, x, input->t_y + input->t_h);
 	}
 	
-	strncpy(str, buf, LABEL_TEXT_LEN-1);
+	gui_label_set_caption(input->text, old_str);
+	free(old_str);
 }
 
 char* gui_input_get_text(gui_input_t *input)
@@ -103,6 +101,8 @@ void gui_input_set_pos(gui_input_t *input, int pos, pos_mode_t mode)
 {
 	if (mode == INPUT_POS_REL)
 		input->pos += pos;
+	else if (mode == INPUT_POS_END)
+		input->pos = strlen(gui_input_get_text(input));
 	else
 		input->pos = pos;
 
@@ -124,7 +124,8 @@ void gui_input_delete_char(gui_input_t *input)
 
 void gui_input_insert_char(gui_input_t *input, char c)
 {
-	xstrins(gui_label_get_caption(input->text), input->pos, c, LABEL_TEXT_LEN);
+	char *str = gui_label_get_caption(input->text);
+	xstrins(str, input->pos, c, strlen(str));
 
 	gui_input_set_pos(input, 1, INPUT_POS_REL);
 }

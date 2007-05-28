@@ -4,6 +4,8 @@
 
 #include "gui_widget.h"
 
+#define LABEL_TEXT_LEN 64
+
 gui_label_t* gui_label_new(display_t *display, const char *font,
 		const char *color, int x, int y, int w, int h, const char *caption)
 {
@@ -17,7 +19,8 @@ gui_label_t* gui_label_new(display_t *display, const char *font,
 		return NULL;
 	}
 
-	memset(label->caption, '\0', LABEL_TEXT_LEN);
+	label->caption = xmalloc(sizeof(*(label->caption)) * LABEL_TEXT_LEN);
+
 	strncpy(label->caption,caption,LABEL_TEXT_LEN-1);
 	
 	XftTextExtents8(display->dpy,label->font,(XftChar8*)"l",1,&extent);

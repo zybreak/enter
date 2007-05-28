@@ -10,17 +10,6 @@
 #include "conf.h"
 
 /**
- * This enum specifies a number of actions
- * that can be returned by greeter_run.
- */
-typedef enum action_t {
-	LOGIN,
-	HIBERNATE,
-	SHUTDOWN,
-	REBOOT
-} action_t;
-
-/**
  * This is the object that handles the high level GUI routines.
  * Which basically means that it is responsible for what should
  * be displayed, when and where.

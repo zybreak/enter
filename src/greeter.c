@@ -30,7 +30,7 @@
 
 #define BUF_LEN 256
 
-static int greeter_input_keypress(gui_widget_t *widget, KeySym keysym)
+static action_t greeter_input_keypress(gui_widget_t *widget, KeySym keysym)
 {
 	gui_input_t *input = &widget->input;
 	
@@ -49,7 +49,7 @@ static int greeter_input_keypress(gui_widget_t *widget, KeySym keysym)
 		gui_input_set_pos(input, 0, INPUT_POS_ABS);
 
 	} else if (keysym == XK_End) {
-		gui_input_set_pos(input, LABEL_TEXT_LEN, INPUT_POS_ABS);
+		gui_input_set_pos(input, 0, INPUT_POS_END);
 
 	} else if (keysym == XK_Return) {
 	} else {
@@ -90,7 +90,7 @@ static void greeter_keypress(greeter_t *greeter, XEvent *event)
 		gui_input_set_pos(input, 0, INPUT_POS_ABS);
 
 	} else if (keysym == XK_End) {
-		gui_input_set_pos(input, LABEL_TEXT_LEN, INPUT_POS_ABS);
+		gui_input_set_pos(input, 0, INPUT_POS_END);
 
 	} else if (keysym == XK_Tab && gui->visible == BOTH) {
 		/* If both input boxes are visible, change focus.  */

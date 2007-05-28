@@ -7,9 +7,6 @@ list_t* list_new(void)
 {
 	list_t *this = xmalloc(sizeof(*this));
 
-	this->data = NULL;
-	this->next = NULL;
-
 	return this;
 }
 
