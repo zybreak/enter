@@ -4,6 +4,35 @@
 
 #include "gui_widget.h"
 
+static action_t input_keypress(gui_widget_t *widget, KeySym keysym)
+{
+	gui_input_t *input = &widget->input;
+	
+	char *ch = XKeysymToString(keysym);
+
+	if (keysym == XK_BackSpace) {
+		gui_input_delete_char(input);
+
+	} else if (keysym == XK_Left) {
+		gui_input_set_pos(input, -1, INPUT_POS_REL);
+
+	} else if (keysym == XK_Right) {
+		gui_input_set_pos(input, 1, INPUT_POS_REL);
+
+	} else if (keysym == XK_Home) {
+		gui_input_set_pos(input, 0, INPUT_POS_ABS);
+
+	} else if (keysym == XK_End) {
+		gui_input_set_pos(input, 0, INPUT_POS_END);
+
+	} else if (keysym == XK_Return) {
+	} else {
+		gui_input_insert_char(input, *ch);
+	}
+
+	return TRUE;
+}
+
 gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 		const char *font, const char *color, 
 		int text_x, int text_y, int text_w, int text_h, int hidden)
@@ -14,6 +43,7 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 	input->y = y;
 	input->type = INPUT;
 	input->hidden = hidden;
+	input->on_key_press = input_keypress;
 
 	input->image = gui_image_new(display, image, x, y);
 	if (!input->image) {

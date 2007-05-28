@@ -30,35 +30,6 @@
 
 #define BUF_LEN 256
 
-static action_t greeter_input_keypress(gui_widget_t *widget, KeySym keysym)
-{
-	gui_input_t *input = &widget->input;
-	
-	char *ch = XKeysymToString(keysym);
-
-	if (keysym == XK_BackSpace) {
-		gui_input_delete_char(input);
-
-	} else if (keysym == XK_Left) {
-		gui_input_set_pos(input, -1, INPUT_POS_REL);
-
-	} else if (keysym == XK_Right) {
-		gui_input_set_pos(input, 1, INPUT_POS_REL);
-
-	} else if (keysym == XK_Home) {
-		gui_input_set_pos(input, 0, INPUT_POS_ABS);
-
-	} else if (keysym == XK_End) {
-		gui_input_set_pos(input, 0, INPUT_POS_END);
-
-	} else if (keysym == XK_Return) {
-	} else {
-		gui_input_insert_char(input, *ch);
-	}
-
-	return TRUE;
-}
-
 static void greeter_keypress(greeter_t *greeter, XEvent *event)
 {
 #if 0
@@ -185,7 +156,6 @@ greeter_t* greeter_new(display_t *display, conf_t *theme)
 			conf_get(theme,"input.username.image"));
 	gui_input_t *input = INPUT_NEW("input.username", buf, 0);
 	greeter->gui->focus = (gui_widget_t*)input;
-	input->on_key_down = greeter_input_keypress;
 	list_add(greeter->gui->widgets, input);
 	
 	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme,"theme"), 

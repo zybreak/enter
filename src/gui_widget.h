@@ -23,7 +23,7 @@ typedef enum gui_widget_type_t {
 	struct { \
 		int type; \
 		int x, y, w, h; \
-		action_t (*on_key_down)(gui_widget_t*, KeySym); \
+		action_t (*on_key_press)(gui_widget_t*, KeySym); \
 	}
 
 #include "gui_label.h"

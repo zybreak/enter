@@ -44,9 +44,7 @@ static void gui_keypress(gui_t *gui, XEvent *event)
 {
 	KeySym keysym = XLookupKeysym(&event->xkey,1);
 
-	if (gui->focus->on_key_down) {
-		gui->focus->on_key_down(gui->focus, keysym);
-	}
+	gui->focus->on_key_press(gui->focus, keysym);
 }
 
 gui_t* gui_new(display_t *display)
