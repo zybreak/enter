@@ -31,7 +31,7 @@ display_t* display_new(const char *display_name);
 
 /**
  * Frees the memory occupied by display.
- * @param display The object to be free'd.
+ * @param display The object to be freed.
 */
 void display_delete(display_t *display);
 
@@ -43,7 +43,7 @@ void display_delete(display_t *display);
 void display_kill_clients(display_t *display, Window window);
 
 /**
- * Check if the DBE extention is available.
+ * Check if the DBE extension is available.
  * @param display Specifies which display to use.
  * @return TRUE if the extension exists, otherwise FALSE.
  */

@@ -22,7 +22,7 @@ typedef enum action_t {
 
 /**
  * This is the object that handles the high level GUI routines.
- * Which basicly means that it is responsible for what should
+ * Which basically means that it is responsible for what should
  * be displayed, when and where.
  */
 typedef struct greeter_t {

@@ -1,3 +1,8 @@
+2007-05-28  Robert Knutsson <rob_dobbs@users.sf.net>
+	* src/*.h:
+	Added doxygen comments to all objects,
+	and spellchecked the comments with aspell.
+
 2007-05-23  Robert Knutsson <rob_dobbs@users.sf.net>
 	* src/gui_widget.c:
 	added draw_focus routine

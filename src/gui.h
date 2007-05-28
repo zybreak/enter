@@ -45,13 +45,13 @@ gui_t* gui_new(display_t *display);
 void gui_delete(gui_t *gui);
 
 /**
- * Show's the gui_t window on the display.
+ * Shows the gui_t window on the display.
  * @param gui Which gui_t object to use.
  */
 void gui_show(gui_t *gui);
 
 /**
- * Hide's the gui_t window from the display.
+ * Hides the gui_t window from the display.
  * @param gui Which gui_t object to use.
  */
 void gui_hide(gui_t *gui);
