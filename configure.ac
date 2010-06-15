@@ -2,16 +2,19 @@
 
 AC_PREREQ(2.60)
 AC_INIT([enter],[svn],[rob_dobbs@users.sourceforge.net])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/enter.c])
-AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADER([config.h])
+AC_CONFIG_AUX_DIR([build-tools])
 
-AM_INIT_AUTOMAKE
-AM_MAINTAINER_MODE
+AM_INIT_AUTOMAKE([dist-bzip2 no-dist-gzip])
+AM_MAINTAINER_MODE([enable])
 
 # Checks for programs.
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_SED
+PKG_PROG_PKG_CONFIG
 
 # Checks for libraries.
 AC_PATH_X
@@ -31,37 +34,20 @@ if test "x$x_libraries" != "x"; then
 	LIBS="$LIBS -L$x_libraries";
 fi
 
-AC_CHECK_FT2
+AC_CHECK_FT2([2.3.12])
 
-AC_CHECK_LIB([Xft], [XftFontOpenName], [LIBS="$LIBS -lXft"],
-			[AC_MSG_ERROR([You need to have libXft.])])
+AM_PATH_LIBGCRYPT([1:1.4.4])
 
-AC_CHECK_LIB([Xau], [XauWriteAuth], [LIBS="$LIBS -lXau"],
-			[AC_MSG_ERROR([You need to have libXau.])])
-
-AC_CHECK_LIB([Imlib2], [imlib_context_new], [LIBS="$LIBS -lImlib2"],
-			[AC_MSG_ERROR([You need to have Imlib2.])])
-
-AC_CHECK_LIB([crypt], [crypt], [LIBS="$LIBS -lcrypt"],
-			[AC_MSG_ERROR([You need to have libcrypt.])])
-
-dnl AC_ARG_ENABLE([pam],
-dnl	      [AS_HELP_STRING([--enable-pam], [enable pam authentication])],
-dnl	      [pam=$enableval],
-dnl	      [pam=no])
-
-dnl if test "x$pam" = "xyes"; then
-dnl	AC_CHECK_HEADERS([security/pam_appl.h], [],
-dnl	      [AC_MSG_WARN([Could not find PAM headers, disabling PAM.])])
-dnl fi
+PKG_CHECK_MODULES([IMLIB2],[imlib2 >= 1.4.2])
+PKG_CHECK_MODULES([XAU],[xau >= 1.0.5])
+PKG_CHECK_MODULES([XFT],[xft >= 2.1.14])
 
 # Checks for header files.
-AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 
 # Check for required headers.
 AC_CHECK_HEADERS([stdlib.h string.h syslog.h unistd.h], [],
-		 [AC_MSG_ERROR([Required header not found.])])
+	[AC_MSG_ERROR([Required header not found.])])
 
 # Check for optional headers.
 AC_CHECK_HEADERS([shadow.h])
@@ -77,16 +63,15 @@ AC_FUNC_MALLOC
 AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([endpwent getusershell memset strdup setenv getspnam \
-		strerror atexit gethostname], [],
-	       [AC_MSG_ERROR([Required function not found.])])
+	strerror atexit gethostname], [],
+	[AC_MSG_ERROR([Required function not found.])])
 
 DEBUG_CFLAGS="-Wall -pedantic -Wmissing-prototypes -Wmissing-declarations"
 AC_SUBST([DEBUG_CFLAGS])
 AC_SUBST([X_PATH])
 
-AC_CONFIG_FILES([Makefile
-                 data/Makefile
-                 doc/Makefile
-                 src/Makefile])
-AC_OUTPUT
+AC_OUTPUT([Makefile
+	data/Makefile
+	doc/Makefile
+	src/Makefile])
 
