@@ -36,11 +36,25 @@ fi
 
 AC_CHECK_FT2([2.3.12])
 
-AM_PATH_LIBGCRYPT([1:1.4.4])
-
 PKG_CHECK_MODULES([IMLIB2],[imlib2 >= 1.4.2])
+AC_SUBST(IMLIB2_CFLAGS)
+AC_SUBST(IMLIB2_LIBS)
+
 PKG_CHECK_MODULES([XAU],[xau >= 1.0.5])
+AC_SUBST(XAU_CFLAGS)
+AC_SUBST(XAU_LIBS)
+
 PKG_CHECK_MODULES([XFT],[xft >= 2.1.14])
+AC_SUBST(XFT_CFLAGS)
+AC_SUBST(XFT_LIBS)
+
+PKG_CHECK_MODULES([GLIB],[glib-2.0 >= 2.14.0])
+AC_SUBST(GLIB_CFLAGS)
+AC_SUBST(GLIB_LIBS)
+
+PKG_CHECK_MODULES([XML],[libxml-2.0 >= 2.6.0])
+AC_SUBST(XML_CFLAGS)
+AC_SUBST(XML_LIBS)
 
 # Checks for header files.
 AC_HEADER_SYS_WAIT
@@ -65,6 +79,8 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([endpwent getusershell memset strdup setenv getspnam \
 	strerror atexit gethostname], [],
 	[AC_MSG_ERROR([Required function not found.])])
+
+AC_CHECK_LIB([crypt],[crypt])
 
 DEBUG_CFLAGS="-Wall -pedantic -Wmissing-prototypes -Wmissing-declarations"
 AC_SUBST([DEBUG_CFLAGS])
