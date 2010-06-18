@@ -1,4 +1,5 @@
 #include "enter.h"
+
 #include "gui_widget.h"
 
 int gui_widget_height(gui_widget_t *widget)

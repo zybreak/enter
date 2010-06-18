@@ -1,9 +1,8 @@
-#include <X11/keysym.h>
 #include <stdlib.h>
 
 #include "enter.h"
-#include "greeter.h"
 
+#include "greeter.h"
 #include "login.h"
 #include "log.h"
 #include "utils.h"
@@ -30,9 +29,9 @@
 
 #define BUF_LEN 256
 
-static void greeter_keypress(greeter_t *greeter, XEvent *event)
-{
 #if 0
+static int greeter_keypress(void *greeter, xcb_connection_t *connection, xcb_key_press_event_t *event)
+{
 	char ch;
 	KeySym keysym;
 	XComposeStatus cstatus;
@@ -113,18 +112,18 @@ static void greeter_keypress(greeter_t *greeter, XEvent *event)
 	}
 
 	gui_draw(gui);
-#endif
 }
+#endif
 
 greeter_t* greeter_new(display_t *display, conf_t *theme)
 {
 	char buf[BUF_LEN];
-	greeter_t *greeter = xmalloc(sizeof(*greeter));
+	greeter_t *greeter = g_new(greeter_t,1);
 
 	greeter->theme = theme;
 	greeter->gui = gui_new(display);
 	if (!greeter->gui) {
-		free(greeter);
+		g_free(greeter);
 		return NULL;
 	}
 
@@ -139,28 +138,34 @@ greeter_t* greeter_new(display_t *display, conf_t *theme)
 		return NULL;
 	}
 
-	Pixmap background = gui_image_pixmap(image);
+	xcb_pixmap_t background = gui_image_pixmap(image);
 	gui_image_delete(image);
+
+	xcb_pixmap_t values[] = {
+		background,
+		NULL
+	};
 	
 	/* Set the background pixmap.  */
-	XSetWindowBackgroundPixmap(display->dpy, greeter->gui->win, background);
+	xcb_change_window_attributes(display->dpy,greeter->gui->win,
+			XCB_CW_BACK_PIXMAP,values);
 
 	/* Load labels.  */
-	list_add(greeter->gui->widgets, LABEL_NEW("label.title"));
-	list_add(greeter->gui->widgets, LABEL_NEW("label.msg"));
-	list_add(greeter->gui->widgets, LABEL_NEW("label.username"));
-	list_add(greeter->gui->widgets, LABEL_NEW("label.password"));
+	greeter->gui->widgets = g_slist_prepend(greeter->gui->widgets, LABEL_NEW("label.title"));
+	greeter->gui->widgets = g_slist_prepend(greeter->gui->widgets, LABEL_NEW("label.msg"));
+	greeter->gui->widgets = g_slist_prepend(greeter->gui->widgets, LABEL_NEW("label.username"));
+	greeter->gui->widgets = g_slist_prepend(greeter->gui->widgets, LABEL_NEW("label.password"));
 
 	/* Load input boxes.  */
 	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme,"theme"), 
 			conf_get(theme,"input.username.image"));
 	gui_input_t *input = INPUT_NEW("input.username", buf, 0);
 	greeter->gui->focus = (gui_widget_t*)input;
-	list_add(greeter->gui->widgets, input);
+	greeter->gui->widgets = g_slist_prepend(greeter->gui->widgets, input);
 	
 	snprintf(buf,BUF_LEN-1, "%s/%s/%s", THEMEDIR, conf_get(theme,"theme"), 
 			conf_get(theme,"input.password.image"));
-	list_add(greeter->gui->widgets, INPUT_NEW("input.password", buf, 1));
+	greeter->gui->widgets = g_slist_prepend(greeter->gui->widgets, INPUT_NEW("input.password", buf, 1));
 
 	return greeter;
 }
@@ -168,7 +173,7 @@ greeter_t* greeter_new(display_t *display, conf_t *theme)
 void greeter_delete(greeter_t *greeter)
 {
 	gui_delete(greeter->gui);
-	free(greeter);
+	g_free(greeter);
 }
 
 void greeter_show(greeter_t *greeter)
@@ -183,13 +188,13 @@ void greeter_hide(greeter_t *greeter)
 
 action_t greeter_run(greeter_t *greeter)
 {
-	XEvent event;
-	
-	while (1) {
-		XNextEvent(greeter->gui->display->dpy, &event);
-		gui_handle_event(greeter->gui, &event);
-	}
+	xcb_generic_event_t *event;
+	gui_t *gui = greeter->gui;
+	display_t *display = gui->display;
 
+	while (event = xcb_wait_for_event(display->dpy)) {
+		gui_handle_event(gui, event);
+	}
 	return LOGIN;
 }
 

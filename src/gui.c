@@ -1,90 +1,86 @@
-#include <X11/keysym.h>
 #include <stdlib.h>
 
 #include "enter.h"
-#include "gui.h"
 
+#include "gui.h"
 #include "login.h"
 
 static void gui_draw(gui_t *gui)
 {
 	display_t *display = gui->display;
-	list_t *it = gui->widgets;
 
-	/* Only clear if double buffering is not present,
-	 * since DBE clears the window for us.  */
-	if (!display_has_doublebuffer(display)) {
-		XClearWindow(display->dpy, gui->win);
-	}
+	//xcb_clear_area(display->dpy, gui->win, 0, 0, gui->width, gui->height);
 
 	/* Draw the widgets.  */
 	if (gui->focus) {
 		gui_widget_draw_focus(gui->focus, gui);
 	}
 
-	while (it = list_next(it)) {
-		if (list_data(it) != gui->focus) {
-			gui_widget_draw(list_data(it), gui);
+	void f(gpointer it, gpointer data) {
+		gui_t *gui = (gui_t*)data;
+
+		if (it != gui->focus) {
+			gui_widget_draw(it, gui);
 		}
 	}
 
-	if (display_has_doublebuffer(display)) {
-		XdbeSwapBuffers(display->dpy, &gui->swap_info, 1);
-	} else {
-		XFlush(display->dpy);
-	}
+	g_slist_foreach(gui->widgets, f, gui);
+
+	xcb_flush(display->dpy);
 }
 
-static void gui_mappingnotify(gui_t *gui, XEvent *event)
+static void gui_mappingnotify(gui_t *gui, xcb_mapping_notify_event_t *event)
 {
-	XRefreshKeyboardMapping(&event->xmapping);
+	//XRefreshKeyboardMapping(&event->xmapping);
 }
 
-static void gui_keypress(gui_t *gui, XEvent *event)
+static void gui_keypress(gui_t *gui, xcb_key_press_event_t *event)
 {
-	KeySym keysym = XLookupKeysym(&event->xkey,1);
+	//KeySym keysym = XLookupKeysym(&event->xkey,1);
+	xcb_keycode_t keycode = event->detail;
+	xcb_keysym_t keysym;
 
 	gui->focus->on_key_press(gui->focus, keysym);
 }
 
 gui_t* gui_new(display_t *display)
 {
-	gui_t *gui = (gui_t*)xmalloc(sizeof(*gui));
+	gui_t *gui = g_new(gui_t,1);
 
 	/* Set default options.  */
 	gui->x = 0;
 	gui->y = 0;
-	gui->width = display->width;
-	gui->height = display->height;
+	gui->width = display->screen->width_in_pixels;
+	gui->height = display->screen->height_in_pixels;
 	gui->display = display;
-	gui->widgets = list_new();
+	gui->widgets = g_slist_alloc();
 	gui->focus = NULL;
 
-	/*
-	gui->swap_info = {
-		.swap_window = gui->win,
-		.swap_action = XdbeBackground
+	uint32_t values[] = {
+		XCB_EVENT_MASK_EXPOSURE | 
+		XCB_EVENT_MASK_KEY_PRESS |
+		XCB_EVENT_MASK_KEY_RELEASE
 	};
-	*/
-
-	unsigned long color = BlackPixel(display->dpy, display->screen);
-
 	/* Create the GUI window.  */
-	gui->win = XCreateSimpleWindow(display->dpy, display->root,
-		gui->x, gui->y, gui->width, gui->height,
-		0, color, color);
+	gui->win = xcb_generate_id(display->dpy);
+	xcb_create_window(
+			display->dpy,
+			display->screen->root_depth,
+			gui->win,
+			display->screen->root,
+			gui->x,
+			gui->y,
+			gui->width,
+			gui->height,
+			0,
+			XCB_WINDOW_CLASS_INPUT_OUTPUT,
+			display->screen->root_visual,
+			XCB_CW_EVENT_MASK,
+			values);
 
-	if (display_has_doublebuffer(display)) {
-		gui->back_buffer = XdbeAllocateBackBufferName(display->dpy,
-			gui->swap_info.swap_window, gui->swap_info.swap_action);
-		gui->drawable = gui->back_buffer;
-	} else {
-		gui->drawable = gui->win;
-	}
+	gui->drawable = gui->win;
 
 	/* Create a draw surface.  */
-	gui->draw = XftDrawCreate(display->dpy, gui->drawable, display->visual,
-					display->colormap);
 
 	return gui;
 }
@@ -93,60 +89,55 @@ void gui_delete(gui_t *gui)
 {
 	display_t *display = gui->display;
 
-	if (display_has_doublebuffer(display))
-		XdbeDeallocateBackBufferName(display->dpy, gui->back_buffer);
-	
-	XftDrawDestroy(gui->draw);
-	XDestroyWindow(display->dpy, gui->win);
+	xcb_destroy_window(display->dpy, gui->win);
 
-	list_t *it = gui->widgets;
-
-	while (it = list_next(it)) {
-		gui_widget_delete(list_data(it));
+	void f(gpointer data, gpointer user_data) {
+		gui_widget_delete(data);
 	}
 
-	list_delete(gui->widgets);
-	free(gui);
+	g_slist_foreach(gui->widgets, f, NULL);
+
+	g_slist_free(gui->widgets);
+	g_free(gui);
 }
 
 void gui_show(gui_t *gui)
 {
 	display_t *display = gui->display;
 
-	XSelectInput(display->dpy, gui->win, ExposureMask | KeyPressMask);
+	xcb_map_window(display->dpy, gui->win);
 
-	XMapWindow(display->dpy, gui->win);
-	XMoveWindow(display->dpy, gui->win, gui->x, gui->y);
+	uint32_t values[] = {
+		gui->x,
+		gui->y
+	};
 
-	XGrabKeyboard(display->dpy, gui->win, False, GrabModeAsync,
-			GrabModeAsync, CurrentTime);
+	xcb_configure_window(display->dpy, gui->win,
+			XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values);
 
 	gui_draw(gui);
 
-	XFlush(display->dpy);
+	xcb_flush(display->dpy);
 }
 
 void gui_hide(gui_t *gui)
 {
 	display_t *display = gui->display;
-
-	XUnmapWindow(display->dpy, gui->win);
-	XUngrabKeyboard(display->dpy, CurrentTime);
-
-	XFlush(display->dpy);
+	xcb_unmap_window(display->dpy, gui->win);
+	xcb_flush(display->dpy);
 }
 
-void gui_handle_event(gui_t *gui, XEvent *event)
+void gui_handle_event(gui_t *gui, xcb_generic_event_t *event)
 {
-	switch(event->type) {
-		case Expose:
+	switch(event->response_type & ~0x80) {
+		case XCB_EXPOSE:
 			gui_draw(gui);
 			break;
-		case KeyPress:
-			gui_keypress(gui, event);
+		case XCB_KEY_PRESS:
+			gui_keypress(gui, (xcb_key_press_event_t*)event);
 			break;
-		case MappingNotify:
-			gui_mappingnotify(gui, event);
+		case XCB_MAPPING_NOTIFY:
+			gui_mappingnotify(gui, (xcb_mapping_notify_event_t*)event);
 			break;
 	}
 	gui_draw(gui);

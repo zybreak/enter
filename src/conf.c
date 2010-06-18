@@ -3,114 +3,84 @@
 #include <stdlib.h>
 
 #include "enter.h"
+
 #include "conf.h"
-#include "utils.h"
 
-#define BUFFER_SIZE 200
 #define EMPTY_DATA ""
-
-typedef struct pair_t {
-	char *key;
-	char *value;
-} pair_t;
-
-static void get_opt_arg(char *str, char **opt, char **arg)
-{
-	char *p = index(str,'=');
-	
-	if (!p)
-		p = str+strlen(str)-1;
-	else
-		*p='\0';
-
-	*opt = xstrtrim(str);
-	*arg = xstrtrim(++p);
-}
-
-static pair_t* new_pair(char *key, char *value)
-{
-	pair_t *pair = xmalloc(sizeof(*pair));
-	
-	pair->key = key;
-	pair->value = value;
-	
-	return pair;
-}
 
 conf_t* conf_new(void)
 {
-	conf_t *conf = xmalloc(sizeof(*conf));
+	conf_t *conf = g_key_file_new();
 
 	return conf;
 }
 
 void conf_delete(conf_t *conf)
 {
-	list_delete(conf);
+	g_key_file_free(conf);
 }
 
-int conf_parse(conf_t *conf, const char *config_file)
+int conf_parse(conf_t *conf, const gchar *config_file)
 {
-	char buffer[BUFFER_SIZE];
-	char *opt,*arg;
+	GError *error = NULL;
+	gboolean ret;
 	
-	FILE *fp = fopen(config_file,"r");
-	
-	if (!fp) {
+	ret = g_key_file_load_from_file(conf,config_file,G_KEY_FILE_NONE, &error);
+
+	if (ret == FALSE) {
+		if (error) {
+			g_error_free(error);
+		}
 		return FALSE;
 	}
-	
-	memset(buffer,'\0',BUFFER_SIZE);
 
-	while (fgets(buffer,BUFFER_SIZE-1,fp)) {
-		get_opt_arg(buffer,&opt,&arg);
-
-		/* Filter out comments and empty lines.  */
-		if ((*opt == '#') || !(*opt))
-			continue;
-
-		conf_set(conf,strdup(opt),strdup(arg));
-	}
-
-	fclose(fp);
-	
 	return TRUE;
 }
 
-char* conf_get(conf_t *conf, char *key)
+gchar* conf_get(conf_t *conf, const gchar *key)
 {
-	/* Skip head.  */
-	conf = list_next(conf);
+	GError *error = NULL;
+	gchar *ret;
 
-	while (conf) {
-		if (!strcmp(((pair_t*)list_data(conf))->key, key))
-			return ((pair_t*)list_data(conf))->value;
-		conf = list_next(conf);
+	ret = g_key_file_get_string(conf,"enter",key, &error);
+
+	if (ret) {
+		return ret;
 	}
-	
+
+	if (error) {
+		g_error_free(error);
+	}
+
 	return EMPTY_DATA;
 }
 
-void conf_set(conf_t *conf, char *key, char *value)
+void conf_set(conf_t *conf, const gchar *key, const gchar *value)
 {
-	/* Skip the first node, since its never used.  */
-	while (list_next(conf)) {
-		conf = list_next(conf);
-
-		if (!strcmp(((pair_t*)list_data(conf))->key, key)) {
-			((pair_t*)list_data(conf))->value = value;
-			return;
-		}
-	}
-
-	list_add(conf, new_pair(key, value));
+	g_key_file_set_string(conf,"enter",key,value);
 }
 
 void conf_merge(conf_t *to, conf_t *from)
 {
-	/* Skip head.  */
-	while (from = list_next(from)) {
-		conf_set(to, ((pair_t*)list_data(from))->key, ((pair_t*)list_data(from))->value);
+	GError *error = NULL;
+	gsize length;
+	gchar **keys;
+	gchar *key;
+	int i = 0;
+
+	keys = g_key_file_get_keys(from,"enter",&length,&error);
+
+	if (keys) {
+		while (i<length) {
+			key = keys[i++];
+			gchar *value = conf_get(from,key);
+			conf_set(to,key,value);
+		}
+		g_strfreev(keys);
+	}
+	
+	if (error) {
+		g_error_free(error);
 	}
 }
 

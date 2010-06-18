@@ -3,6 +3,8 @@
 # graphics by capsyl.
 #
 
+[enter]
+
 # Display settings
 enter.background = background.png
 enter.visible = single

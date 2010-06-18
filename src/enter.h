@@ -5,8 +5,7 @@
 #include "config.h"
 #endif
 
-#define FALSE 0
-#define TRUE (!FALSE)
+#include <glib.h>
 
 /**
  * This enum specifies a number of actions

@@ -1,14 +1,15 @@
 #include <stdlib.h>
+#include <xcb/xcb_image.h>
 
 #include "enter.h"
-#include "utils.h"
 
+#include "utils.h"
 #include "gui_widget.h"
 
 gui_image_t* gui_image_new(display_t *display, const char *filename,
 							int x, int y)
 {
-	gui_image_t *image = xmalloc(sizeof(*image));
+	gui_image_t *image = g_new(gui_image_t,1);
 
 	image->display = display;
 	image->x = x;
@@ -19,7 +20,7 @@ gui_image_t* gui_image_new(display_t *display, const char *filename,
 
 	if (filename) {
 		if (gui_image_load(image, filename) == FALSE) {
-			free(image);
+			g_free(image);
 			return NULL;
 		}
 	}
@@ -31,21 +32,36 @@ void gui_image_delete(gui_image_t *image)
 {
 	imlib_context_set_image(image->im_image);
 	imlib_free_image();
-	free(image);
+	g_free(image);
 }
 
-static void gui_image_draw_drawable(gui_image_t *image, Drawable drawable)
+static void gui_image_draw_drawable(gui_image_t *image, xcb_drawable_t img)
 {
 	display_t *display = image->display;
 
-	imlib_context_set_display(display->dpy);
-	imlib_context_set_visual(display->visual);
-	imlib_context_set_colormap(display->colormap);
-	imlib_context_set_drawable(drawable);
-
 	imlib_context_set_image(image->im_image);
 
-	imlib_render_image_on_drawable(image->x,image->y);
+	uint32_t *data = imlib_image_get_data_for_reading_only();
+
+	int width = imlib_image_get_width();
+	int height = imlib_image_get_height();
+	int y,x;
+
+	for(y = 0; y < height; y++) {
+		for (x = 0;x<width;x++) {
+			int i, pixel, tmp;
+
+			i = y*width+x;
+
+			tmp  = (data[i] >> 16) & 0xff;
+			tmp += (data[i] >> 8)  & 0xff;
+			tmp += data[i]         & 0xff;
+
+			pixel = (tmp / 3 < 127) ? 0 : 1;
+
+			//xcb_image_put_pixel(img,x,y,pixel);
+		}
+	}
 }
 
 void gui_image_draw(gui_image_t *image, gui_t *gui)
@@ -53,13 +69,19 @@ void gui_image_draw(gui_image_t *image, gui_t *gui)
 	gui_image_draw_drawable(image, gui->drawable);
 }
 
-Pixmap gui_image_pixmap(gui_image_t *image)
+xcb_pixmap_t gui_image_pixmap(gui_image_t *image)
 {
 	display_t *display = image->display;
 
-	Pixmap pixmap = XCreatePixmap(display->dpy, display->root,
-			image->w, image->h, display->depth);
+	xcb_pixmap_t pixmap = xcb_generate_id(display->dpy);
 
+	xcb_create_pixmap(display->dpy,
+			display->screen->root_depth,
+			pixmap,
+			display->screen->root,
+			display->screen->width_in_pixels,
+			display->screen->height_in_pixels);
+		
 	int x = image->x;
 	int y = image->y;
 

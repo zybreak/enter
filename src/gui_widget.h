@@ -1,8 +1,6 @@
 #ifndef GUI_WIDGET_H_
 #define GUI_WIDGET_H_
 
-#include <X11/Xlib.h>
-
 #include "enter.h"
 
 typedef union gui_widget_t gui_widget_t;
@@ -23,7 +21,7 @@ typedef enum gui_widget_type_t {
 	struct { \
 		int type; \
 		int x, y, w, h; \
-		action_t (*on_key_press)(gui_widget_t*, KeySym); \
+		action_t (*on_key_press)(gui_widget_t*, xcb_keysym_t); \
 	}
 
 #include "gui_label.h"

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "enter.h"
+
 #include "auth.h"
 #include "log.h"
 #include "utils.h"
@@ -17,7 +18,7 @@ static char* generate_mit_magic_cookie(int length)
 	int i = 0;
 	int hexcount = 0;
 	const char digits[] = "0123456789abcdef";
-	char *cookie = xmalloc(sizeof(char) * length);
+	char *cookie = g_new(char, length);
 
 	srand(time(NULL));
 	while (i < length -1) {
@@ -79,7 +80,7 @@ static int xdm_new(auth_t *auth)
 
 auth_t* auth_new(auth_type type, const char *hostname, const char *display)
 {
-	auth_t *auth = xmalloc(sizeof(*auth));
+	auth_t *auth = g_new(auth_t,1);
 
 	auth->auth.family = FamilyLocal;
 	
@@ -113,8 +114,8 @@ void auth_delete(auth_t *auth)
 {
 	free(auth->auth.address);
 	free(auth->auth.number);
-	free(auth->auth.data);
-	free(auth);
+	g_free(auth->auth.data);
+	g_free(auth);
 }
 
 int auth_write(auth_t *auth, const char *file)

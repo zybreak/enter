@@ -1,13 +1,15 @@
-#include <X11/Xlib.h>
+#include <string.h>
+
+#include "enter.h"
 
 #include "utils.h"
-
 #include "gui_widget.h"
 
-static action_t input_keypress(gui_widget_t *widget, KeySym keysym)
+static action_t input_keypress(gui_widget_t *widget, xcb_keysym_t keysym)
 {
 	gui_input_t *input = &widget->input;
-	
+
+#if 0
 	char *ch = XKeysymToString(keysym);
 
 	if (keysym == XK_BackSpace) {
@@ -30,6 +32,8 @@ static action_t input_keypress(gui_widget_t *widget, KeySym keysym)
 		gui_input_insert_char(input, *ch);
 	}
 
+#endif
+
 	return TRUE;
 }
 
@@ -37,7 +41,7 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 		const char *font, const char *color, 
 		int text_x, int text_y, int text_w, int text_h, int hidden)
 {
-	gui_input_t *input = xmalloc(sizeof(*input));
+	gui_input_t *input = g_new(gui_input_t,1);
 
 	input->x = x;
 	input->y = y;
@@ -47,7 +51,7 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 
 	input->image = gui_image_new(display, image, x, y);
 	if (!input->image) {
-		free(input);
+		g_free(input);
 		return NULL;
 	}
 	
@@ -64,7 +68,7 @@ gui_input_t* gui_input_new(display_t *display, const char *image, int x, int y,
 					input->t_w, input->t_h, "");
 	if (!input->text) {
 		gui_image_delete(input->image);
-		free(input);
+		g_free(input);
 		return NULL;
 	}
 
@@ -78,11 +82,12 @@ void gui_input_delete(gui_input_t *input, display_t *display)
 {
 	gui_image_delete(input->image);
 	gui_label_delete(input->text, display);
-	free(input);
+	g_free(input);
 }
 
 void gui_input_draw(gui_input_t *input, gui_t *gui, int focus)
 {
+#if 0
 	int i;
 	char *str = gui_label_get_caption(input->text);
 	char *old_str = strdup(str);
@@ -114,6 +119,7 @@ void gui_input_draw(gui_input_t *input, gui_t *gui, int focus)
 	
 	gui_label_set_caption(input->text, old_str);
 	free(old_str);
+#endif
 }
 
 char* gui_input_get_text(gui_input_t *input)

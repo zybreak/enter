@@ -1,8 +1,6 @@
 #ifndef GUI_INPUT_H_
 #define GUI_INPUT_H_
 
-#include <X11/Xft/Xft.h>
-
 typedef struct gui_input_t gui_input_t;
 
 #include "display.h"

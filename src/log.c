@@ -2,6 +2,7 @@
 #include <stdarg.h>
 
 #include "enter.h"
+
 #include "log.h"
 
 #define MSG_LEN 256

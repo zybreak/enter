@@ -10,6 +10,7 @@
 #include <X11/Xauth.h>
 
 #include "enter.h"
+
 #include "server.h"
 #include "greeter.h"
 #include "log.h"
@@ -150,8 +151,9 @@ static auth_t* setup_authentication(conf_t *conf)
 	}
 
 	if (unlink(conf_get(conf, "auth_file")) == -1) {
+		char* error = strerror(errno);
 		log_print(LOG_WARNING, "Could not remove auth file: %s.",
-				strerror(errno));
+				error);
 	}
 
 	if (!auth_write(auth, conf_get(conf, "auth_file"))) {
@@ -204,7 +206,7 @@ int main(int argc, char **argv)
 	
 	/* Assign default settings to conf
 	 * and parse command line arguments.  */
-	default_settings(conf);
+	default_settings(cmd);
 
 	conf_set(cmd,"config_file", CONFDIR "/enter.conf");
 	parse_args(argc, argv, cmd);
@@ -288,7 +290,7 @@ int main(int argc, char **argv)
 		closelog();
 		exit(EXIT_FAILURE);
 	}
-	
+
 	/* Create a GUI window.  */
 	greeter_t *greeter = greeter_new(display, theme);
 	if (!greeter) {

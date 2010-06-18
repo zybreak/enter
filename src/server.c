@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "enter.h"
+
 #include "server.h"
 #include "log.h"
 #include "utils.h"

@@ -1,7 +1,7 @@
 #ifndef GUI_LABEL_H_
 #define GUI_LABEL_H_
 
-#include <X11/Xft/Xft.h>
+#include <xcb/xcb.h>
 
 typedef struct gui_label_t gui_label_t;
 
@@ -14,8 +14,7 @@ typedef struct gui_label_t gui_label_t;
 struct gui_label_t {
 	GUI_WIDGET_BASE;
 
-	XftFont *font;
-	XftColor *color;
+	xcb_gcontext_t gc;
 	char *caption;
 };
 
@@ -31,7 +30,7 @@ struct gui_label_t {
  * @param caption Caption of the label.
  * @return A new gui_label_t object.
  */
-gui_label_t* gui_label_new(display_t *display, const char *font,
+gui_label_t* gui_label_new(display_t *display, const char *font_name,
 		const char *color, int x, int y, int w, int h,
 		const char *caption);
 

@@ -1,12 +1,10 @@
 #ifndef CONF_H_
 #define CONF_H_
 
-#include "list.h"
-
 /**
  * The conf_t struct is just a linked list.
  */
-typedef list_t conf_t;
+typedef GKeyFile conf_t;
 
 /**
  * Creates a new conf_t object. 
@@ -26,7 +24,7 @@ void conf_delete(conf_t *conf);
  * @param config_file Which configuration file to use.
  * @return TRUE if successful, otherwise FALSE.
  */
-int conf_parse(conf_t *conf, const char *config_file);
+int conf_parse(conf_t *conf, const gchar *config_file);
 
 /**
  * Return the value associated with a specified key.
@@ -34,7 +32,7 @@ int conf_parse(conf_t *conf, const char *config_file);
  * @param key Which key to use.
  * @return The value associated with key, or EMPTY_DATA.
  */
-char* conf_get(conf_t *conf, char *key);
+char* conf_get(conf_t *conf, const gchar *key);
 
 /**
  * Assign key a specified value.
@@ -42,7 +40,7 @@ char* conf_get(conf_t *conf, char *key);
  * @param key Which key to assign a value to.
  * @param value The value to assign.
  */
-void conf_set(conf_t *conf, char *key, char *value);
+void conf_set(conf_t *conf, const gchar *key, const gchar *value);
 
 /**
  * Merge two conf_t objects.

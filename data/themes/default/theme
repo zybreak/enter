@@ -2,6 +2,8 @@
 # This is the default enter theme.
 #
 
+[enter]
+
 # Display settings
 enter.background = background.png
 enter.visible = both

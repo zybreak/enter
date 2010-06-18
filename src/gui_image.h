@@ -1,7 +1,6 @@
 #ifndef __GUI_IMAGE_H__
 #define __GUI_IMAGE_H__
 
-#include <X11/Xlib.h>
 #include <Imlib2.h>
 
 #include "display.h"
@@ -26,7 +25,8 @@ typedef struct gui_image_t {
  * @param y The images initial position.
  * @return A new gui_image_t object.
  */
-gui_image_t* gui_image_new(display_t *display, const char *filename, int x, int y);
+gui_image_t* gui_image_new(display_t *display,
+		const char *filename, int x, int y);
 
 /**
  * Delete a object created by gui_image_new.
@@ -46,7 +46,7 @@ void gui_image_draw(gui_image_t *image, gui_t *gui);
  * @param image The image to convert.
  * @return The gui_image_t object as an Pixmap.
  */
-Pixmap gui_image_pixmap(gui_image_t *image);
+xcb_pixmap_t gui_image_pixmap(gui_image_t *image);
 
 /**
  * Load a image from a file to a gui_image_t object.

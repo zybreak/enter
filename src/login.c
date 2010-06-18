@@ -8,6 +8,7 @@
 #include <sys/wait.h>
 
 #include "enter.h"
+
 #include "login.h"
 #include "utils.h"
 #include "log.h"
@@ -49,7 +50,7 @@ static void auth_spawn(login_t *pwd, const char *display, auth_t *auth,
 	if (auth) {
 		/* Convert relative to absolute path names.  */
 		if (*auth_file != '/') {
-			char *new_path = xmalloc(sizeof(*new_path) * 512);
+			char *new_path = g_newa(char,512);
 			snprintf(new_path, 511, "%s/%s", pwd->pw_dir, auth_file);
 			auth_file = new_path;
 		}
@@ -72,12 +73,12 @@ static void auth_spawn(login_t *pwd, const char *display, auth_t *auth,
 	};
 
 	char *env[] = {
-		xstrcat("HOME=", pwd->pw_dir),
-		xstrcat("SHELL=", pwd->pw_shell),
-		xstrcat("USER=", pwd->pw_name),
-		xstrcat("LOGNAME=", pwd->pw_name),
-		xstrcat("XAUTHORITY=", auth_file),
-		xstrcat("DISPLAY=", display),
+		g_strconcat("HOME=", pwd->pw_dir, NULL),
+		g_strconcat("SHELL=", pwd->pw_shell, NULL),
+		g_strconcat("USER=", pwd->pw_name, NULL),
+		g_strconcat("LOGNAME=", pwd->pw_name, NULL),
+		g_strconcat("XAUTHORITY=", auth_file, NULL),
+		g_strconcat("DISPLAY=", display, NULL),
 		NULL
 	};
 
@@ -87,9 +88,8 @@ static void auth_spawn(login_t *pwd, const char *display, auth_t *auth,
 login_t* login_authenticate(const char *username, const char *password)
 {
 	char *real_pwd;
-	login_t *pwd = xmalloc(sizeof(*pwd));
 
-	pwd = getpwnam(username);
+	login_t* pwd = getpwnam(username);
 	endpwent();
 
 	if (!pwd) {
@@ -149,13 +149,13 @@ int login_start_session(login_t *login, const char *display, auth_t *auth,
 
 		/* If the user session could not spawn return FALSE.  */
 		
-		free(login);
+		g_free(login);
 		
 		return FALSE;
 	}
 
 	/* Reset the auth struct for subsequent calls.  */
-	free(login);
+	g_free(login);
 
 	/* Wait for the user session in the parent thread.  */
 	pid_t p = waitpid(pid, NULL, 0);

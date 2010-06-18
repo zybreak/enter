@@ -11,7 +11,6 @@ enter_SOURCES = \
 	conf.c conf.h \
 	auth.c auth.h \
 	log.c log.h \
-	list.c list.h \
 	login.c login.h \
 	display.c display.h \
 	gui_image.c gui_image.h \
@@ -22,11 +21,11 @@ enter_SOURCES = \
 	greeter.c greeter.h
 
 enter_CFLAGS = \
-	@FT2_CFLAGS@ @IMLIB2_CFLAGS@ \
-	@XAU_CFLAGS@ @XFT_CFLAGS@ @GLIB_CFLAGS@ \
+	@IMLIB2_CFLAGS@ @XCB_CFLAGS@ \
+	@XAU_CFLAGS@ @GLIB_CFLAGS@ \
 	-DCONFDIR=\"$(sysconfdir)\" -DTHEMEDIR=\"$(datadir)/@PACKAGE@/themes\"
 
 enter_LDFLAGS = \
-	@FT2_LIBS@ @IMLIB2_LIBS@ \
-	@XAU_LIBS@ @XFT_LIBS@ @GLIB_LIBS@ -lcrypt
+	@IMLIB2_LIBS@ @XCB_LIBS@ \
+	@XAU_LIBS@ @GLIB_LIBS@ -lcrypt
 

@@ -1,73 +1,42 @@
 #include <stdlib.h>
 
+#include "enter.h"
+
 #include "display.h"
 #include "utils.h"
 
 display_t* display_new(const char *display_name)
 {
-	display_t *display = xmalloc(sizeof(*display));
+	int i;
+	int n_screens;
+	display_t *display = g_new(display_t,1);
 
-	display->dpy = XOpenDisplay(display_name);
-	if (!display->dpy) {
-		free(display);
+	display->dpy = xcb_connect(display_name,&n_screens);
+	if (xcb_connection_has_error(display->dpy)) {
+		g_free(display);
 		return NULL;
 	}
 
-	display->screen = DefaultScreen(display->dpy);
-	display->root = RootWindow(display->dpy,display->screen);
-	display->depth = DefaultDepth(display->dpy,display->screen);
+	const xcb_setup_t *setup = xcb_get_setup(display->dpy);
+	xcb_screen_iterator_t iter = xcb_setup_roots_iterator(setup);
 
-	display->width = XWidthOfScreen(
-			ScreenOfDisplay(display->dpy, display->screen));
-	display->height = XHeightOfScreen(
-			ScreenOfDisplay(display->dpy, display->screen));
-	XGCValues values;
-	values.foreground = WhitePixel(display->dpy,display->screen);
-	values.background = BlackPixel(display->dpy,display->screen);
-	values.graphics_exposures = False;
+	for (i = 0; i < n_screens; ++i) {
+		xcb_screen_next(&iter);
+	}
 
-	display->gc = XCreateGC(display->dpy,display->root,
-		GCForeground|GCBackground|GCGraphicsExposures,
-		&values); 
-	
-	display->visual = DefaultVisual(display->dpy, display->screen);
-	display->colormap = DefaultColormap(display->dpy, display->screen);
+	display->screen = iter.data;
 
-	int major, minor;
-	display->has_doublebuffer = XdbeQueryExtension(display->dpy, &major, &minor);
-	
 	return display;
 }
 
 void display_delete(display_t *display)
 {
-	XFreeGC(display->dpy,display->gc);
-	XCloseDisplay(display->dpy);
-	free(display);
+	xcb_disconnect(display->dpy);
+	g_free(display);
 }
 
-void display_kill_clients(display_t *display, Window window)
+void display_kill_clients(display_t *display, xcb_window_t window)
 {
-	unsigned int num_children = 0;
-	int i;
-	Window dummywindow;
-	Window *child;
-
-	XSync(display->dpy, 0);
-
-	XQueryTree(display->dpy, display->root, &dummywindow, &dummywindow,
-			&child, &num_children);
-
-	for (i=0;i < num_children; i++) {
-		if (child[i] != window)
-			XKillClient(display->dpy, child[i]);
-	}
-	
-	XSync(display->dpy, 0);
-}
-
-int display_has_doublebuffer(display_t *display)
-{
-	return display->has_doublebuffer;
+	return;
 }
 
