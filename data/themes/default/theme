@@ -46,6 +46,7 @@ input.username.text.x =	8
 input.username.text.y = 8
 input.username.text.width = 275
 input.username.text.height = 28
+input.username.hidden = 0
 
 # Password input field
 input.password.x = 186
@@ -57,5 +58,6 @@ input.password.text.x = 8
 input.password.text.y = 8
 input.password.text.width = 275
 input.password.text.height = 28
+input.password.hidden = 1
 
 # End of file.

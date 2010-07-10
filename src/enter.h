@@ -5,7 +5,7 @@
 #include "config.h"
 #endif
 
-#include <glib.h>
+#include <gtk/gtk.h>
 
 /**
  * This enum specifies a number of actions

@@ -20,23 +20,16 @@ AC_PATH_PROGS([X_PATH], [X], [none])
 if test "$X_PATH" = "none"; then
 	AC_MSG_ERROR([Cannot find X Windows binary!])
 fi
+AC_SUBST([X_PATH])
 
 # Checks for libraries.
-PKG_CHECK_MODULES([IMLIB2],[imlib2 >= 1.4.2])
-AC_SUBST(IMLIB2_CFLAGS)
-AC_SUBST(IMLIB2_LIBS)
-
 PKG_CHECK_MODULES([XAU],[xau >= 1.0.5])
 AC_SUBST(XAU_CFLAGS)
 AC_SUBST(XAU_LIBS)
 
-PKG_CHECK_MODULES([GLIB],[glib-2.0 >= 2.14.0])
-AC_SUBST(GLIB_CFLAGS)
-AC_SUBST(GLIB_LIBS)
-
-PKG_CHECK_MODULES([XCB],[xcb >= 1.5])
-AC_SUBST(XCB_CFLAGS)
-AC_SUBST(XCB_LIBS)
+PKG_CHECK_MODULES([GTK],[gtk+-2.0 >= 2.20.1])
+AC_SUBST(GTK_CFLAGS)
+AC_SUBST(GTK_LIBS)
 
 # Checks for header files.
 AC_HEADER_SYS_WAIT
@@ -66,7 +59,6 @@ AC_CHECK_LIB([crypt],[crypt])
 
 DEBUG_CFLAGS="-Wall -pedantic -Wmissing-prototypes -Wmissing-declarations"
 AC_SUBST([DEBUG_CFLAGS])
-AC_SUBST([X_PATH])
 
 AC_OUTPUT([Makefile
 	data/Makefile

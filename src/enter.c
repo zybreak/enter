@@ -7,12 +7,9 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <X11/Xauth.h>
-
 #include "enter.h"
 
 #include "server.h"
-#include "greeter.h"
 #include "log.h"
 #include "conf.h"
 #include "utils.h"
@@ -25,61 +22,48 @@
 
 static void parse_args(int argc, char **argv, conf_t *conf)
 {
-	int i;
+	gchar *config_filename = CONFDIR "/enter.conf";
+	gchar *auth_filename = "/tmp/enter.xauth";
+	gchar *login_filename = ".xinitrc";
+	gchar *theme = "default";
+	gboolean no_daemon = FALSE;
+	gboolean version = FALSE;
 
-	for (i=1;i<argc;i++) {
-		if ((strcmp(argv[i],"-c") == 0) && (i+1 < argc)) {
-			conf_set(conf,"config_file",argv[++i]);
+	GOptionEntry entries[] = {
+		{ "config", 'c', 0, G_OPTION_ARG_FILENAME, &config_filename, "Use config file CONFIG", "CONFIG" },
+		{ "auth", 'a', 0, G_OPTION_ARG_FILENAME, &auth_filename, "Write server authentication to AUTH", "AUTH" },
+		{ "login", 'l', 0, G_OPTION_ARG_FILENAME, &login_filename, "Run FILE instead of ~/.xinitrc", "FILE" },
+		{ "theme", 't', 0, G_OPTION_ARG_STRING, &theme, "Use theme THEME", "THEME" },
+		{ "no-daemon", 'n', G_OPTION_ARG_NONE, no_daemon, "Don't run as a daemon", NULL },
+		{ "version", 'v', G_OPTION_ARG_NONE, version, "Print version information", NULL },
+		NULL
+	};
 
-		} else if ((strcmp(argv[i],"-a") == 0) && (i+1 < argc)) {
-			conf_set(conf,"auth_file",argv[++i]);
+	GError *error = NULL;
+	gchar *description = "";
+	GOptionContext *context;
 
-		} else if ((strcmp(argv[i],"-l") == 0) && (i+1 < argc)) {
-			conf_set(conf,"login_file",argv[++i]);
-			
-		} else if ((strcmp(argv[i],"-d") == 0) && (i+1 < argc)) {
-			conf_set(conf,"display",argv[++i]);
-		
-		} else if ((strcmp(argv[i],"-t") == 0) && (i+1 < argc)) {
-			conf_set(conf,"theme",argv[++i]);
+	context = g_option_context_new("");
+	g_option_context_add_main_entries(context, entries, NULL);
+	g_option_context_add_group(context, gtk_get_option_group(FALSE));
+	g_option_context_set_help_enabled(context, TRUE);
+	g_option_context_set_description(context, description);
 
-		} else if (strcmp(argv[i],"-n") == 0) {
-			conf_set(conf,"daemon","false");
-
-		} else if (strcmp(argv[i],"-v") == 0) {
-			printf("%s version %s\n", PACKAGE, VERSION);
-			exit(EXIT_SUCCESS);
-
-		} else if (strcmp(argv[i],"-h") == 0) {
-			printf(
-			"Usage: %s: [OPTIONS]\n\n"
-			"  -c CONFIG   use config file CONFIG\n"
-			"  -a AUTH     write server authentication to AUTH\n"
-			"  -l LOGIN    run LOGIN as the user session\n"
-			"  -d DISPLAY  connect to display DISPLAY\n"
-			"  -t THEME    override config theme's setting with THEME\n"
-			"  -n          dont run as a daemon\n"
-			"  -v          print version information\n"
-			"  -h          print this help info\n"
-			"\n"
-			"Report bugs to <%s>.\n",
-			argv[0], PACKAGE_BUGREPORT);
-			exit(EXIT_SUCCESS);
-		} else {
-			printf("unknown argument, try -h\n");
-			exit(EXIT_SUCCESS);
-		}
+	if (!g_option_context_parse(context, &argc, &argv, &error)) {
+		g_print("Option parsing failed: %s\n", error->message);
+		exit(EXIT_SUCCESS);
 	}
-}
 
-static void default_settings(conf_t *conf)
-{
-	conf_set(conf, "auth_file", "/tmp/enter.xauth");
-	conf_set(conf, "login_file", ".xinitrc");
-	conf_set(conf, "daemon", "true");
-	conf_set(conf, "authentication", "magic-cookie");
-	conf_set(conf, "display", ":0");
-	conf_set(conf, "theme", "default");
+	if (version) {
+		printf("%s version %s\n", PACKAGE, VERSION);
+		exit(EXIT_SUCCESS);
+	}
+
+	conf_set(conf,"config_file",config_filename);
+	conf_set(conf,"auth_file",auth_filename);
+	conf_set(conf,"login_file",login_filename);
+	conf_set(conf,"theme",theme);
+	conf_set(conf,"daemon",(no_daemon) ? "false" : "true");
 }
 
 static int daemonize()
@@ -204,11 +188,6 @@ int main(int argc, char **argv)
 	conf_t *cmd = conf_new();
 	auth_t *auth = NULL;
 	
-	/* Assign default settings to conf
-	 * and parse command line arguments.  */
-	default_settings(cmd);
-
-	conf_set(cmd,"config_file", CONFDIR "/enter.conf");
 	parse_args(argc, argv, cmd);
 
 	/* Check if we have enough privileges.  */
@@ -283,7 +262,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Connect to the X display.  */
-	display_t *display = display_new(conf_get(conf, "display"));
+	GdkDisplay *display = gdk_display_open(NULL);
 	if (!display) {
 		log_print(LOG_EMERG, "Could not connect to X display.");
 		server_stop();
@@ -292,43 +271,15 @@ int main(int argc, char **argv)
 	}
 
 	/* Create a GUI window.  */
-	greeter_t *greeter = greeter_new(display, theme);
-	if (!greeter) {
-		log_print(LOG_EMERG, "Could not open GUI.");
-		server_stop();
-		closelog();
-		exit(EXIT_FAILURE);
-	}
+	GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
 
-	while (1) {
-		greeter_show(greeter);
-		action_t action = greeter_run(greeter);
-		greeter_hide(greeter);
-#if 0
-		switch (action) {
-		case LOGIN:
-			log_print(LOG_DEBUG, "Logging in user...");
+	gtk_widget_show(window);
 
-			if (login_start_session(conf_get(conf, "display"),
-						auth, ".Xauthority",
-						conf_get(conf, "login_file")) == FALSE) {
-				log_print(LOG_EMERG,
-						"Could not open user session.");
-				
-				server_stop();
-				closelog();
-				exit(EXIT_FAILURE);
-			}
-			break;
-		}
-		display_kill_clients(display, greeter->gui->win);
-#endif
-	}
-
+	gtk_main();
 
 	log_print(LOG_DEBUG, "Shutting down.");
 	
-	greeter_delete(greeter);
 	conf_delete(conf);
 	conf_delete(theme);
 	
