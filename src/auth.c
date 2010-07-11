@@ -4,7 +4,6 @@
 
 #include "auth.h"
 #include "log.h"
-#include "utils.h"
 #include "time.h"
 
 #define AUTH_MIT_LEN 16

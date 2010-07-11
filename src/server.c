@@ -11,7 +11,6 @@
 
 #include "server.h"
 #include "log.h"
-#include "utils.h"
 
 #define SERVER_TIMEOUT 5
 

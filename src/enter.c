@@ -12,7 +12,6 @@
 #include "server.h"
 #include "log.h"
 #include "conf.h"
-#include "utils.h"
 #include "login.h"
 #include "auth.h"
 
@@ -20,22 +19,23 @@
 #define PIDBUF 20
 #define THEME_LEN 512
 
-static void parse_args(int argc, char **argv, conf_t *conf)
+gchar *config_filename = CONFDIR "/enter.conf";
+gchar *auth_filename = "/tmp/enter.xauth";
+gchar *login_filename = ".xinitrc";
+gchar *theme_name = "default";
+gboolean no_daemon = FALSE;
+
+static void parse_args(int argc, char **argv)
 {
-	gchar *config_filename = CONFDIR "/enter.conf";
-	gchar *auth_filename = "/tmp/enter.xauth";
-	gchar *login_filename = ".xinitrc";
-	gchar *theme = "default";
-	gboolean no_daemon = FALSE;
 	gboolean version = FALSE;
 
 	GOptionEntry entries[] = {
 		{ "config", 'c', 0, G_OPTION_ARG_FILENAME, &config_filename, "Use config file CONFIG", "CONFIG" },
 		{ "auth", 'a', 0, G_OPTION_ARG_FILENAME, &auth_filename, "Write server authentication to AUTH", "AUTH" },
 		{ "login", 'l', 0, G_OPTION_ARG_FILENAME, &login_filename, "Run FILE instead of ~/.xinitrc", "FILE" },
-		{ "theme", 't', 0, G_OPTION_ARG_STRING, &theme, "Use theme THEME", "THEME" },
-		{ "no-daemon", 'n', G_OPTION_ARG_NONE, no_daemon, "Don't run as a daemon", NULL },
-		{ "version", 'v', G_OPTION_ARG_NONE, version, "Print version information", NULL },
+		{ "theme", 't', 0, G_OPTION_ARG_STRING, &theme_name, "Use theme THEME", "THEME" },
+		{ "no-daemon", 'n', 0, G_OPTION_ARG_NONE, &no_daemon, "Don't run as a daemon", NULL },
+		{ "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Print version information", NULL },
 		NULL
 	};
 
@@ -58,12 +58,6 @@ static void parse_args(int argc, char **argv, conf_t *conf)
 		printf("%s version %s\n", PACKAGE, VERSION);
 		exit(EXIT_SUCCESS);
 	}
-
-	conf_set(conf,"config_file",config_filename);
-	conf_set(conf,"auth_file",auth_filename);
-	conf_set(conf,"login_file",login_filename);
-	conf_set(conf,"theme",theme);
-	conf_set(conf,"daemon",(no_daemon) ? "false" : "true");
 }
 
 static int daemonize()
@@ -185,10 +179,9 @@ int main(int argc, char **argv)
 {
 	conf_t *conf = conf_new();
 	conf_t *theme = conf_new();
-	conf_t *cmd = conf_new();
 	auth_t *auth = NULL;
 	
-	parse_args(argc, argv, cmd);
+	parse_args(argc, argv);
 
 	/* Check if we have enough privileges.  */
 	if (getuid() != 0) {
@@ -205,20 +198,16 @@ int main(int argc, char **argv)
 	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
 	
 	/* Parse config file.  */
-	if (conf_parse(conf, conf_get(cmd,"config_file")) == FALSE) {
+	if (conf_parse(conf, config_filename) == FALSE) {
 		log_print(LOG_EMERG, "Could not read config file: \"%s\"",
-					conf_get(cmd, "config_file"));
+					config_filename);
 		closelog();
 		exit(EXIT_FAILURE);
 	}
 
-	conf_merge(conf, cmd);
-	conf_delete(cmd);
-
 	/* Parse theme file.  */
 	char theme_file[THEME_LEN];
-	snprintf(theme_file, THEME_LEN-1, "%s/%s/theme", THEMEDIR,
-			conf_get(conf, "theme"));
+	snprintf(theme_file, THEME_LEN-1, "%s/%s/theme", THEMEDIR, theme_name);
 
 	if (conf_parse(theme, theme_file) == FALSE) {
 		log_print(LOG_EMERG,
@@ -230,11 +219,10 @@ int main(int argc, char **argv)
 
 	/* Add theme name to theme, so the full path of data files
 	 * can be read by only supplying theme.  */
-	conf_set(theme, "theme",
-			conf_get(conf, "theme"));
+	conf_set(theme, "theme", theme_name);
 
 	/* Fork to background if "daemon" mode is enabled in the config. */
-	if (!strcmp(conf_get(conf,"daemon"),"true")) {
+	if (!no_daemon) {
 		if (daemonize() == FALSE) {
 			log_print(LOG_EMERG, "Could not daemonize enter.");
 			closelog();

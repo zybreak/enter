@@ -10,7 +10,6 @@
 #include "enter.h"
 
 #include "login.h"
-#include "utils.h"
 #include "log.h"
 
 #ifdef HAVE_SHADOW_H
