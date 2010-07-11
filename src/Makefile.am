@@ -7,7 +7,6 @@ bin_PROGRAMS = enter
 enter_SOURCES = \
 	enter.c enter.h \
 	server.c server.h \
-	utils.c utils.h \
 	conf.c conf.h \
 	auth.c auth.h \
 	log.c log.h \
