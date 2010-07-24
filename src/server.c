@@ -17,6 +17,11 @@
 static int server_started = FALSE;
 static pid_t server_pid = 0;
 
+void child_setup(gpointer user_data)
+{
+	signal(SIGUSR1,SIG_IGN);
+}
+
 static void server_callback(int signal)
 {
 	if (signal == SIGUSR1)
@@ -94,9 +99,11 @@ int server_start(conf_t *conf)
 	sa.sa_handler = server_callback;
 	sigaction(SIGUSR1,&sa,NULL);
 
+
+
 	char *cmd[] = {
-		conf_get(conf,"server_path"),
-		conf_get(conf,"display"),
+		"Xnest",
+		":1",
 		NULL, NULL, NULL
 	};
 
@@ -104,23 +111,23 @@ int server_start(conf_t *conf)
 		cmd[2] = "-auth";
 		cmd[3] = conf_get(conf,"auth_file");
 	}
-	
-	server_pid = fork();
-	switch(server_pid) {
-		case -1:
-			log_print(LOG_ERR, "Could not fork process.");
-			return FALSE;
-		case 0:
-			signal(SIGUSR1,SIG_IGN);
-			execve(cmd[0],cmd,NULL);
 
-			/* If we reach this line, the exec call failed.  */
-			return FALSE;
-		default:
-			if (!server_startup(server_pid, SERVER_TIMEOUT)) {
-				log_print(LOG_ERR, "Could not start X, server timed out.");
-				return FALSE;
-			}
+	GPid *child_pid;
+	GError *error = NULL;
+	gboolean spawn_successful = g_spawn_async(
+			NULL, cmd, NULL,
+			G_SPAWN_SEARCH_PATH,
+			child_setup, NULL,
+			child_pid, &error);
+
+	if (!spawn_successful) {
+		log_print(LOG_ERR, "Spawn X failed: %s\n", error->message);
+		return FALSE;
+	}
+	
+	if (!server_startup(server_pid, SERVER_TIMEOUT)) {
+		log_print(LOG_ERR, "Could not start X, server timed out.");
+		return FALSE;
 	}
 
 	return server_pid;
