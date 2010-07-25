@@ -15,6 +15,7 @@ This is a config with the default values:
 # This is a sample config file
 #
 
+server_path=/usr/X11R6/bin/X
 login_file=.xinitrc
 auth_file=.Xauthenticate
 authentication=magic-cookie
@@ -22,6 +23,12 @@ theme=default
 
 # End of file
 .fi
+.LP
+This configuration specifies to run `/usr/X11R6/bin/X' as the X
+server, and to use the default theme.
+.TP
+.BI "server_path=" <filename>
+Specifies where the X server is located.
 .TP
 .BI "login_file=" <filename>
 Specifies which file to run as the user session.

@@ -19,6 +19,7 @@ gchar *config_filename = CONFDIR "/enter.conf";
 gchar *auth_filename = "/tmp/enter.xauth";
 gchar *login_filename = ".xinitrc";
 gchar *theme_name = "default";
+gchar *display_string = NULL;
 gboolean no_daemon = FALSE;
 
 static void parse_args(int argc, char **argv)
@@ -31,6 +32,7 @@ static void parse_args(int argc, char **argv)
 		{ "login", 'l', 0, G_OPTION_ARG_FILENAME, &login_filename, "Run FILE instead of ~/.xinitrc", "FILE" },
 		{ "theme", 't', 0, G_OPTION_ARG_STRING, &theme_name, "Use theme THEME", "THEME" },
 		{ "no-daemon", 'n', 0, G_OPTION_ARG_NONE, &no_daemon, "Don't run as a daemon", NULL },
+		{ "display", 'd', 0, G_OPTION_ARG_STRING, &display_string, "Display to connect to", "DISPLAY" },
 		{ "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Print version information", NULL },
 		{ NULL }
 	};
@@ -41,7 +43,7 @@ static void parse_args(int argc, char **argv)
 
 	context = g_option_context_new("");
 	g_option_context_add_main_entries(context, entries, NULL);
-	g_option_context_add_group(context, gtk_get_option_group(FALSE));
+	//g_option_context_add_group(context, gtk_get_option_group(FALSE));
 	g_option_context_set_help_enabled(context, TRUE);
 	g_option_context_set_description(context, description);
 
@@ -209,6 +211,10 @@ int main(int argc, char **argv)
 	 * can be read by only supplying theme.  */
 	conf_set(theme, "theme", theme_name);
 
+	/* Set display in config */
+	display_string = (display_string) ? display_string : getenv("DISPLAY");
+	conf_set(conf, "display", display_string);
+
 	/* Fork to background if "daemon" mode is enabled in the config. */
 	if (!no_daemon) {
 		if (daemonize() == FALSE) {
@@ -236,7 +242,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Connect to the X display.  */
-	GdkDisplay *display = gdk_display_open(NULL);
+	GdkDisplay *display = gdk_display_open(conf_get(conf,"display"));
 	if (!display) {
 		g_warning("Could not connect to X display.");
 		server_stop();

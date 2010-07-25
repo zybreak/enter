@@ -98,11 +98,11 @@ gboolean server_start(conf_t *conf)
 	sa.sa_handler = server_callback;
 	sigaction(SIGUSR1,&sa,NULL);
 
-
+	/* TODO: fix cmd */
 
 	char *cmd[] = {
 		"Xnest",
-		":1",
+		conf_get(conf,"display"),
 		NULL, NULL, NULL
 	};
 
