@@ -1,16 +1,12 @@
 #include <pwd.h>
 #include <grp.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <crypt.h>
-#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include "enter.h"
+#include "login.h"
 #include <sys/types.h>
 #include <sys/wait.h>
-
-#include "enter.h"
-
-#include "login.h"
-#include "log.h"
 
 #ifdef HAVE_SHADOW_H
 #include <shadow.h>
@@ -55,11 +51,11 @@ static void auth_spawn(login_t *pwd, const char *display, auth_t *auth,
 		}
 
 		if (unlink(auth_file) == -1) {
-			log_print(LOG_WARNING, "Could not remove old auth file.");
+			g_warning("Could not remove old auth file.");
 		}
 		
 		if (!auth_write(auth, auth_file)) {
-			log_print(LOG_ERR, "Could not write to auth file.");
+			g_warning("Could not write to auth file.");
 			return;
 		}
 	}
@@ -139,7 +135,7 @@ int login_start_session(login_t *login, const char *display, auth_t *auth,
 	pid_t pid = fork();
 
 	if (pid == -1) {
-		log_print(LOG_ERR, "Could not fork process.");
+		g_warning("Could not fork process.");
 		return FALSE;
 	} else if (pid == 0) {
 		/* Spawn a user session in the child thread.  */
@@ -159,7 +155,7 @@ int login_start_session(login_t *login, const char *display, auth_t *auth,
 	/* Wait for the user session in the parent thread.  */
 	pid_t p = waitpid(pid, NULL, 0);
 	if (p == -1) {
-		log_print(LOG_ERR, "Could not wait for user session.");
+		g_warning("Could not wait for user session.");
 		return FALSE;
 	}
 

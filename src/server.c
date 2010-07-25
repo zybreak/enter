@@ -1,21 +1,20 @@
-#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <unistd.h>
 #include <signal.h>
-#include <time.h>
-#include <errno.h>
+#include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
 #include "enter.h"
 
 #include "server.h"
-#include "log.h"
 
 #define SERVER_TIMEOUT 5
 
 static int server_started = FALSE;
-static pid_t server_pid = 0;
+static GPid server_pid;
+
+void child_setup(gpointer user_data);
 
 void child_setup(gpointer user_data)
 {
@@ -28,7 +27,7 @@ static void server_callback(int signal)
 		server_started = TRUE;
 }
 
-static int server_timeout(pid_t server_pid, time_t timeout)
+static int server_timeout(time_t timeout)
 {
 	time_t start_time = time(NULL);
 	pid_t pidfound = waitpid(server_pid, NULL, WNOHANG);
@@ -45,7 +44,7 @@ static int server_timeout(pid_t server_pid, time_t timeout)
 	return TRUE;
 }
 
-static int server_startup(pid_t server_pid, time_t timeout)
+static int server_startup(time_t timeout)
 {
 	time_t start_time = time(NULL);
 
@@ -59,28 +58,28 @@ static int server_startup(pid_t server_pid, time_t timeout)
 	return TRUE;
 }
 
-int server_stop(void)
+gboolean server_stop(void)
 {
 	if (server_started == FALSE)
 		return TRUE;
 
 	/* Send SIGTERM to the server process.  */
 	if (killpg(server_pid, SIGTERM) < 0) {
-		log_print(LOG_ERR, "Could not kill server (%d): %s",
+		g_warning("Could not kill server (%d): %s",
 						server_pid, strerror(errno));
 		return FALSE;
 	}
 
 	/* Wait for the process to terminate.  */
-	if (!server_timeout(server_pid, SERVER_TIMEOUT)) {
+	if (!server_timeout(SERVER_TIMEOUT)) {
 		/* If the server won't terminate, send SIGKILL.  */
 		if (killpg(server_pid, SIGKILL) < 0) {
-			log_print(LOG_ERR, "Could not kill server: %s", strerror(errno));
+			g_warning("Could not kill server: %s", strerror(errno));
 			return FALSE;
 		}
 		/* If it STILL won't die, just let it be...  */
-		if (!server_timeout(server_pid, SERVER_TIMEOUT)) {
-			log_print(LOG_ERR, "Could not kill server: %s", strerror(errno));
+		if (!server_timeout(SERVER_TIMEOUT)) {
+			g_warning("Could not kill server: %s", strerror(errno));
 			return FALSE;
 		}
 	}
@@ -88,7 +87,7 @@ int server_stop(void)
 	return TRUE;
 }
 
-int server_start(conf_t *conf)
+gboolean server_start(conf_t *conf)
 {
 	struct sigaction sa;
 	
@@ -112,24 +111,23 @@ int server_start(conf_t *conf)
 		cmd[3] = conf_get(conf,"auth_file");
 	}
 
-	GPid *child_pid;
 	GError *error = NULL;
 	gboolean spawn_successful = g_spawn_async(
 			NULL, cmd, NULL,
 			G_SPAWN_SEARCH_PATH,
 			child_setup, NULL,
-			child_pid, &error);
+			&server_pid, &error);
 
 	if (!spawn_successful) {
-		log_print(LOG_ERR, "Spawn X failed: %s\n", error->message);
+		g_warning("Spawn X failed: %s\n", error->message);
 		return FALSE;
 	}
 	
-	if (!server_startup(server_pid, SERVER_TIMEOUT)) {
-		log_print(LOG_ERR, "Could not start X, server timed out.");
+	if (!server_startup(SERVER_TIMEOUT)) {
+		g_warning("Could not start X, server timed out.");
 		return FALSE;
 	}
 
-	return server_pid;
+	return TRUE;
 }
 

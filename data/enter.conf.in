@@ -4,8 +4,6 @@
 
 [enter]
 
-server_path=@X_PATH@
-
 theme=default
 
 login_file=.xinitrc

@@ -1,10 +1,6 @@
 #include <stdlib.h>
-
 #include "enter.h"
-
 #include "auth.h"
-#include "log.h"
-#include "time.h"
 
 #define AUTH_MIT_LEN 16
 #define AUTH_MIT_NAME "MIT-MAGIC-COOKIE-1"
@@ -99,7 +95,7 @@ auth_t* auth_new(auth_type type, const char *hostname, const char *display)
 	}
 
 	if (auth_ok == FALSE) {
-		log_print(LOG_ERR, "Could not generate magic cookie.");
+		g_warning("Could not generate magic cookie.");
 
 		auth_delete(auth);
 		
@@ -122,7 +118,7 @@ int auth_write(auth_t *auth, const char *file)
 	FILE *auth_file;
 
 	if (XauLockAuth(file, 3, 3, 0) != LOCK_SUCCESS) {
-		log_print(LOG_ERR, "Failed to lock authorization file.");
+		g_warning("Failed to lock authorization file.");
 
 		return FALSE;
 	}
@@ -130,13 +126,13 @@ int auth_write(auth_t *auth, const char *file)
 	/* Write authentication file.  */
 	auth_file = fopen(file, "w");
 	if (!auth_file) {
-		log_print(LOG_ERR, "Failed to open authorization file.");
+		g_warning("Failed to open authorization file.");
 		
 		return FALSE;
 	}
 	
 	if (!XauWriteAuth(auth_file, &auth->auth)) {
-		log_print(LOG_ERR, "Failed to write authorization data.");
+		g_warning("Failed to write authorization data.");
 		
 		fclose(auth_file);
 		

@@ -1,21 +1,16 @@
 Critical priority
 * Add PAM authentication support.
 * Add NLS support.
-* Move primitive gui code to new class.
 * Fork the GUI process and drop privileges.
 * Let the GUI and the authentication code communicate through IPC.
 * Don't rely on the existance of ~/.xinitrc.
   Maybe we should fallback on /etc/X11/xinit/xinitrc?
+* Update man-pages and debian build.
 
 Moderate priority
 * Add Doxygen comments.
-* Allow for scaled/centered background.
-* Option to hide cursor when not wanted.
 * Add buttons and animations.
-* Replace Imlib2 with own functions.
 * Add XDM-AUTHORIZATION-1.
 
 Low priority
-* Add support for runtime theme switching.
-* Add support for multiple sessions.
 * Add support for actions other than login (shutdown, hibernate).

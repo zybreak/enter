@@ -9,12 +9,12 @@ enter_SOURCES = \
 	server.c server.h \
 	conf.c conf.h \
 	auth.c auth.h \
-	log.c log.h \
 	login.c login.h
 
 enter_CFLAGS = \
 	@GTK_CFLAGS@ \
 	@XAU_CFLAGS@ \
+	@DEBUG_CFLAGS@ \
 	-DCONFDIR=\"$(sysconfdir)\" -DTHEMEDIR=\"$(datadir)/@PACKAGE@/themes\"
 
 enter_LDADD = \

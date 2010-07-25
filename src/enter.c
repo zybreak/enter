@@ -1,16 +1,12 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <unistd.h>
 #include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "enter.h"
 
 #include "server.h"
-#include "log.h"
 #include "conf.h"
 #include "login.h"
 #include "auth.h"
@@ -36,7 +32,7 @@ static void parse_args(int argc, char **argv)
 		{ "theme", 't', 0, G_OPTION_ARG_STRING, &theme_name, "Use theme THEME", "THEME" },
 		{ "no-daemon", 'n', 0, G_OPTION_ARG_NONE, &no_daemon, "Don't run as a daemon", NULL },
 		{ "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Print version information", NULL },
-		NULL
+		{ NULL }
 	};
 
 	GError *error = NULL;
@@ -65,7 +61,7 @@ static int daemonize()
 	pid_t pid, sid;
 	pid = fork();
 	if (pid < 0) {
-		log_print(LOG_ERR, "Could not fork to background.");
+		g_warning("Could not fork to background.");
 		return FALSE;
 	} else if (pid > 0) {
 		/* Kill the parent thread.  */
@@ -75,12 +71,12 @@ static int daemonize()
 	sid = setsid();
 	
 	if (sid < 0) {
-		log_print(LOG_ERR, "Could not set session id.");
+		g_warning("Could not set session id.");
 		return FALSE;
 	}
 	
 	if (chdir("/") < 0) {
-		log_print(LOG_ERR, "Could not change working directory.");
+		g_warning("Could not change working directory.");
 		return FALSE;
 	}
 
@@ -88,8 +84,6 @@ static int daemonize()
 	freopen("/dev/null", "r", stdin);
 	freopen("/dev/null", "w", stdout);
 	freopen("/dev/null", "w", stderr);
-
-	log_daemon(TRUE);
 
 	return TRUE;
 }
@@ -116,10 +110,10 @@ static auth_t* setup_authentication(conf_t *conf)
 	if (!strcmp(authentication, "magic-cookie")) {
 		auth = auth_new(AUTH_MIT_MAGIC_COOKIE, hostname, display);
 	} else if (!strcmp(authentication, "xdm")) {
-		log_print(LOG_ERR, "XDM is currently not implemented.");
+		g_warning("XDM is currently not implemented.");
 		return NULL;
 	} else {
-		log_print(LOG_ERR, "'%s' is a unknown authentication protocol.", 
+		g_warning("'%s' is a unknown authentication protocol.", 
 				authentication);
 		return NULL;
 	}
@@ -130,12 +124,12 @@ static auth_t* setup_authentication(conf_t *conf)
 
 	if (unlink(conf_get(conf, "auth_file")) == -1) {
 		char* error = strerror(errno);
-		log_print(LOG_WARNING, "Could not remove auth file: %s.",
+		g_warning("Could not remove auth file: %s.",
 				error);
 	}
 
 	if (!auth_write(auth, conf_get(conf, "auth_file"))) {
-		log_print(LOG_ERR, "Could not write to auth file.");
+		g_warning("Could not write to auth file.");
 		return NULL;
 	}
 	
@@ -151,7 +145,7 @@ static void write_pidfile(pid_t pid)
 	FILE *fp = fopen(PIDFILE,"w");
 
 	if (!fp) {
-		log_print(LOG_ERR, "Could not write pidfile: %s.",PIDFILE);
+		g_warning("Could not write pidfile: %s.",PIDFILE);
 		return;
 	}
 
@@ -185,7 +179,7 @@ int main(int argc, char **argv)
 
 	/* Check if we have enough privileges.  */
 	if (getuid() != 0) {
-		log_print(LOG_EMERG, "Not enough privileges to run.");
+		g_warning("Not enough privileges to run.");
 		exit(EXIT_FAILURE);
 	}
 
@@ -195,13 +189,10 @@ int main(int argc, char **argv)
 	 * should be set so only the creator can read and write.  */
 	umask(077);
 	
-	openlog(PACKAGE, LOG_NOWAIT, LOG_DAEMON);
-	
 	/* Parse config file.  */
 	if (conf_parse(conf, config_filename) == FALSE) {
-		log_print(LOG_EMERG, "Could not read config file: \"%s\"",
+		g_warning("Could not read config file: \"%s\"",
 					config_filename);
-		closelog();
 		exit(EXIT_FAILURE);
 	}
 
@@ -210,10 +201,7 @@ int main(int argc, char **argv)
 	snprintf(theme_file, THEME_LEN-1, "%s/%s/theme", THEMEDIR, theme_name);
 
 	if (conf_parse(theme, theme_file) == FALSE) {
-		log_print(LOG_EMERG,
-			"Could not parse theme \"%s\"",
-			theme_file);
-		closelog();
+		g_warning("Could not parse theme \"%s\"", theme_file);
 		exit(EXIT_FAILURE);
 	}
 
@@ -224,8 +212,7 @@ int main(int argc, char **argv)
 	/* Fork to background if "daemon" mode is enabled in the config. */
 	if (!no_daemon) {
 		if (daemonize() == FALSE) {
-			log_print(LOG_EMERG, "Could not daemonize enter.");
-			closelog();
+			g_warning("Could not daemonize enter.");
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -236,25 +223,23 @@ int main(int argc, char **argv)
 	if (strcmp(conf_get(conf, "authentication"), "none") != 0) {
 		auth = setup_authentication(conf);
 		if (!auth) {
-			log_print(LOG_ERR, "Could not setup authentication system, disabling authentication.");
+			g_warning("Could not setup authentication system, disabling authentication.");
 			conf_set(conf, "authentication", "none");
 		}
 	}
 
-	log_print(LOG_DEBUG, "Starting X server.");
-	pid_t server_pid = server_start(conf);
-	if (server_pid == FALSE) {
-		log_print(LOG_EMERG, "Could not start X server");
-		closelog();
+	g_message("Starting X server.");
+	gboolean server_started = server_start(conf);
+	if (!server_started) {
+		g_warning("Could not start X server");
 		exit(EXIT_FAILURE);
 	}
 
 	/* Connect to the X display.  */
 	GdkDisplay *display = gdk_display_open(NULL);
 	if (!display) {
-		log_print(LOG_EMERG, "Could not connect to X display.");
+		g_warning("Could not connect to X display.");
 		server_stop();
-		closelog();
 		exit(EXIT_FAILURE);
 	}
 
@@ -266,13 +251,12 @@ int main(int argc, char **argv)
 
 	gtk_main();
 
-	log_print(LOG_DEBUG, "Shutting down.");
+	g_message("Shutting down.");
 	
 	conf_delete(conf);
 	conf_delete(theme);
 	
 	server_stop();
-	closelog();
 	
 	exit(EXIT_SUCCESS);
 }

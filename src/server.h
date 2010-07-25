@@ -3,7 +3,7 @@
 
 #include "conf.h"
 
-int server_stop(void);
-int server_start(conf_t *conf);
+gboolean server_stop(void);
+gboolean server_start(conf_t *conf);
 
 #endif /*SERVER_H_*/
